@@ -1,0 +1,96 @@
+* {
+	box-sizing: border-box;
+}
+
+html, body {
+	padding: 0;
+	margin: 0;
+	background: black;
+}
+
+body, #root {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;	
+}
+
+body {
+	width: 100%;
+}
+
+#root {
+	width: 95%;
+	padding: 0;
+	margin: 0;
+}
+
+
+body::-webkit-scrollbar {
+	scrollbar-color: none;
+  	scrollbar-width: 10px;
+}
+
+
+body::-webkit-scrollbar-thumb {
+	background: red;
+
+}
+
+body::-webkit-scrollbar-track {
+	background: none;
+}
+
+
+/* ANIMATIONS  */
+.slideRight {
+	animation: slideRight 1s ease-in-out;
+	transition: transform 1s ease;
+}
+
+.slideLeft {
+	animation: slideLeft 1s ease-in-out;
+	transition: All 1s ease;
+}
+
+.SlideFromTop {
+	animation: SlideFromTop 1s ease-in-out;
+	transition: All 1s ease;
+}
+
+@keyframes slideRight {
+	from {
+		transform: translateX(20px);
+		opacity: 0;
+	}	
+
+	to {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+
+@keyframes SlideFromTop {
+	from {
+		transform: translateY(-20px);
+		opacity: 0;
+	}	
+
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+
+@keyframes slideLeft {
+	from {
+		transform: translateX(20px);
+		opacity: 0;
+	}	
+
+	to {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
