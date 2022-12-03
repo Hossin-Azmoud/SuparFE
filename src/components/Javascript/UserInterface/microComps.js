@@ -3,6 +3,12 @@ import { faInfoCircle, faWarning, faCircleCheck, faEdit } from '@fortawesome/fre
 import { FontAwesomeIcon as Fa } from '@fortawesome/react-fontawesome';
 import { convertBase64 } from "../Util/functions";
 
+import { useSelector, useDispatch } from 'react-redux';
+
+import { 
+  updateUser
+} from '../store/userStore';
+
 
 const Paragraphs = ({ Text, Class="" }) => {
 	
@@ -74,24 +80,27 @@ const Notify = ({ msg, StyleKey }) => {
 
 const Iframe = ({ Obj }) => {
 	const MainContainer = useRef(null);
+	const Dispatch = useDispatch();
 	const [Notification, setNotification] = useState(null);
 	const [imgData, setimgData] = useState(Obj.variables.img);
 	const [buffer, setBuffer] = useState(null);
 	const [Vars, setVars] = useState({
 		uuid: Obj.variables.uuid,
-		payload: Obj.variables.payload
+		payload: Obj.variables.payload,
+		key: Obj.variables.Updatekey
 	});
-	
+
 	const uploadBuffer = () => {
 		Vars.payload(buffer, Vars.uuid)
-		
 		.then(res => {
 			return res.json();
 		})
-		
 		.then(js => {
 			if(js.code === 200) {
-				setimgData(Data);
+				var UpdatingObject = {  };
+				UpdatingObject[Vars.key] = buffer;
+				Dispatch(updateUser(UpdatingObject))
+				setimgData(buffer)
 			} else {
 				console.log(js);
 			}

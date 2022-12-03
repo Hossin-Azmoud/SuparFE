@@ -23,10 +23,8 @@ const App = () => {
     const [Loading, setLoading] = useState(true);
     
     useEffect(() => {
-        
+
         if(JWT) {
-            // If there is a cookie of jwt, I will send it to the server, then get the user logged in.
-            console.log(JWT)
             SubmitJWT(JWT)
             .then((res) => {
                 return res.json()
@@ -48,7 +46,7 @@ const App = () => {
         } else {
             setLoading(false);
         }
-
+        
     }, []);
 
     return (

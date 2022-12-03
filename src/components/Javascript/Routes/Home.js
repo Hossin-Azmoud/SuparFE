@@ -16,7 +16,6 @@ import { JWT } from "../Util/functions";
 
 const Home = () => {
 	const User = useSelector(state => state.User);
-	
 	const [Image, setImage] = useState(null);
 	const [Text, setText] = useState("");
 	const [state, setState] = useState({});
@@ -24,6 +23,7 @@ const Home = () => {
 	const [refresh, setRefresh] = useState(true);
 	const [Notification, setNotification] = useState(null);
 	const [isLoading, setisLoading] = useState(true);
+
 	const resetAll = () => {
 		setImage(null);
 		setText(null);
@@ -41,48 +41,58 @@ const Home = () => {
 			text: Text
 		});
 
-		console.log(state)
 
 	}, [Image, Text]);
 
-	const FetchPosts = () => {
-		if(!isLoading){
-			setisLoading(true);
-		}
-
+	const FetchPosts = (isSubscribed) => {
 		
-        GetAllPosts()
-        .then((res) => {
-            return res.json()
-        })
-        
-        .then((Json) => {
-        	if(Json.code == 200) {
-        		if(Json.data.length > 0) {
-        			setPosts(Json.data);
-        		} else {
-        			setPosts("No posts to display.");
-        		}
-        		
-        	} else { 
-        		setNotification({
-					text: "Could not get posts from the server",
+
+		if(isSubscribed) {
+			
+			if(!isLoading){
+				setisLoading(true);
+			}
+
+			GetAllPosts()
+	        .then((res) => {
+	            return res.json()
+	        })
+	        
+	        .then((Json) => {
+	        	if(Json.code == 200) {
+	        		if(Json.data.length > 0) {
+	        			setPosts(Json.data);
+	        		} else {
+	        			setPosts("No posts to display.");
+	        		}
+	        		
+	        	} else { 
+	        		setNotification({
+						text: "Could not get posts from the server",
+						status: "error"
+					});
+	        	}
+	        }).catch(() => {
+	        	setNotification({
+					text: "Error accured.",
 					status: "error"
 				});
-        	}
-        }).catch(() => {
-        	setNotification({
-				text: "Error accured.",
-				status: "error"
-			});
-        }).finally(() => {
-       		setRefresh(false);
-        	setisLoading(false); 	
-        })
+	        }).finally(() => {
+	       		setRefresh(false);
+	        	setisLoading(false); 	
+	        })
+		}
 	}
 
 	useEffect(() => {
-		FetchPosts()
+		var subscribed = true;
+		
+		FetchPosts(subscribed)
+
+		return () => {
+			subscribed = false;
+		}
+
 	}, [refresh])
 
 	const OnTypingText = (e) => {
@@ -228,18 +238,3 @@ const Home = () => {
 
 
 export default Home;
-/*
-POST rendering:
-
-*/
-
-
-
-
-
-
-
-
-
-
-

@@ -21,6 +21,16 @@ const UserSlice = createSlice({
 			}
 		},
 
+		updateUser: (state, action) => {
+			//doc: update a field.
+			console.log(action.payload)
+			Object.keys(state.User).map(k => {
+				if(k in action.payload) {
+					state.User[k] = action.payload[k];
+				}
+			})
+		},
+
 		logout: state => {
 			state.value = null;
 			RemoveJWT();
@@ -30,7 +40,8 @@ const UserSlice = createSlice({
 
 export const { 
 	logout, 
-	login 
+	login,
+	updateUser
 } = UserSlice.actions;
 
 export default configureStore({

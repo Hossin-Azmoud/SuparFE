@@ -4,43 +4,45 @@ import UserUI from "./UserUI";
 import Loader from "./Loader";
 
 const AccountsSearchPannel = ({ CurrUserId }) => {
-	const [Users, setUsers] = useState(null);
+    const [Users, setUsers] = useState(null);
     const [Query, setQuery] = useState("");
-    
-    useEffect(() => {
-        // an onmount event to fetch everything from the database/server once the page is loaded
-        setUsers(null);
-
-        fetch((Query.length) ? `${api}/query?q=${Query}` : `${api}/query`, {
+    const GetUsersFromApi = (subbed) => {
+        if(subbed) {
+            fetch((Query.length) ? `${api}/query?q=${Query}` : `${api}/query`, {
             headers: {
                 "content-type": "application/json",
             },
             method: "GET"
-        })
-        
-        .then((res) => {
-            return res.json()
-        })
-        
-        .then((jsonData) => {
-            console.log(jsonData);
-            if(jsonData.code == 200) {
-                setUsers([...jsonData.data]);     
-            }
+            })
             
-        }).finally(() => {
-            console.log(Users);
-        })
-
-
-        return () => {
-            setUsers(null);
+            .then((res) => {
+                return res.json()
+            })
+            
+            .then((jsonData) => {
+                if(jsonData.code == 200) {
+                    setUsers([...jsonData.data])
+                }
+            }).catch(e => {
+                console.log(e);
+            })
+        }
+    }
+    
+    useEffect(() => {
+        // an onmount event to fetch everything from the database/server once the page is loaded
+        var subscribed = true;
+        GetUsersFromApi(subscribed)
+        
+        return () => { 
+            subscribed = false;
+            setUsers(null) 
         }
 
     }, [Query])
 
-	return (
-		<section className="flex sm:w-[500px] w-full flex-col flex-row justify-center items-center"> 
+    return (
+        <section className="flex sm:w-[500px] w-full flex-col flex-row justify-center items-center"> 
             
             <form className="w-full my-2">
                 <input onChange={(e) => setQuery(e.target.value)} className="text-white bg-none border-b border-b-yellow-500 focus:border-sky-400 py-2 px-2 w-full outline-none my-2 bg-black" type="query" placeholder="search">
@@ -67,7 +69,7 @@ const AccountsSearchPannel = ({ CurrUserId }) => {
             </div>
 
         </section>
-	)
+    )
 }
 
 export default AccountsSearchPannel;

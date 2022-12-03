@@ -10,7 +10,7 @@ import { useParams } from "react-router-dom";
 import { Notify, Paragraphs, Iframe } from "../UserInterface/microComps";
 import Loader from "../UserInterface/Loader";
 import { 
-    login
+  updateUser
 } from '../store/userStore';
 
 const ProfileEditor = () => {
@@ -43,7 +43,6 @@ const ProfileEditor = () => {
 const ProfileRenderer = ({ User }) => {
 	// TODO: Implement Likes..
 	// TODO: Implement comments..
-	// TODO: implement More user modifications (UserName, Bio, Email)...
 
 	var CurrentUser = useSelector(state => state.User);
 	const [Posts, setPosts] = useState(null);
@@ -71,7 +70,8 @@ const ProfileRenderer = ({ User }) => {
 				img: User.img,
 				Editable: true,
 				payload: updateProfileImage,
-				uuid: CurrentUser.id_
+				uuid: CurrentUser.id_,
+				Updatekey: "img"
 			})
 		} else {
 			setimgCmp({
@@ -87,7 +87,8 @@ const ProfileRenderer = ({ User }) => {
 				img: User.bg,
 				Editable: true,
 				payload: updateBackgroundImage,
-				uuid: CurrentUser.id_
+				uuid: CurrentUser.id_,
+				Updatekey: "bg"
 			});
 		} else {
 			setimgCmp({
@@ -107,15 +108,10 @@ const ProfileRenderer = ({ User }) => {
 		.then((res) => {
 			return res.json()
 		})
+
 		.then(Json => {
-			if(Json.code === 200) {
-				var ob = {...CurrentUser};
-				Object.keys(ob).map(k => {
-					if(k in state) {
-						ob[k] = state[k];
-					}
-				})
-				Dispatch(login(ob))
+			if(Json.code === 200) {	
+				Dispatch(updateUser(state))
 			} else {
 				console.log(Json)
 			}
@@ -135,40 +131,49 @@ const ProfileRenderer = ({ User }) => {
 	}
 
 	const ToggleEdit = () => setEdit(true)
-	const FetchUserPosts = () => {
+
+	const FetchUserPosts = (subscribed) => {
 		
 		if(!Loading) setLoading(true);
 
-		GetUserPostsById(User.id_)
-		
-		.then(res => {
-            return res.json()
-        })
-        
-        .then(Json => {
-        	if(Json.code == 200) {
-        		if(Json.data) {
-        			setPosts(Json.data);
-        		} else {
-        			setPosts("No posts yet.");
-        		}
-        	} else if (Json.code == 500) {
-        		setPosts(Json.data);
-        	}
-        })
-        .finally(() => {
-        	setLoading(false);
-        })
-        .catch(e => {
-        	setNotification({
-        		msg: `an error accured while getting data: ${e}`,
-        		StyleKey: "error"
-        	})
-        })
+		if(subscribed) {
+			GetUserPostsById(User.id_)
+			.then(res => {
+	            return res.json()
+	        })
+	        .then(Json => {
+	        	if(Json.code == 200) {
+	        		if(Json.data) {
+	        			setPosts(Json.data);
+	        		} else {
+	        			setPosts("No posts yet.");
+	        		}
+	        	} else if (Json.code == 500) {
+	        		setPosts(Json.data);
+	        	}
+	        })
+	        .finally(() => {
+	        	setLoading(false);
+	        })
+	        .catch(e => {
+	        	setNotification({
+	        		msg: `an error accured while getting data: ${e}`,
+	        		StyleKey: "error"
+	        	})
+	        })	
+		}
 	}
 
 	useEffect(() => {
-		FetchUserPosts();
+		
+		var subscribed = true;
+		
+		FetchUserPosts(subscribed);
+		
+		return () => {
+			subscribed = false
+		}
+
 	}, []);
 
 	
