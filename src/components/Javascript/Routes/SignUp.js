@@ -23,7 +23,6 @@ const SignUp = () => {
 	const [Notification, setNotification] = useState(null);
 	const isReq = (k) => (k === "UserName") || (k === "Email") || (k === "Password") || (k === "bio");
 	
-
 	const [state, setState] = useState({
 		UserName: "",
 		Email: "",

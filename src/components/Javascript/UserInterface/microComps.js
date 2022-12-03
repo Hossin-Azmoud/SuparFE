@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { faInfoCircle, faWarning, faCircleCheck } from '@fortawesome/free-solid-svg-icons';
+import { faInfoCircle, faWarning, faCircleCheck, faEdit } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon as Fa } from '@fortawesome/react-fontawesome';
+import { convertBase64 } from "../Util/functions";
 
 
 const Paragraphs = ({ Text, Class="" }) => {
@@ -11,27 +12,12 @@ const Paragraphs = ({ Text, Class="" }) => {
 		(Lines.length > 1) ? (
 			Lines.map((v, idx) => (v.length > 1) ? <p key={idx} className={Class}> {v} </p> : "")
 		) : (
-			<p class={Class}> { Lines[0] } </p>
+			<p className={Class}> { Lines[0] } </p>
 		)
 	)
 
 }
 
-const IMFrame = ({ img, show_=true }) => {
-	const [show, setShow] = useState(show_);
-	const hide = () => setShow(false);
-	useEffect(() => setShow(true), []);
-
-	return (
-		(show) ? (
-			<div style={{
-			background: "rgba(0 0 0 / 40%)"
-			}} className="fixed top-0 flex justify-center items-center left-0 w-screen h-screen bg-black" onClick={hide}>
-				<img src={img} alt="img" className="w-64 rounded"/>
-			</div>
-		) : ""
-	)
-};
 
 const Notify = ({ msg, StyleKey }) => {
 
@@ -60,13 +46,12 @@ const Notify = ({ msg, StyleKey }) => {
 	}
 
 	const hide = () => {
+		
 		frame.current.style.transform = "translateY(-20px)";
 		frame.current.style.opacity = "0";
-
 		setTimeout(() => {
 			frame.current.style.display = "none";
 		}, 2000);
-
 	}
 	
 	// For developement.
@@ -76,20 +61,118 @@ const Notify = ({ msg, StyleKey }) => {
 
 	useEffect(() => {
 		initialize();
-		setTimeout(hide, 10 * 1000);
+		setTimeout(hide, 3 * 1000);
 	}, [])
 
 	return (
 		<div ref={frame} className={`flex flex-row items-center justify-center shadow visible SlideFromTop fixed top-5 w-[200px] p-4 rounded ${Map_[StyleKey].T}`}> 
-			 
 			<span className="mx-2"> { msg } </span>
 			<Fa icon={Map_[StyleKey].icon} />
 		</div>
 	)
 }
 
-export { 
+const Iframe = ({ Obj }) => {
+	const MainContainer = useRef(null);
+	const [Notification, setNotification] = useState(null);
+	const [imgData, setimgData] = useState(Obj.variables.img);
+	const [buffer, setBuffer] = useState(null);
+	const [Vars, setVars] = useState({
+		uuid: Obj.variables.uuid,
+		payload: Obj.variables.payload
+	});
+	
+	const uploadBuffer = () => {
+		Vars.payload(buffer, Vars.uuid)
+		
+		.then(res => {
+			return res.json();
+		})
+		
+		.then(js => {
+			if(js.code === 200) {
+				setimgData(Data);
+			} else {
+				console.log(js);
+			}
+		})
+
+		.catch(e => {
+			console.log(e);
+		})
+	}
+
+	useEffect(() => {
+		
+		if(buffer) {
+			uploadBuffer()	
+		}
+
+	}, [buffer])
+
+	const OnEdit = (e) => {
+		document.getElementById("imgFile").click();
+	};
+
+	const OnFileUpload = (e) => {
+		console.log("Clicked")
+		
+		convertBase64(e.target.files[0])
+		.then(Data => {
+			// TODO Edit background and profile image feature.
+			setBuffer(Data);
+			
+		})
+		
+		.catch(e => {
+			setNotification({ 
+				text: "profile image could not be uploaded!" + String(e),
+				status: "error"
+			});
+		})
+	}
+
+	return (
+		<div
+			style={{
+				background: "rgba(0 0 0 / 40%)"
+			}}
+			ref={MainContainer}
+			className="fixed top-0 flex flex-col justify-center items-center left-0 w-screen h-screen bg-black" 
+			
+			onClick={(e) => {
+				var flag = false;
+				
+				if(!(e.target === MainContainer.current)) {
+					flag = true;
+				};
+
+				Obj.onclick(flag);
+			}}
+		>
+			{(Notification) ? <Notify msg={Notification.text} StyleKey={Notification.status}/> : ""}
+			
+			<input type="file" id="imgFile" accept="image/*" className="hidden" onChange={OnFileUpload} />
+
+			<img 
+				src={imgData} 
+				alt="img" 
+				className="sm:w-[700px] w-[70%] rounded"
+			/>
+
+			{
+				(Obj.variables.Editable) ? (
+					<button onClick={OnEdit} className="my-3 bg-blue-700 hover:bg-blue-500 transition-all p-2 text-white rounded">
+						Edit <Fa icon={faEdit}/>
+					</button>	
+				) : ""
+			}
+		</div>
+	)
+}
+
+export {
 	Paragraphs, 
 	Notify,
-	IMFrame
+	Iframe
 };

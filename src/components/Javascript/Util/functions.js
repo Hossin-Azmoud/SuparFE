@@ -12,7 +12,7 @@ const SetAuthCookie = (T, ExpirationDays = 365) => {
 };
 
 
-const getJwtAuthToken = (key = "AccessToken") => {
+const getJwtAuthToken = (key="AccessToken") => {
     
     var cookies = document.cookie.split(';')[0];  
     var [CookieKey, CookieValue] = cookies.split("=");
@@ -51,7 +51,6 @@ const convertBase64 = (file) => {
 };
 
 const copytoclip = (T) => navigator.clipboard.writeText(T);
-
 
 export { 
 	SetAuthCookie, 

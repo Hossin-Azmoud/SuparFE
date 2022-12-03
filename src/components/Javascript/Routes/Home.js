@@ -8,9 +8,11 @@ import { useState, useEffect } from "react"
 import { useSelector } from 'react-redux';
 import { api } from "../Var";
 import { convertBase64 } from "../Util/functions";
+import { GetAllPosts } from "../Util/serverFuncs";
 import Post from "../UserInterface/Post";
 import Loader from "../UserInterface/Loader";
 import { Notify } from "../UserInterface/microComps";
+import { JWT } from "../Util/functions";
 
 const Home = () => {
 	const User = useSelector(state => state.User);
@@ -22,7 +24,6 @@ const Home = () => {
 	const [refresh, setRefresh] = useState(true);
 	const [Notification, setNotification] = useState(null);
 	const [isLoading, setisLoading] = useState(true);
-
 	const resetAll = () => {
 		setImage(null);
 		setText(null);
@@ -34,33 +35,35 @@ const Home = () => {
 	useEffect(() => {
 		
 		setState({
-			User_id: User.id_,
+			token: JWT,
+			uuid: User.id_,
 			img: Image,
-			text: Text	
+			text: Text
 		});
 
+		console.log(state)
 
 	}, [Image, Text]);
 
-	useEffect(() => {
+	const FetchPosts = () => {
 		if(!isLoading){
 			setisLoading(true);
 		}
 
-		fetch(`${api}/GetAllPosts`, {
-            headers: {
-                "content-type": "application/json",
-            },
-            method: "GET"
-        })
-        
+		
+        GetAllPosts()
         .then((res) => {
             return res.json()
         })
         
         .then((Json) => {
         	if(Json.code == 200) {
-        		setPosts(Json.data);
+        		if(Json.data.length > 0) {
+        			setPosts(Json.data);
+        		} else {
+        			setPosts("No posts to display.");
+        		}
+        		
         	} else { 
         		setNotification({
 					text: "Could not get posts from the server",
@@ -72,10 +75,14 @@ const Home = () => {
 				text: "Error accured.",
 				status: "error"
 			});
-        });
+        }).finally(() => {
+       		setRefresh(false);
+        	setisLoading(false); 	
+        })
+	}
 
-        setRefresh(false);
-        setisLoading(false);
+	useEffect(() => {
+		FetchPosts()
 	}, [refresh])
 
 	const OnTypingText = (e) => {
@@ -99,7 +106,7 @@ const Home = () => {
 		e.preventDefault();
 		
 		if(state.text || state.img) {
-			fetch(`${api}/MakePost`, {
+			fetch(`${api}/NewPost`, {
 				headers: {
 					"content-type": "application/json",
 				},
@@ -172,30 +179,45 @@ const Home = () => {
             	
 				<div className="w-full flex-col justify-start items-center">
 
-	            	{
-						(Posts) ? (
+	         		{
+						(Posts && (typeof Posts === "object")) ? (
 							Posts.map((v, i) => {
 								return (
 									<Post 
 										Userid_={v.user.id_}
 										UserName={v.user.UserName}
 										UserImg={v.user.img}
-										PostImg={v.IMG}
-										PostText={v.Text}
+										PostImg={v.img}
+										PostText={v.text}
 										key={i}
 									/>
 								)
 							})
 							
-						) : (
-							(isLoading) ? (
-								<div className="w-full h-[100px] flex justify-center items-center">
-		            				<Loader size="60"/>
-		            			</div>
-							) : ""
-						)
-					}
+							) : (
+								<div className="text-white flex flex-col justify-center items-center h-24">
+									{
+										(isLoading) ? (<Loader />) : (
+										
+												(typeof Posts === "string") ? (
+													<p className="text-white"> { Posts } </p>
 
+												) : (
+													<>
+														<h1 className="my-2"> Failed to load data! </h1>
+														<button
+															className="hover:text-slate-700 hover:bg-white p-2 bg-neutral-900 rounded-md"
+															onClick={FetchPosts}
+														>
+															try again
+														</button>
+													</>
+												)
+										)
+									}
+								</div>
+							)
+					}	
 				</div>
 			</div>
 
@@ -206,10 +228,10 @@ const Home = () => {
 
 
 export default Home;
+/*
+POST rendering:
 
-
-
-
+*/
 
 
 

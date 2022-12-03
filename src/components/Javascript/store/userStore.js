@@ -1,5 +1,8 @@
 import { createSlice, configureStore } from '@reduxjs/toolkit';
-import { SetAuthCookie, RemoveJWT } from '../Util/functions';
+import { 
+	SetAuthCookie, 
+	RemoveJWT 
+} from '../Util/functions';
 
 const UserSlice = createSlice({
 	name: 'Auth',
@@ -9,7 +12,7 @@ const UserSlice = createSlice({
 	},
 	
 	reducers: {
-		
+
 		login: (state, action) => {
 			// Gets the token using the payload.
 			state.User = action.payload;
@@ -25,7 +28,10 @@ const UserSlice = createSlice({
 	}
 });
 
-export const { logout, login } = UserSlice.actions;
+export const { 
+	logout, 
+	login 
+} = UserSlice.actions;
 
 export default configureStore({
 	reducer: UserSlice.reducer
