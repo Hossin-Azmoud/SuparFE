@@ -76,6 +76,11 @@ async function UpdateBio(bio_) {
     return response;
 }
 async function update(state) {
+    if(!("token" in state)) {
+        state.token = JWT;
+        console.log(JWT);
+    }
+    
     return await fetch(`${api}/update`, {
         
         headers: {

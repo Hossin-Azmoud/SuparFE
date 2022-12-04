@@ -1,7 +1,6 @@
 import { useSelector, useDispatch } from 'react-redux';
 import {
-	logout,
-	login
+	logout
 } from "../store/userStore";
 
 import { useEffect, useState } from 'react';
@@ -9,11 +8,13 @@ import { faHouse, faUserFriends, faSignOut, faUsers, faCog  } from '@fortawesome
 import { FontAwesomeIcon as Fa } from '@fortawesome/react-fontawesome';
 import { Link } from "react-router-dom";
 
+// Guts@gmail.com
 const NavBar = ({ UserImg }) => {
-	const dispatch = useDispatch();
 
+	const dispatch = useDispatch();
 	const signOut = () => {
-		dispatch(logout);
+		dispatch(logout());
+		console.log("Ha?")
 	}
 
 	return (
@@ -36,10 +37,8 @@ const NavBar = ({ UserImg }) => {
 				<Fa icon={ faCog } className="hover:text-blue-500 transition-all text-white" size="xl"/>
 			</Link>
 			
-			<button onClick={signOut}>
-				<Fa icon={ faSignOut } className="hover:text-blue-500 transition-all text-white" size="xl"/>
-			</button>
-
+			
+			<Fa onClick={signOut} icon={ faSignOut } className="cursor-pointer hover:text-blue-500 transition-all text-white" size="xl"/>
 		</aside>
 	)
 };

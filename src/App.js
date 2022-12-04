@@ -25,18 +25,20 @@ const App = () => {
     useEffect(() => {
 
         if(JWT) {
+            console.log(JWT);
             SubmitJWT(JWT)
             .then((res) => {
                 return res.json()
             })
-            
             .then((Json) => {
+                console.log(Json.data);
                 if(Json.code === 200) {
                     dispatch(login(Json.data));
                     console.log(Json.data);
                 } else {
                     console.log(Json);
                 }
+                
                 console.log(Json)
 
             })
@@ -46,7 +48,7 @@ const App = () => {
         } else {
             setLoading(false);
         }
-        
+
     }, []);
 
     return (

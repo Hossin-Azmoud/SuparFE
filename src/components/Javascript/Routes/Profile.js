@@ -103,7 +103,8 @@ const ProfileRenderer = ({ User }) => {
 		e.preventDefault();
 		var state = EditState;
 		state.token = JWT;
-
+		console.log(JWT);
+		
 		update(state)
 		.then((res) => {
 			return res.json()
@@ -218,12 +219,17 @@ const ProfileRenderer = ({ User }) => {
 								Edit ?  (
 									<textarea ref={bioRef} onInput={(e) => onInput(e, "bio")} rows="10" cols="35" className="rounded outline-none text-white inline bg-neutral-700 p-2 border border-neutral-900 focus:border-blue-400"></textarea>
 								) : (
-									<Paragraphs Text={User.bio} Class="font-normal text-sky-100 text-slate-200 text-base my-1"/>
+									<Paragraphs Text={User.bio} Class="w-[300px] font-normal text-sky-100 text-slate-200 text-base my-1"/>
 								)
 							}
 							
 						</div>
-
+						
+						<div>
+							<p> Follwing </p>
+							<p> Followers </p>
+						</div>
+						
 						<p className="text-sky-600 font-thin my-2">
 							
 							{

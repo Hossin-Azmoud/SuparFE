@@ -28,7 +28,6 @@ const Login = () => {
 		const NewState = state;
 		NewState[key] = e.target.value;
 		setState(NewState);
-		console.log(NewState);
 	}
 	
 	useEffect(() => {
@@ -62,16 +61,17 @@ const Login = () => {
 			})
 
 			.then((Json) => {
+				console.log(Json.data)
 				
 				if(Json.code === 200) {
 					dispatch(login(Json.data));
-					
+						
+					console.log(Json.data)
 					setNotification({
 						text: "Welcome to your account, " + Json.data.UserName + "!",
 						status: "info"
 					});
 
-					navigate("/");
 				} else {
 					setNotification({
 						text: Json.data,
@@ -85,11 +85,9 @@ const Login = () => {
 				});
 			})
 		} else {
-			
-			Problematics.map((v) => {
+			Problematics.map(v => {
 				setErrorContent(v.index, v.errMsg)
 			});
-
 		}
 
 		setLoading(false);

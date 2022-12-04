@@ -16,8 +16,10 @@ const UserSlice = createSlice({
 		login: (state, action) => {
 			// Gets the token using the payload.
 			state.User = action.payload;
-			if(action.payload.Token) {
-				SetAuthCookie(action.payload.Token);
+			console.log("Login signaled!");
+			if(action.payload.token) {
+				// console.log()
+				SetAuthCookie(action.payload.token);
 			}
 		},
 
@@ -32,7 +34,8 @@ const UserSlice = createSlice({
 		},
 
 		logout: state => {
-			state.value = null;
+			console.log("LOGING out!");
+			state.User = null;
 			RemoveJWT();
 		}
 	}
