@@ -146,6 +146,7 @@ const ProfileRenderer = ({ User }) => {
 	        	if(Json.code == 200) {
 	        		if(Json.data) {
 	        			setPosts(Json.data);
+	        			// console.table(Json.data);
 	        		} else {
 	        			setPosts("No posts yet.");
 	        		}
@@ -282,6 +283,7 @@ const ProfileRenderer = ({ User }) => {
 							return (
 								<Post 
 									Userid_={User.id_}
+									PostId={v.id}
 									UserName={User.UserName}
 									UserImg={User.img}
 									PostImg={v.img}

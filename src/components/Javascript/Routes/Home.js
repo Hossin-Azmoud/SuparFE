@@ -4,7 +4,7 @@ import {
 	faArrowRight
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useSelector } from 'react-redux';
 import { api } from "../Var";
 import { convertBase64 } from "../Util/functions";
@@ -14,15 +14,18 @@ import Loader from "../UserInterface/Loader";
 import { Notify } from "../UserInterface/microComps";
 import { JWT } from "../Util/functions";
 
+
 const Home = () => {
 	const User = useSelector(state => state.User);
 	const [Image, setImage] = useState(null);
 	const [Text, setText] = useState("");
+	const [rows, setRows] = useState(2);
 	const [state, setState] = useState({});
 	const [Posts, setPosts] = useState(null);
 	const [refresh, setRefresh] = useState(true);
 	const [Notification, setNotification] = useState(null);
 	const [isLoading, setisLoading] = useState(true);
+	const textField = useRef(null);
 
 	const resetAll = () => {
 		setImage(null);
@@ -30,17 +33,23 @@ const Home = () => {
 		setState(null);
 		setPosts(null);
 		setRefresh(true);
+		textField.current.value = "";
+
 	}
 
+	const countLines = (t) => t.split('\n').length;
+
 	useEffect(() => {
-		
+		// TODO count lines in the Text, then set row/line number.
+		setRows(countLines(Text));
+		console.log(rows)
+
 		setState({
 			token: JWT,
 			uuid: User.id_,
 			img: Image,
 			text: Text
 		});
-
 
 	}, [Image, Text]);
 
@@ -62,6 +71,7 @@ const Home = () => {
 	        	if(Json.code == 200) {
 	        		if(Json.data.length > 0) {
 	        			setPosts(Json.data);
+	        			// console.table(Json.data)
 	        		} else {
 	        			setPosts("No posts to display.");
 	        		}
@@ -134,6 +144,7 @@ const Home = () => {
 						text: "Post added!",
 						status: "success"
 					});
+					
 					resetAll();
 				} else {
 					setNotification({
@@ -151,30 +162,31 @@ const Home = () => {
 		
 		return;
 	}
+	// OLD BUTTON ICONS
+	// <FontAwesomeIcon icon={faImage} className="text-white" size="xs"/>
+	// <FontAwesomeIcon icon={faArrowRight} className="text-white" size="xs"/>
+
 
 	return (
 		<>
 			{(Notification) ? <Notify msg={Notification.text} StyleKey={Notification.status}/> : ("")}
 
 			<div className="flex w-[90%] sm:w-[600px] flex-col justify-start items-start">
-				<form className="mt-2 flex rounded p-5 flex-row justify-center items-center my-2 w-full border border-neutral-600 transition-all">
+				<form className="mt-2 flex rounded p-2 flex-col justify-center items-start my-2 w-full transition-all">
 					<input type="file" id="image" className="hidden" onChange={OnImageSelected}/>
 
-                	<textarea onChange={OnTypingText} className="resize-none p-3 rounded-md text-white bg-none px-2 w-full outline-none bg-black p-2" type="text" placeholder="say something"> 
-                	</textarea>
+
+                	<textarea cols="81" rows={rows} ref={textField} onChange={OnTypingText} className="NoBar w-full focus:border-b-sky-700 border-b-neutral-700 border-b resize-none p-3 text-white bg-none px-2 outline-none bg-black p-2" type="text" placeholder="say something" /> 
                 	
-                	<div className="flex flex-row items-center justify-center">
-                		
-                		<span onClick={OpenFileDialogue} title="Attach image" className="p-1 flex justify-center items-center rounded-full h-[35px] w-[40px] duration-50 cursor-pointer mx-2 hover:bg-slate-800">
-              				<FontAwesomeIcon icon={faImage} className="text-white" size="xs"/>
-	              		</span>
+                	<div className="flex flex-row items-center justify-center mt-2">
+                		<button onClick={OpenFileDialogue} title="Attach image" className="text-white p-2 hover:bg-neutral-800 bg-neutral-900 rounded">
+              				<p className=""> add image </p>
+	              		</button>
 
-						<span onClick={OnSubmit}
-							title="Send post" className="p-1 flex justify-center items-center rounded-full h-[35px] w-[40px] duration-50 cursor-pointer mx-2 hover:bg-slate-800">
-		              		<FontAwesomeIcon icon={faArrowRight} className="text-white" size="xs"/>
-		              	</span>
-
-		              
+						<button onClick={OnSubmit} title="Send post" className="text-white p-2 hover:bg-sky-500 bg-sky-600 rounded mx-2">
+		              		
+		              		<p className=""> post </p>
+		              	</button>
                 	</div>
 
             	</form>
@@ -195,6 +207,7 @@ const Home = () => {
 								return (
 									<Post 
 										Userid_={v.user.id_}
+										PostId={v.id}
 										UserName={v.user.UserName}
 										UserImg={v.user.img}
 										PostImg={v.img}

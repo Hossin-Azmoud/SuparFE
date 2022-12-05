@@ -67,11 +67,11 @@ const Notify = ({ msg, StyleKey }) => {
 
 	useEffect(() => {
 		initialize();
-		setTimeout(hide, 3 * 1000);
+		setTimeout(hide, 10 * 1000);
 	}, [])
 
 	return (
-		<div ref={frame} className={`flex flex-row items-center justify-center shadow visible SlideFromTop fixed top-5 w-[200px] p-4 rounded ${Map_[StyleKey].T}`}> 
+		<div ref={frame} className={`flex flex-row items-center justify-center shadow visible SlideFromTop fixed top-5 p-4 rounded ${Map_[StyleKey].T}`}> 
 			<span className="mx-2"> { msg } </span>
 			<Fa icon={Map_[StyleKey].icon} />
 		</div>

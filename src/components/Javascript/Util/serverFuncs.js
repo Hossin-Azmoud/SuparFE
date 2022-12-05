@@ -27,6 +27,26 @@ async function GetAllPosts() {
     })
 }
 
+async function DeletePost(UserId, PostId) {
+    console.table({
+        token: JWT,
+        uuid: UserId,
+        id_: PostId 
+    })
+    
+    return await fetch(`${api}/DeletePost`, {
+        headers: {
+            "content-type": "application/json",
+        },
+        method: "POST",
+        body: JSON.stringify({
+            token: JWT,
+            uuid: UserId,
+            id_: PostId 
+        })
+    })
+}
+
 async function updateProfileImage(img) {
     
     const response = await fetch(`${api}/update`, {
@@ -143,7 +163,8 @@ export {
     updateProfileImage,
     updateBackgroundImage,
     GetAllPosts,
-    update
+    update,
+    DeletePost
 };
 
 

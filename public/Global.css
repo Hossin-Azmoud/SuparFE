@@ -41,6 +41,10 @@ body::-webkit-scrollbar-track {
 	background: none;
 }
 
+.NoBar::-webkit-scrollbar {
+  display: none;
+}
+
 
 /* ANIMATIONS  */
 .slideRight {
