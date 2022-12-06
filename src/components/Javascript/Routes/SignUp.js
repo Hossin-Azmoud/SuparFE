@@ -12,7 +12,10 @@ import { faCloudUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon as Fa} from '@fortawesome/react-fontawesome'
 import { convertBase64 } from "../Util/functions";
 
-const SignUp = () => {
+const SignUp = ({
+	NotificationFunc = () => {}
+}) => {
+
 
 	const navigate = useNavigate();
 	const dispatch = useDispatch()
@@ -20,7 +23,6 @@ const SignUp = () => {
 	const [img, setImg] = useState(null);
 	const [bg, setbg] = useState(null);
 	const [Loading, setLoading] = useState(false);
-	const [Notification, setNotification] = useState(null);
 	const isReq = (k) => (k === "UserName") || (k === "Email") || (k === "Password") || (k === "bio");
 	
 	const [state, setState] = useState({
@@ -45,7 +47,7 @@ const SignUp = () => {
 			setState({...state, img: Data})
 		})
 		.catch(() => {
-			setNotification({ 
+			NotificationFunc({ 
 				text: "profile image could not be uploaded!",
 				status: "error"
 			});
@@ -62,7 +64,7 @@ const SignUp = () => {
 			setState({...state, bg: Data});
 		})
 		.catch(() => {
-			setNotification({ 
+			NotificationFunc({ 
 				text: "background image could not be uploaded!",
 				status: "error"
 			});
@@ -122,7 +124,7 @@ const SignUp = () => {
 				if(Json.code === 200) {
 					dispatch(login(Json.data));
 					
-					setNotification({ 
+					NotificationFunc({ 
 						text: "Welcome to your account " + Json.data.UserName + "!",
 						status: "success"
 					});
@@ -130,13 +132,13 @@ const SignUp = () => {
 					navigate("/");
 					location.reload();
 				} else {
-					setNotification({ 
+					NotificationFunc({ 
 						text: Json.data,
 						status: "error"
 					});
 				}
 			}).catch((e) => {
-				setNotification({ 
+				NotificationFunc({ 
 					text: "an error accured and you could not sign in!",
 					status: "error"
 				});
@@ -151,7 +153,6 @@ const SignUp = () => {
 
 	return (
 		<div className="w-full h-screen flex flex-col justify-center items-center">
-			{(Notification) ? <Notify msg={Notification.text} StyleKey={Notification.status}/> : ("")}
 			{
 				(Index === 0) ? (
 					<form className="slideRight w-[90%] flex flex-row justify-between items-center w-11/12 sm:w-[700px] rounded-md shadow-md bg-neutral-900">

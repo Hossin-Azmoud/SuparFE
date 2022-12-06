@@ -27,7 +27,6 @@ const Paragraphs = ({ Text, Class="" }) => {
 
 const Notify = ({ msg, StyleKey }) => {
 
-
 	const Map_ = {
 		info: {
 			T: "text-slate-900 bg-white",
@@ -46,14 +45,14 @@ const Notify = ({ msg, StyleKey }) => {
 	const frame = useRef(null);
 	
 	const initialize = () => {
-		frame.current.style.display = "block";
-		frame.current.style.transform = "translateY(0)";
+		frame.current.style.display = "flex";
+		frame.current.style.transform = "translate(-50%, 0)";
 		frame.current.style.opacity = "1";
 	}
 
 	const hide = () => {
 		
-		frame.current.style.transform = "translateY(-20px)";
+		frame.current.style.transform = "translate(0, -20px)";
 		frame.current.style.opacity = "0";
 		setTimeout(() => {
 			frame.current.style.display = "none";
@@ -71,14 +70,14 @@ const Notify = ({ msg, StyleKey }) => {
 	}, [])
 
 	return (
-		<div ref={frame} className={`flex flex-row items-center justify-center shadow visible SlideFromTop fixed top-5 p-4 rounded ${Map_[StyleKey].T}`}> 
+		<div ref={frame} className={`centerX flex flex-row items-center justify-center shadow visible SlideFromTop fixed top-5 p-3 rounded ${Map_[StyleKey].T}`}> 
 			<span className="mx-2"> { msg } </span>
 			<Fa icon={Map_[StyleKey].icon} />
 		</div>
 	)
 }
 
-const Iframe = ({ Obj }) => {
+const Iframe = ({ Obj, NotificationFunc = () => {} }) => {
 	const MainContainer = useRef(null);
 	const Dispatch = useDispatch();
 	const [Notification, setNotification] = useState(null);

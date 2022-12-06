@@ -9,9 +9,10 @@ import {
 } from '../store/userStore';
 import { Link, useNavigate } from "react-router-dom";
 import Loader from "../UserInterface/Loader";
-import { Notify } from "../UserInterface/microComps";
 
-const Login = () => {
+const Login = ({ 
+	NotificationFunc = () => {}
+}) => {
 	const User = useSelector(state => state.User);
 	const dispatch = useDispatch()
 	const [Loading, setLoading] = useState(false);
@@ -19,7 +20,6 @@ const Login = () => {
 		Email: "",
 		Password: ""
 	});
-	const [Notification, setNotification] = useState(null);
 	
 	const navigate = useNavigate();
 	const validators = document.getElementsByClassName("validator");
@@ -67,19 +67,19 @@ const Login = () => {
 					dispatch(login(Json.data));
 						
 					console.log(Json.data)
-					setNotification({
+					NotificationFunc({
 						text: "Welcome to your account, " + Json.data.UserName + "!",
 						status: "info"
 					});
 
 				} else {
-					setNotification({
+					NotificationFunc({
 						text: Json.data,
 						status: "error"
 					});
 				}
 			}).catch((e) => {
-				setNotification({
+				NotificationFunc({
 					text: Json.data,
 					status: "error"
 				});
@@ -95,7 +95,6 @@ const Login = () => {
 
 	return (
 		<div className="w-screen h-screen flex flex-col justify-center items-center">
-			{(Notification) ? <Notify msg={Notification.text} StyleKey={Notification.status}/> : ("")}
 			<form className="w-[90%] flex flex-row justify-between items-center w-11/12 sm:w-[700px] rounded-md shadow-md bg-neutral-900">
 				<div className="flex flex-col w-full sm:w-1/2 justify-center p-4 px-6">
 					

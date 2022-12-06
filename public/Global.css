@@ -28,7 +28,7 @@ body {
 
 body::-webkit-scrollbar {
 	scrollbar-color: none;
-  	scrollbar-width: 10px;
+  scrollbar-width: 10px;
 }
 
 
@@ -43,6 +43,11 @@ body::-webkit-scrollbar-track {
 
 .NoBar::-webkit-scrollbar {
   display: none;
+}
+
+.centerX {
+	left: 50%;
+	top: 15px;
 }
 
 
@@ -76,12 +81,12 @@ body::-webkit-scrollbar-track {
 
 @keyframes SlideFromTop {
 	from {
-		transform: translateY(-20px);
+		transform: translate(-20px, -50%);
 		opacity: 0;
 	}	
 
 	to {
-		transform: translateY(0);
+		transform: translate(0, -50%);
 		opacity: 1;
 	}
 }

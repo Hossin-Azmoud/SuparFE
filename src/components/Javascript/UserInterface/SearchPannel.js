@@ -3,7 +3,20 @@ import { api, goApi } from "../Var";
 import UserUI from "./UserUI";
 import Loader from "./Loader";
 
-const AccountsSearchPannel = ({ CurrUserId }) => {
+const AccountsSearchPannel = ({ 
+    CurrUserId, 
+    NotificationFunc= () => {} 
+}) => {
+    // NotificationFunc is used to push a notification.
+    /**
+     * Usage:
+       
+        NotificationFunc(
+           text: String | number | error,
+           status: "error" | "info" | "success" 
+        ) 
+      
+     */
     const [Users, setUsers] = useState(null);
     const [Query, setQuery] = useState("");
     const GetUsersFromApi = (subbed) => {
@@ -28,7 +41,7 @@ const AccountsSearchPannel = ({ CurrUserId }) => {
             })
         }
     }
-    
+
     useEffect(() => {
         // an onmount event to fetch everything from the database/server once the page is loaded
         var subscribed = true;

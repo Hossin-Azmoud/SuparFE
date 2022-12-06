@@ -7,40 +7,16 @@ import Post from "../UserInterface/Post";
 import { copytoclip as cp, JWT } from "../Util/functions";
 import { GetUserById, GetUserPostsById, updateProfileImage, updateBackgroundImage, update } from "../Util/serverFuncs";
 import { useParams } from "react-router-dom";
-import { Notify, Paragraphs, Iframe } from "../UserInterface/microComps";
+import { Paragraphs, Iframe } from "../UserInterface/microComps";
 import Loader from "../UserInterface/Loader";
 import { 
   updateUser
 } from '../store/userStore';
 
-const ProfileEditor = () => {
-	/*
-		TODO:
-			! Adjust the Ui to look more modern and appealin
-			!! Make it so the user is able to change the bg, img, bio and username.
-
-	*/
-	const User = useSelector(state => state.User);	
-	
-
-	const [Images, setImages] = useState({
-		img: User.img,
-		bg: User.bg
-	});
-
-	const [bio, setbio] = useState(User.bio);
-	const [UserName, setUserName] = useState(User.UserName);
-
-	return (
-		<div>
-
-		</div>
-	)
-
-}
-
-
-const ProfileRenderer = ({ User }) => {
+const ProfileRenderer = ({ 
+	User,
+	NotificationFunc = () => {}	
+}) => {
 	// TODO: Implement Likes..
 	// TODO: Implement comments..
 
@@ -48,7 +24,6 @@ const ProfileRenderer = ({ User }) => {
 	const [Posts, setPosts] = useState(null);
 	const [imgCmp, setimgCmp] = useState(false);
 	const [Loading, setLoading] = useState(true);
-	const [Notification, setNotification] = useState(null);
 	const [Edit, setEdit] = useState(false)
 	const [bioRef, addrRedd, UnameRef] = [useRef(null), useRef(null), useRef(null)]	
 	const [EditState, setEditState] = useState({})
@@ -158,7 +133,7 @@ const ProfileRenderer = ({ User }) => {
 	        	setLoading(false);
 	        })
 	        .catch(e => {
-	        	setNotification({
+	        	NotificationFunc({
 	        		msg: `an error accured while getting data: ${e}`,
 	        		StyleKey: "error"
 	        	})
@@ -184,7 +159,6 @@ const ProfileRenderer = ({ User }) => {
 		<div className="w-[90%] sm:w-[600px] flex flex-col justify-start items-start">
 			
 			{ (imgCmp) ? <Iframe Obj={{ onclick: setimgCmp, variables: imgCmp }} /> : "" }
-			{ (Notification) ? <Notify {...Notification}/> : ""}
 			<header className="rounded-b-xl bg-neutral-800 flex flex-col justify-center items-center w-full">
 				
 				<div 
@@ -325,19 +299,21 @@ const ProfileRenderer = ({ User }) => {
 	)
 }
 
-const CurrentUserProfile = () => {
+const CurrentUserProfile = ({
+	NotificationFunc=() => {}
+}) => {
 	const User = useSelector(state => state.User);	
-	
 	return (
-		<ProfileRenderer User={User}/>
+		<ProfileRenderer NotificationFunc={NotificationFunc} User={User}/>
 	)
 }
 
-const Account = () => {
+const Account = ({
+	NotificationFunc = () => {}
+}) => {
 	let { id } = useParams();
 	
 	const [ User, setUser ] = useState()
-
 	useEffect(() => {
 		GetUserById(id)
 		.then((res) => {
@@ -358,7 +334,8 @@ const Account = () => {
 
 	return (
 		(User) ? (<ProfileRenderer 
-			User={User}
+			User={ User }
+			NotificationFunc={NotificationFunc}
 		/>) : ""
 	)
 }

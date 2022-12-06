@@ -11,19 +11,19 @@ import { convertBase64 } from "../Util/functions";
 import { GetAllPosts } from "../Util/serverFuncs";
 import Post from "../UserInterface/Post";
 import Loader from "../UserInterface/Loader";
-import { Notify } from "../UserInterface/microComps";
 import { JWT } from "../Util/functions";
 
 
-const Home = () => {
+const Home = ({
+	NotificationFunc = () => {}
+}) => {
 	const User = useSelector(state => state.User);
 	const [Image, setImage] = useState(null);
 	const [Text, setText] = useState("");
-	const [rows, setRows] = useState(2);
+	const [rows, setRows] = useState(3);
 	const [state, setState] = useState({});
 	const [Posts, setPosts] = useState(null);
 	const [refresh, setRefresh] = useState(true);
-	const [Notification, setNotification] = useState(null);
 	const [isLoading, setisLoading] = useState(true);
 	const textField = useRef(null);
 
@@ -34,15 +34,15 @@ const Home = () => {
 		setPosts(null);
 		setRefresh(true);
 		textField.current.value = "";
-
 	}
 
 	const countLines = (t) => t.split('\n').length;
 
 	useEffect(() => {
 		// TODO count lines in the Text, then set row/line number.
-		setRows(countLines(Text));
-		console.log(rows)
+		if(Text) {
+			setRows(countLines(Text));
+		}
 
 		setState({
 			token: JWT,
@@ -77,13 +77,13 @@ const Home = () => {
 	        		}
 	        		
 	        	} else { 
-	        		setNotification({
+	        		NotificationFunc({
 						text: "Could not get posts from the server",
 						status: "error"
 					});
 	        	}
 	        }).catch(() => {
-	        	setNotification({
+	        	NotificationFunc({
 					text: "Error accured.",
 					status: "error"
 				});
@@ -109,17 +109,33 @@ const Home = () => {
 		setText(e.target.value);
 	}
 
-	const OpenFileDialogue = () => {
+	const OpenFileDialogue = (e) => {
+		e.preventDefault();
 		document.getElementById("image").click()
 	};
 
-
 	const OnImageSelected = (e) => {
-		const type_ = e.target.files[0].type;
-		convertBase64(e.target.files[0])
-		.then((Data) => {
-			setImage(Data);	
-		})
+		const Files = e.target.files;
+		if(Files.length === 1) {
+			convertBase64(Files[0])
+			.then((Data) => {
+				setImage(Data);	
+			})
+		} else if (Files.length > 1) {
+			const FilesData = [];
+			for (let i = 0; i < Files.length; i++) {
+				convertBase64(Files[i])
+				.then((Data) => {
+					FilesData.push(Data);	
+				})
+			}
+			setImage(FilesData);
+		} else {
+			NotificationFunc({
+				text: "No images were selected!",
+				status: "info"
+			});
+		}
 	}
 
 	const OnSubmit = (e) => {
@@ -140,51 +156,41 @@ const Home = () => {
 
 			.then((Json) => {
 				if(Json.code === 200) {
-					setNotification({
+					NotificationFunc({
 						text: "Post added!",
 						status: "success"
 					});
 					
 					resetAll();
 				} else {
-					setNotification({
+					NotificationFunc({
 						text: "Could not add your post",
 						status: "error"
 					});
 				}
 			}).catch((e) => {
-				setNotification({
+				NotificationFunc({
 					text: "could not add post",
 					status: "error"
 				});
 			})
 		}
-		
+
 		return;
 	}
-	// OLD BUTTON ICONS
-	// <FontAwesomeIcon icon={faImage} className="text-white" size="xs"/>
-	// <FontAwesomeIcon icon={faArrowRight} className="text-white" size="xs"/>
-
 
 	return (
 		<>
-			{(Notification) ? <Notify msg={Notification.text} StyleKey={Notification.status}/> : ("")}
-
 			<div className="flex w-[90%] sm:w-[600px] flex-col justify-start items-start">
-				<form className="mt-2 flex rounded p-2 flex-col justify-center items-start my-2 w-full transition-all">
+				<form className="mt-2 flex rounded py-6 px-2 flex-col justify-center items-start my-2 w-full transition-all">
 					<input type="file" id="image" className="hidden" onChange={OnImageSelected}/>
-
-
                 	<textarea cols="81" rows={rows} ref={textField} onChange={OnTypingText} className="NoBar w-full focus:border-b-sky-700 border-b-neutral-700 border-b resize-none p-3 text-white bg-none px-2 outline-none bg-black p-2" type="text" placeholder="say something" /> 
-                	
                 	<div className="flex flex-row items-center justify-center mt-2">
                 		<button onClick={OpenFileDialogue} title="Attach image" className="text-white p-2 hover:bg-neutral-800 bg-neutral-900 rounded">
               				<p className=""> add image </p>
 	              		</button>
 
 						<button onClick={OnSubmit} title="Send post" className="text-white p-2 hover:bg-sky-500 bg-sky-600 rounded mx-2">
-		              		
 		              		<p className=""> post </p>
 		              	</button>
                 	</div>
@@ -193,9 +199,18 @@ const Home = () => {
             	
             	{
             		(Image) ? (
-            			<div className="text-white flex justify-center items-start flex-row flex-wrap">
-            				<img src={Image} className="rounded-md h-20" alt='imgUploaded'/>
-            			</div>
+            			<div className="text-white flex justify-center items-start flex-row flex-wrap p-2">
+	            			{
+	            				(typeof Image === "string") ? (
+	            					<img src={Image} className="rounded-md h-30" alt='imgUploaded' />
+	            				) : (
+	            				
+            						Image.map((v, i) => {
+			        					return <img key={i} src={v} className="rounded-md h-24" alt='imgUploaded' />	
+            						})
+	            				)
+	            			}
+						</div>
             		) : ""
             	}
             	
@@ -213,6 +228,7 @@ const Home = () => {
 										PostImg={v.img}
 										PostText={v.text}
 										key={i}
+										NotificationFunc={NotificationFunc}
 									/>
 								)
 							})
