@@ -47,6 +47,61 @@ async function DeletePost(UserId, PostId) {
     })
 }
 
+// const CDN = "http://localhost:8500"
+
+// async function AddAvatarToCDN(img) {
+    
+//     const response = await fetch(`${CDN}/Zimg/addAvatar`, {
+//         headers: {
+//             "content-type": "application/json",
+//         },
+
+//         method: "POST",
+//         body: JSON.stringify({
+//             mime: img,
+//             id: uuid
+//         })
+//     })
+
+//     return response;
+// }
+
+
+// async function AddBackgroundToCDN(img) {
+    
+//     const response = await fetch(`${CDN}/Zimg/addbg`, {
+//         headers: {
+//             "content-type": "application/json",
+//         },
+
+//         method: "POST",
+//         body: JSON.stringify({
+//             mime: img,
+//             id: uuid
+//         })
+//     })
+
+//     return response;
+// }
+
+// async function AddBackgroundToCDN(img) {
+    
+//     const response = await fetch(`${CDN}/Zimg/NewPostImg`, {
+//         headers: {
+//             "content-type": "application/json",
+//         },
+
+//         method: "POST",
+//         body: JSON.stringify({
+//             mime: img,
+//             id: uuid,
+//             postID: PID
+//         })
+//     })
+
+//     return response;
+// }
+
 async function updateProfileImage(img) {
     
     const response = await fetch(`${api}/update`, {
@@ -71,9 +126,10 @@ async function updateBackgroundImage(img) {
         },
 
         method: "POST",
+        
         body: JSON.stringify({
             token: JWT,
-            img: img
+            bg: img
         })
     })
 

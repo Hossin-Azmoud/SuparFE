@@ -66,7 +66,7 @@ const Notify = ({ msg, StyleKey }) => {
 
 	useEffect(() => {
 		initialize();
-		setTimeout(hide, 10 * 1000);
+		setTimeout(hide, 7 * 1000);
 	}, [])
 
 	return (
@@ -95,6 +95,9 @@ const Iframe = ({ Obj, NotificationFunc = () => {} }) => {
 			return res.json();
 		})
 		.then(js => {
+			
+			console.log(js)
+			
 			if(js.code === 200) {
 				var UpdatingObject = {  };
 				UpdatingObject[Vars.key] = buffer;
@@ -103,6 +106,7 @@ const Iframe = ({ Obj, NotificationFunc = () => {} }) => {
 			} else {
 				console.log(js);
 			}
+
 		})
 
 		.catch(e => {

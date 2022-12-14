@@ -134,7 +134,6 @@ const Post = ({
 				</div>
 				
 				<main className="p-2">
-					// The content of the 
 					{
 						(PostText) ? (
 							<Paragraphs Text={PostText} Class="text-white my-2" />
@@ -149,17 +148,19 @@ const Post = ({
 
 				<div className="pl-2 pb-2 flex flex-row items-center justify-start">
 
-					<div className="flex flex-row items-center justify-start">
-						<Fa icon={ faHeart } className={`transition-all cursor-pointer ${(Liked) ? "text-rose-700" : "text-white"}`} onClick={like} size="lg" />
-						<span className="mx-2 font-thin font-mono text-white"> 0 </span>
+					<div className="flex flex-row items-center justify-start hover:bg-sky-400  bg-neutral-800 p-2 rounded shadow-2xl cursor-pointer" onClick={like}>
+						<Fa icon={ faHeart } className={`transition-all ${(Liked) ? "text-rose-700" : "text-white"}`} size="lg" />
+						<span className="font-thin text-white ml-5"> 0 </span>
 					</div>
-					<div className="flex flex-row items-center justify-start">
-						<Fa icon={ faComment } className="transition-all cursor-pointer mx-5 text-white" size="lg" />
-						<span className="mx-2 font-thin font-mono text-white"> 0 </span>
+					
+					<div className="flex flex-row items-center justify-start mx-3 hover:bg-sky-400  bg-neutral-800 p-2 rounded shadow-2xl cursor-pointer">
+						<Fa icon={ faComment } className="transition-all text-white" size="lg" />
+						<span className="font-thin text-white ml-5"> 0 </span>
 					</div>
-					<div className="flex flex-row items-center justify-start">
-						<Fa icon={ faShare } className="transition-all cursor-pointer text-white" size="lg" />
-						<span className="mx-2 font-thin font-mono text-white"> 0 </span>
+
+					<div className="flex flex-row items-center justify-start hover:bg-sky-400  bg-neutral-800 p-2 rounded shadow-2xl cursor-pointer">
+						<Fa icon={ faShare } className="transition-all text-white" size="lg" />
+						<span className="font-thin text-white ml-5"> 0 </span>
 					</div>
 				</div>
 

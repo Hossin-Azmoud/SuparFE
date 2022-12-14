@@ -200,9 +200,9 @@ const ProfileRenderer = ({
 							
 						</div>
 						
-						<div>
-							<p> Follwing </p>
-							<p> Followers </p>
+						<div className="flex flex-row items-center justify-between my-4">
+							<p className="shadow-sm font-bold text-white bg-neutral-700 p-2 rounded-md"> Follwing  <span className="font-thin ml-2"> 0 </span></p>
+							<p className="shadow-sm font-bold text-white bg-neutral-700 mx-2 p-2 rounded-md"> Followers <span className="font-thin ml-2"> 0 </span> </p>
 						</div>
 						
 						<p className="text-sky-600 font-thin my-2">
