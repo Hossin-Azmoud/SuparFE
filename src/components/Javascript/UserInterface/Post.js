@@ -4,7 +4,15 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Paragraphs, Iframe } from "./microComps";
 import { useSelector, useDispatch } from 'react-redux';
-import { DeletePost } from "../Util/serverFuncs";
+
+import { 
+	DeletePost, 
+	getComments, 
+	getLikes, 
+	Comment, 
+	Like,
+	unLike
+} from "../Util/serverFuncs";
 
 const Post = ({
 
@@ -17,30 +25,108 @@ const Post = ({
 	NotificationFunc = () => {}
 
 }) => {
-
+	
+	const [PostLikes, setPostLikes] = useState([]);
+	// const [post_comment, setpost_comment] = useState(null);	
 	const User = useSelector(state => state.User);
-	const [Liked, SetLike] = useState(false);
+	const [Liked, setLike] = useState(false);
 	const [imgcmp, setImgcmp] = useState(false);
 	const [ShowEdit, setShowEdit] = useState(false);
-	
 	const [EditPos, setEditPos] = useState({
 		x: 0,
 		y: 0
 	});
+
 	const [deletedflag, setdeletedflag] = useState(null); // it will be set once we delete a post successfully, substituting the content of the current post.
 
 	const like = () => {
-		SetLike(!Liked);
+		console.log(PostId, User.id_);
+		
+		if(Liked) {
+			setLike(!Liked)
+
+			unLike(PostId, User.id_)
+			.then(r => r.json())
+			.then(json => {
+				if(json.code === 200) {
+					// Success.
+					var New = PostLikes.filter(s => s.uuid != User.id_);
+					setPostLikes(New)
+				} else {
+					setLike(!Liked)
+				}
+			})
+			.catch(e => {
+				console.log(e)
+			})
+
+		} else {
+			// like
+			setLike(!Liked)
+			Like(PostId, User.id_)
+			.then(r => r.json())
+			.then(json => {
+				if(json.code === 200) {
+					// Success.
+					var New = []
+
+					if(PostLikes.length > 0) {
+						New = PostLikes;	
+					}
+
+					New.push(json.data)
+					setPostLikes(New)
+				} else {
+					setLike(!Liked)		
+				}
+			})
+			.catch(e => {
+				console.log(e)
+			})
+		}
 	}
 
-	// TODO: Add likes, comments to db.
-	const AddLikeById = () => {
-		// TODO
+
+	const UpdateLikes = () => {
+		
+		getLikes(PostId)
+		.then((r) => {
+			return r.json()
+		})
+
+		.then((json) => {
+			
+			if(json.code === 200 ) {
+				if(json.data != null) {
+					setPostLikes(json.data)
+				}
+			}
+		})
+		
+		.catch(e => {
+			console.log(e)
+		})
 	}
 
-	const addComment = () => {
-		//TODO
-	}
+	useEffect(() => {
+		if(PostLikes.length > 0) {
+			PostLikes.map(v => {
+				if(v.uuid === User.id_) {
+					setLike(true)
+				}
+			})	
+		}
+
+	}, [PostLikes]);
+
+	useEffect(() => {
+		UpdateLikes()
+
+		return () => {
+			setPostLikes([])
+		}
+
+	}, [])
 
 	const PostOnClick = () => {
 		setImgcmp({
@@ -139,18 +225,20 @@ const Post = ({
 							<Paragraphs Text={PostText} Class="text-white my-2" />
 						) : ""
 					}
+					
 					<img 
 						src={PostImg} alt="user avatar" 
 						className={(PostImg) ? "my-4 w-full h-full visible rounded" : "hidden"} 
 						onClick={PostOnClick}
 					/>
+
 				</main>
 
 				<div className="pl-2 pb-2 flex flex-row items-center justify-start">
 
 					<div className="flex flex-row items-center justify-start hover:bg-sky-400  bg-neutral-800 p-2 rounded shadow-2xl cursor-pointer" onClick={like}>
 						<Fa icon={ faHeart } className={`transition-all ${(Liked) ? "text-rose-700" : "text-white"}`} size="lg" />
-						<span className="font-thin text-white ml-5"> 0 </span>
+						<span className="font-thin text-white ml-5"> {PostLikes.length} </span>
 					</div>
 					
 					<div className="flex flex-row items-center justify-start mx-3 hover:bg-sky-400  bg-neutral-800 p-2 rounded shadow-2xl cursor-pointer">

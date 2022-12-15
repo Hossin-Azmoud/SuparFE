@@ -47,60 +47,86 @@ async function DeletePost(UserId, PostId) {
     })
 }
 
-// const CDN = "http://localhost:8500"
+async function getComments(pid) {
+   
+    const response = await fetch(`${api}/getComments/${pid}`, {
+        headers: {
+            "content-type": "application/json",
+        },
 
-// async function AddAvatarToCDN(img) {
-    
-//     const response = await fetch(`${CDN}/Zimg/addAvatar`, {
-//         headers: {
-//             "content-type": "application/json",
-//         },
+        method: "GET"
+    })
 
-//         method: "POST",
-//         body: JSON.stringify({
-//             mime: img,
-//             id: uuid
-//         })
-//     })
+    return response;
+}
 
-//     return response;
-// }
+async function getLikes(pid) {
+   
+    const response = await fetch(`${api}/getLikes/${pid}`, {
+        headers: {
+            "content-type": "application/json",
+        },
+
+        method: "GET"
+    })
+
+    return response;
+}
+
+async function Comment(post_id, uuid, text) {
+    const response = await fetch(`${api}/comment`, {
+        headers: {
+            "content-type": "application/json",
+        },
+
+        method: "POST",
+        body: JSON.stringify({
+            token: JWT,
+            post_id,
+            uuid,
+            text
+        })
+    })
+
+    return response;
+}
 
 
-// async function AddBackgroundToCDN(img) {
-    
-//     const response = await fetch(`${CDN}/Zimg/addbg`, {
-//         headers: {
-//             "content-type": "application/json",
-//         },
+async function Like(post_id, uuid) {
+    const response = await fetch(`${api}/like`, {
+        headers: {
+            "content-type": "application/json",
+        },
 
-//         method: "POST",
-//         body: JSON.stringify({
-//             mime: img,
-//             id: uuid
-//         })
-//     })
+        method: "POST",
+        body: JSON.stringify({
+            token: JWT,
+            post_id,
+            uuid
+        })
+    })
 
-//     return response;
-// }
+    return response;
+}
 
-// async function AddBackgroundToCDN(img) {
-    
-//     const response = await fetch(`${CDN}/Zimg/NewPostImg`, {
-//         headers: {
-//             "content-type": "application/json",
-//         },
 
-//         method: "POST",
-//         body: JSON.stringify({
-//             mime: img,
-//             id: uuid,
-//             postID: PID
-//         })
-//     })
+async function unLike(post_id, uuid) {
+    const response = await fetch(`${api}/like/remove`, {
+        headers: {
+            "content-type": "application/json",
+        },
 
-//     return response;
-// }
+        method: "POST",
+        body: JSON.stringify({
+            token: JWT,
+            post_id,
+            uuid
+        })
+    })
+
+    return response;
+}
+
 
 async function updateProfileImage(img) {
     
@@ -220,10 +246,10 @@ export {
     updateBackgroundImage,
     GetAllPosts,
     update,
-    DeletePost
+    DeletePost,
+    getComments,
+    getLikes,
+    Comment,
+    Like,
+    unLike
 };
-
-
-
-
-
