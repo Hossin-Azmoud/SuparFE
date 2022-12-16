@@ -234,7 +234,7 @@ const ProfileRenderer = ({
 					</div>
 
 					<div className="flex flex-col justify-center items-center">
-						<img onClick={profileImageOnClick} src={User.img} alt="user_avatar" className="rounded-full shadow-xl w-24 h-24 cursor-pointer" />
+						<img onClick={profileImageOnClick} src={User.img} alt="user_avatar" className="rounded-full hover:ring shadow-xl w-24 h-24 cursor-pointer" />
 						{
 							(Edit) ? (
 								<input ref={UnameRef} onChange={(e) => onInput(e, "UserName")} className="outline-none rounded w-[140px] my-2 text-white inline bg-neutral-700 p-2 border border-neutral-900 focus:border-blue-400"/>

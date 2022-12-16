@@ -34,7 +34,6 @@ const UserSlice = createSlice({
 		},
 
 		logout: state => {
-			console.log("LOGING out!");
 			state.User = null;
 			RemoveJWT();
 		}

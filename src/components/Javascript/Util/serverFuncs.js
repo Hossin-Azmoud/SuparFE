@@ -28,11 +28,6 @@ async function GetAllPosts() {
 }
 
 async function DeletePost(UserId, PostId) {
-    console.table({
-        token: JWT,
-        uuid: UserId,
-        id_: PostId 
-    })
     
     return await fetch(`${api}/DeletePost`, {
         headers: {
@@ -177,7 +172,9 @@ async function UpdateBio(bio_) {
 
     return response;
 }
+
 async function update(state) {
+    
     if(!("token" in state)) {
         state.token = JWT;
         console.log(JWT);
@@ -193,6 +190,7 @@ async function update(state) {
         body: JSON.stringify(state)
     })
 }
+
 async function updateALL(img_, bg_, bio_, addr_) { 
     const response = await fetch(`${api}/update`, {
         
