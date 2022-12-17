@@ -7,7 +7,8 @@ const UserUI = ({
 }) => {
 
 	return (
-		<div className="flex bg-neutral-900 flex-row w-full justify-between items-center bg-black rounded p-4 m-1 text-slate-900 font-semibold sm:w-[400px]"> 
+		<div className="flex bg-neutral-900 flex-row w-[90%] justify-between items-center bg-black rounded p-2 my-1 text-slate-900 font-semibold sm:w-[400px]"> 
+			
 			<Link to={`/Accounts/${id_}`}>
 				<img className="shadow-xl w-10 rounded-full h-10" src={(img) ? img : "/img/defUser.jpg"} />
 			</Link>

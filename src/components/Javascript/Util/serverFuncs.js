@@ -235,7 +235,6 @@ async function SubmitJWT(Token) {
     return response;
 }
 
-
 export {
 	GetUserById,
 	GetUserPostsById,

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { api, goApi } from "../Var";
+import { api, goApi, HOST } from "../Var";
 import UserUI from "./UserUI";
 import Loader from "./Loader";
 
@@ -34,7 +34,16 @@ const AccountsSearchPannel = ({
             
             .then((jsonData) => {
                 if(jsonData.code == 200) {
-                    setUsers([...jsonData.data])
+                    var users = [...jsonData.data];
+                    if(HOST) {
+                        users.map((v) => {
+                            v.img = v.img.replace("localhost", HOST);
+                            v.bg = v.bg.replace("localhost", HOST);
+                        });
+                    }
+
+                    setUsers(users);
+                    users = null;
                 }
             }).catch(e => {
                 console.log(e);
@@ -49,7 +58,7 @@ const AccountsSearchPannel = ({
         
         return () => { 
             subscribed = false;
-            setUsers(null) 
+            setUsers(null);
         }
 
     }, [Query])
@@ -62,7 +71,7 @@ const AccountsSearchPannel = ({
                 </input>
             </form>
 
-            <div className="flex flex-wrap flex-row justify-center items-center">
+            <div className="flex w-full flex-wrap flex-row justify-center items-center">
 
                 {
                     (Users) ? Users.map((v, i) => {
@@ -75,7 +84,9 @@ const AccountsSearchPannel = ({
                             />
                         ) : ""
                     }) : (
-                        <Loader size="50" Class="my-6"/>
+                        <div className="h-[500px]">
+                            <Loader size="20" Class="my-6"/>
+                        </div>
                     )
                 }
 

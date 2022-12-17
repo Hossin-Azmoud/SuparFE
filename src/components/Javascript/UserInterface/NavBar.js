@@ -19,23 +19,25 @@ const NavBar = ({ UserImg }) => {
 	}
 
 	return (
-		<aside className="border-t-white border-t sm:border-none fixed bottom-0 left-0 sm:h-full sm:w-24 w-full flex sm:flex-col flex-row justify-around sm:bg-transparent bg-black items-center py-2 transition-all">
+		<aside className="overflow-x-hidden w-full border-t-white border-t sm:border-none fixed bottom-0 left-0 sm:h-full sm:w-24 w-full flex sm:flex-col flex-row justify-around sm:bg-transparent bg-black items-center py-4 transition-all">
+
 			<Link to="/profile">
-				<img src={(UserImg) ? UserImg : "/img/defUser.jpg"} className="w-10 rounded-md hover:ring"/>
+				<img src={(UserImg) ? UserImg : "/img/defUser.jpg"} className="w-6 rounded-md hover:ring"/>
 			</Link>
 			
-			
 			<Link to="/Accounts">
-				<Fa icon={ faUsers } className="hover:text-blue-500 transition-all text-white" size="xl"/>
+				<Fa icon={ faUsers } className="hover:text-blue-500 transition-all text-white" size="md"/>
 			</Link>
 			
 			<Link to="/Home">
-				<Fa icon={ faHouse } className="hover:text-blue-500 transition-all text-white" size="xl"/>
+				<Fa icon={ faHouse } className="hover:text-blue-500 transition-all text-white" size="md"/>
 			</Link>		
-			
-			<Fa onClick={signOut} icon={ faSignOut } className="cursor-pointer hover:text-blue-500 transition-all text-white" size="xl"/>
+
+			<Fa onClick={signOut} icon={ faSignOut } className="cursor-pointer hover:text-blue-500 transition-all text-white" size="md"/>
+
 		</aside>
 	)
 };
+
 
 export default NavBar;

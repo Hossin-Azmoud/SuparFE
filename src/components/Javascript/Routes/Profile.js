@@ -2,7 +2,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useEffect, useState, useRef } from 'react';
 import { faEdit, faCopy, faLocationDot } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon as Fa } from '@fortawesome/react-fontawesome';
-import { api } from "../Var";
+import { api, HOST } from "../Var";
 import Post from "../UserInterface/Post";
 import { copytoclip as cp, JWT } from "../Util/functions";
 import { GetUserById, GetUserPostsById, updateProfileImage, updateBackgroundImage, update } from "../Util/serverFuncs";
@@ -120,8 +120,17 @@ const ProfileRenderer = ({
 	        .then(Json => {
 	        	if(Json.code == 200) {
 	        		if(Json.data) {
-	        			setPosts(Json.data);
-	        			// console.table(Json.data);
+	        			
+	        			var posts = Json.data;
+	        			
+	        			if(HOST) {
+	        				posts.map((v, i) => {
+								v.img = v.img.replace("localhost", HOST)
+	        				})
+	        			}
+
+	        			setPosts(posts);
+
 	        		} else {
 	        			setPosts("No posts yet.");
 	        		}
@@ -175,10 +184,11 @@ const ProfileRenderer = ({
 				>
 
 				</div>
+
 				<section className="px-4 flex flex-row justify-between items-start my-4 w-full">
-					<div className="flex flex-col justify-center items-start">
+					<div className="flex flex-col justify-between items-start w-[70%]">
 						
-						<div className="flex flex-row justify-between items-center text-sm my-2 rounded-md">
+						<div className="flex flex-row justify-start items-center text-sm my-2 rounded-md">
 						 	<p className="p-2 font-semibold bg-black text-green-400 shadow-lg rounded "> ID: #{ User.id_ } </p>
 						 	{
 						 		(CurrentUser.id_ === User.id_) ? (
@@ -200,11 +210,8 @@ const ProfileRenderer = ({
 							
 						</div>
 						
-						<div className="flex flex-row items-center justify-between my-4">
-							<p className="shadow-sm font-bold text-white bg-neutral-700 p-2 rounded-md"> Follwing  <span className="font-thin ml-2"> 0 </span></p>
-							<p className="shadow-sm font-bold text-white bg-neutral-700 mx-2 p-2 rounded-md"> Followers <span className="font-thin ml-2"> 0 </span> </p>
-						</div>
-						
+
+
 						<p className="text-sky-600 font-thin my-2">
 							
 							{
@@ -218,28 +225,31 @@ const ProfileRenderer = ({
 								)
 							}
 						</p>
-					{	
-						(Edit) ? (
-							<div>
-								<button onClick={SaveChanges} className="cursor-pointer shadow hover:bg-sky-600 bg-sky-500 text-white rounded p-2">
-									save changes
-								</button>
-								
-								<button onClick={() => {setEdit(false)}} className="cursor-pointer shadow bg-rose-700 mx-3 text-white rounded p-2">
-									Cancel
-								</button>
-							</div>
-						) : ""
-					}
+					
+						{	
+							(Edit) ? (
+								<div>
+									<button onClick={SaveChanges} className="cursor-pointer shadow hover:bg-sky-600 bg-sky-500 text-white rounded p-2">
+										save changes
+									</button>
+									
+									<button onClick={() => {setEdit(false)}} className="cursor-pointer shadow bg-rose-700 mx-3 text-white rounded p-2">
+										Cancel
+									</button>
+								</div>
+							) : ""
+						}
+
 					</div>
 
-					<div className="flex flex-col justify-center items-center">
-						<img onClick={profileImageOnClick} src={User.img} alt="user_avatar" className="rounded-full hover:ring shadow-xl w-24 h-24 cursor-pointer" />
+					<div className="w-[30%] flex flex-col justify-center items-center">
+						<img onClick={profileImageOnClick} src={User.img} alt="user_avatar" className="rounded-full shadow-lg hover:ring shadow-xl w-full cursor-pointer" />
+					
 						{
 							(Edit) ? (
-								<input ref={UnameRef} onChange={(e) => onInput(e, "UserName")} className="outline-none rounded w-[140px] my-2 text-white inline bg-neutral-700 p-2 border border-neutral-900 focus:border-blue-400"/>
+								<input ref={UnameRef} onChange={(e) => onInput(e, "UserName")} className="outline-none rounded w-full my-2 text-white inline bg-neutral-700 p-2 border border-neutral-900 focus:border-blue-400"/>
 							) : (
-								<h5 className="font-semibold my-2 text-lg text-green-400"> { User.UserName } </h5>
+								<h5 className="font-semibold my-2 text-normal text-green-200"> { User.UserName } </h5>
 							)
 						}
 					
@@ -249,7 +259,7 @@ const ProfileRenderer = ({
 	
 			</header>
 			
-			<div className="w-full flex-col justify-start items-center">
+			<div className="w-full flex-col justify-start items-center pb-14">
 				
 				{
 					(Posts && (typeof Posts === "object")) ? (
@@ -320,12 +330,16 @@ const Account = ({
 			return res.json()
 		})
 		.then((Json) => {
-			if(Json.code)
-			{
-				setUser(Json.data);
-				console.log(Json.data)
+			if(Json.code){
+				var U =  Json.data;
+			    
+			    if(HOST) {
+    				U.img = U.img.replace("localhost", HOST);
+    				U.bg = U.bg.replace("localhost", HOST);
+    			}
+
+				setUser(U);
 			} else {
-				console.log(Json.code)
 			}
 		}).catch(e => {
 			alert(e);

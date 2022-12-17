@@ -16,9 +16,9 @@ import Loader from "./components/Javascript/UserInterface/Loader";
 import AccountsSearchPannel from "./components/Javascript/UserInterface/SearchPannel";
 import { SubmitJWT } from "./components/Javascript/Util/serverFuncs";
 import { Notify } from "./components/Javascript/UserInterface/microComps";
+import { HOST } from "./components/Javascript/Var";
 
-const App = () => {
-    
+const App = () => {    
     const User = useSelector(state => state.User);
     const dispatch = useDispatch();
     const [Loading, setLoading] = useState(true);
@@ -33,14 +33,21 @@ const App = () => {
                 return res.json()
             })
             .then((Json) => {
-                console.log(Json.data);
+                
                 if(Json.code === 200) {
-                    dispatch(login(Json.data));
-                    console.log(Json.data);
+                    var user = Json.data;
+
+                    if(HOST) {
+                        user.img = user.img.replace("localhost", HOST)
+                        user.bg = user.bg.replace("localhost", HOST)
+                    }
+
+                    dispatch(login(user));
+        
                 } else {
                     console.log(Json);
                 }
-                
+
                 console.log(Json)
 
             })

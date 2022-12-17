@@ -13,6 +13,7 @@ import {
 	Like,
 	unLike
 } from "../Util/serverFuncs";
+import { HOST } from "../Var";
 
 const Post = ({
 	Userid_,
@@ -22,7 +23,6 @@ const Post = ({
 	PostImg=null,
 	PostText,
 	NotificationFunc = () => {}
-
 }) => {
 	
 	const [PostLikes, setPostLikes] = useState([]);
@@ -31,10 +31,12 @@ const Post = ({
 	const [Liked, setLike] = useState(false);
 	const [imgcmp, setImgcmp] = useState(false);
 	const [ShowEdit, setShowEdit] = useState(false);
+	
 	const [EditPos, setEditPos] = useState({
 		x: 0,
 		y: 0
 	});
+
 	const [ExpandPost, setExpandPost] = useState(false);
 	const [deletedflag, setdeletedflag] = useState(null); // it will be set once we delete a post successfully, substituting the content of the current post.
 	const ToggleExpandPost = (e) => {
@@ -112,6 +114,7 @@ const Post = ({
 				// Success.
 				console.log(PostLikes.length)
 			} else {
+				console.log(json.data);
 				setPostLikes(temp);
 				setLike(true);
 			}
@@ -132,6 +135,7 @@ const Post = ({
 		setPostLikes(New)
 
 		Like(PostId, User.id_)
+		
 		.then(r => r.json())
 		.then(json => {
 			
@@ -143,6 +147,7 @@ const Post = ({
 			} else {
 				setPostLikes(temp);
 				setLike(false);
+				console.log(json.data);
 			}
 		})
 		.catch(e => {
@@ -182,7 +187,12 @@ const Post = ({
 			if(json.code === 200 ) {
 				// alert(JSON.stringify(json));
 				if(json.data != null) {
-					setPostComments(json.data)
+					var comments = json.data;
+					if(HOST) {
+						comments.map((v) => v.user.img = v.user.img.replace("localhost", HOST))
+					}
+					
+					setPostComments(comments)
 				}
 			}
 		})
@@ -346,17 +356,17 @@ const Post = ({
 
 				<div className="pl-2 pb-2 flex flex-row items-center justify-start">
 
-					<div className="flex flex-row items-center justify-start p-2 rounded shadow-2xl">
+					<div className="flex flex-row items-center justify-start rounded shadow-2xl">
 						<Fa icon={ faHeart } className={`cursor-pointer transition-all ${(Liked) ? "text-rose-700" : "text-white"}`} size="lg" onClick={like}/>
 						<span className="font-base text-slate-400 ml-2"> { PostLikes.length } </span>
 					</div>
 					
-					<div className="ml-2 flex flex-row items-center justify-start p-2 rounded shadow-2xl">
+					<div className="ml-5 flex flex-row items-center justify-start rounded shadow-2xl">
 						<Fa icon={ faComment } className="cursor-pointer transition-all text-white" size="lg" onClick={ToggleExpandPost}/>
 						<span className="font-thin text-white ml-2"> { PostComments.length } </span>
 					</div>
 
-					<div className="ml-2 flex flex-row items-center justify-start p-2 rounded shadow-2xl">
+					<div className="ml-5 flex flex-row items-center justify-start rounded shadow-2xl">
 						<Fa icon={ faShare } className="cursor-pointer transition-all text-white" size="lg" />
 						<span className="font-thin text-white ml-2"> 0 </span>
 					</div>

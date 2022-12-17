@@ -12,7 +12,7 @@ import { GetAllPosts } from "../Util/serverFuncs";
 import Post from "../UserInterface/Post";
 import Loader from "../UserInterface/Loader";
 import { JWT } from "../Util/functions";
-
+import { HOST } from "../Var";
 
 const Home = ({
 	NotificationFunc = () => {}
@@ -70,8 +70,18 @@ const Home = ({
 	        .then((Json) => {
 	        	if(Json.code == 200) {
 	        		if(Json.data.length > 0) {
-	        			setPosts(Json.data);
-	        			// console.table(Json.data)
+	        			var posts = Json.data;
+	        			
+	        			if(HOST) {
+	        				posts.map((v, i) => {
+	        					v.user.img = v.user.img.replace("localhost", HOST)
+	        					console.log(v.user.img)
+								v.img = v.img.replace("localhost", HOST)
+	        				})
+	        			}
+
+	        			setPosts(posts);
+
 	        		} else {
 	        			setPosts("No posts to display.");
 	        		}
@@ -214,7 +224,7 @@ const Home = ({
             		) : ""
             	}
             	
-				<div className="w-full flex-col justify-start items-center">
+				<div className="w-full flex-col justify-start items-center pb-14">
 
 	         		{
 						(Posts && (typeof Posts === "object")) ? (
