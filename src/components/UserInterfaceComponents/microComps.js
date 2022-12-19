@@ -1,14 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { faInfoCircle, faWarning, faCircleCheck, faEdit } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon as Fa } from '@fortawesome/react-fontawesome';
-import { convertBase64 } from "../Util/functions";
-
+import { convertBase64 } from "../../server/functions";
 import { useSelector, useDispatch } from 'react-redux';
-
 import { 
   updateUser
-} from '../store/userStore';
-
+} from '../../store/userStore';
 
 const Paragraphs = ({ Text, Class="" }) => {
 	

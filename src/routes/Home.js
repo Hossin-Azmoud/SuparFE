@@ -6,17 +6,19 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState, useEffect, useRef } from "react"
 import { useSelector } from 'react-redux';
-import { api } from "../Var";
-import { convertBase64 } from "../Util/functions";
-import { GetAllPosts } from "../Util/serverFuncs";
-import Post from "../UserInterface/Post";
-import Loader from "../UserInterface/Loader";
-import { JWT } from "../Util/functions";
-import { HOST } from "../Var";
+import { api } from "../server/Var";
+import { convertBase64 } from "../server/functions";
+import { GetAllPosts } from "../server/serverFuncs";
+import Post from "../components/UserInterfaceComponents/Post";
+
+import Loader from "../components/UserInterfaceComponents/Loader";
+import { JWT } from "../server/functions";
+import { HOST } from "../server/Var";
 
 const Home = ({
 	NotificationFunc = () => {}
 }) => {
+	
 	const User = useSelector(state => state.User);
 	const [Image, setImage] = useState(null);
 	const [Text, setText] = useState("");

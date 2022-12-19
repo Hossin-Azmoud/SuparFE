@@ -2,7 +2,7 @@ import { createSlice, configureStore } from '@reduxjs/toolkit';
 import { 
 	SetAuthCookie, 
 	RemoveJWT 
-} from '../Util/functions';
+} from '../server/functions';
 
 const UserSlice = createSlice({
 	name: 'Auth',

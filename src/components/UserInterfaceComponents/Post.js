@@ -12,8 +12,9 @@ import {
 	Comment, 
 	Like,
 	unLike
-} from "../Util/serverFuncs";
-import { HOST } from "../Var";
+} from "../../server/serverFuncs";
+
+import { HOST } from "../../server/Var";
 
 const Post = ({
 	Userid_,

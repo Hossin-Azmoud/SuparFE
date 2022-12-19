@@ -1,14 +1,14 @@
 
-import { api } from "../Var";
+import { api } from "../server/Var";
 import { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from 'react-redux';
-import { SetAuthCookie } from "../Util/functions";
+import { SetAuthCookie } from "../server/functions";
 import { 
     login,
     logout
 } from '../store/userStore';
 import { Link, useNavigate } from "react-router-dom";
-import Loader from "../UserInterface/Loader";
+import Loader from "../components/UserInterfaceComponents/Loader";
 
 const Login = ({ 
 	NotificationFunc = () => {}

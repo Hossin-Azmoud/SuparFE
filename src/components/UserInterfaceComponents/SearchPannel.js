@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { api, goApi, HOST } from "../Var";
+import { api, goApi, HOST } from "../../server/Var";
 import UserUI from "./UserUI";
 import Loader from "./Loader";
 

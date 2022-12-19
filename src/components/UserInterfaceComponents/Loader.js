@@ -1,4 +1,4 @@
-import "../../Css/Loader.css";
+import "../Css/Loader.css";
 
 const Loader = ({
 	color="white",

@@ -2,13 +2,13 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useEffect, useState, useRef } from 'react';
 import { faEdit, faCopy, faLocationDot } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon as Fa } from '@fortawesome/react-fontawesome';
-import { api, HOST } from "../Var";
-import Post from "../UserInterface/Post";
-import { copytoclip as cp, JWT } from "../Util/functions";
-import { GetUserById, GetUserPostsById, updateProfileImage, updateBackgroundImage, update } from "../Util/serverFuncs";
+import { api, HOST } from "../server/Var";
+import Post from "../components/UserInterfaceComponents/Post";
+import { copytoclip as cp, JWT } from "../server/functions";
+import { GetUserById, GetUserPostsById, updateProfileImage, updateBackgroundImage, update } from "../server/serverFuncs";
 import { useParams } from "react-router-dom";
-import { Paragraphs, Iframe } from "../UserInterface/microComps";
-import Loader from "../UserInterface/Loader";
+import { Paragraphs, Iframe } from "../components/UserInterfaceComponents/microComps";
+import Loader from "../components/UserInterfaceComponents/Loader";
 import { 
   updateUser
 } from '../store/userStore';

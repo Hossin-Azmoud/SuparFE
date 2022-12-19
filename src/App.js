@@ -1,22 +1,23 @@
 import "./index.css";
-import Home from "./components/Javascript/Routes/Home";
-import Login from "./components/Javascript/Routes/Login";
-import SignUp from "./components/Javascript/Routes/SignUp";
+import Home from "./routes/Home";
+import Login from "./routes/Login";
+import SignUp from "./routes/SignUp";
+
 import { Routes, Route, useParams } from "react-router-dom";
-import Icons from "./components/Javascript/Routes/Icons";
-import CurrentUserProfile, { Account } from "./components/Javascript/Routes/Profile";
+import Icons from "./routes/Icons";
+import CurrentUserProfile, { Account } from "./routes/Profile";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from 'react-redux';
-import { SetAuthCookie, JWT } from "./components/Javascript/Util/functions";
+import { SetAuthCookie, JWT } from "./server/functions";
 import { 
     login
-} from './components/Javascript/store/userStore';
-import NavBar from "./components/Javascript/UserInterface/NavBar";
-import Loader from "./components/Javascript/UserInterface/Loader";
-import AccountsSearchPannel from "./components/Javascript/UserInterface/SearchPannel";
-import { SubmitJWT } from "./components/Javascript/Util/serverFuncs";
-import { Notify } from "./components/Javascript/UserInterface/microComps";
-import { HOST } from "./components/Javascript/Var";
+} from './store/userStore';
+import NavBar from "./components/UserInterfaceComponents/NavBar";
+import Loader from "./components/UserInterfaceComponents/Loader";
+import AccountsSearchPannel from "./components/UserInterfaceComponents/SearchPannel";
+import { SubmitJWT } from "./server/serverFuncs";
+import { Notify } from "./components/UserInterfaceComponents/microComps";
+import { HOST } from "./server/Var";
 
 const App = () => {    
     const User = useSelector(state => state.User);

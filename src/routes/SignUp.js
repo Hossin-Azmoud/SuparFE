@@ -1,16 +1,18 @@
 import "./CustomStyles/Animations.css";
-import Loader from "../UserInterface/Loader";
-import UserUI from "../UserInterface/UserUI";
-import { api } from "../Var";
+import Loader from "../components/UserInterfaceComponents/Loader";
+
+import UserUI from "../components/UserInterfaceComponents/UserUI";
+import { api } from "../server/Var";
 import { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import { 
     login
 } from '../store/userStore';
+
 import { useNavigate } from "react-router-dom";
 import { faCloudUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon as Fa} from '@fortawesome/react-fontawesome'
-import { convertBase64 } from "../Util/functions";
+import { convertBase64 } from "../server/functions";
 
 const SignUp = ({
 	NotificationFunc = () => {}

@@ -3,7 +3,7 @@ THIS FILE CONTAINS SERVER REQUESTIN FUNCTIONALITY.
 IT AIMS TOWARDS SEPERATING THE UI RENDERING AND THE DATA REQUESTING..
 */
 
-import { api } from "../Var";
+import { api } from "./Var";
 import { JWT } from "./functions";
 
 
