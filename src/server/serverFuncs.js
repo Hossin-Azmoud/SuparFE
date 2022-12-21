@@ -235,6 +235,63 @@ async function SubmitJWT(Token) {
     return response;
 }
 
+async function addFollow(follower_id, followed_id) {
+    const response = await fetch(`${api}/follow`, {
+        
+        headers: {
+            "content-type": "application/json",
+        },
+
+        method: "POST",
+
+        body: JSON.stringify({
+            token: JWT,
+            follower_id,
+            followed_id
+        })
+
+    })
+
+    return response;
+}
+
+
+async function removeFollow(follower_id, followed_id) {
+    
+    const response = await fetch(`${api}/unfollow`, {
+
+        headers: {
+            "content-type": "application/json",
+        },
+
+        method: "POST",
+
+        body: JSON.stringify({
+            token: JWT,
+            follower_id,
+            followed_id
+        })
+
+    })
+
+    return response;
+}
+
+
+async function GetUserFollowers(uuid) {
+    
+    const response = await fetch(`${api}/getFollowers/${uuid}`, {
+
+        headers: {
+            "content-type": "application/json",
+        },
+
+        method: "GET"
+    })
+
+    return response;
+}
+
 export {
 	GetUserById,
 	GetUserPostsById,
@@ -248,5 +305,8 @@ export {
     getLikes,
     Comment,
     Like,
-    unLike
+    unLike,
+    addFollow,
+    removeFollow,
+    GetUserFollowers
 };

@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { api, goApi, HOST } from "../../server/Var";
 import UserUI from "./UserUI";
 import Loader from "./Loader";
+import { useSelector } from 'react-redux';
+
 
 const AccountsSearchPannel = ({ 
     CurrUserId, 
@@ -17,15 +19,19 @@ const AccountsSearchPannel = ({
         ) 
       
      */
+  
     const [Users, setUsers] = useState(null);
     const [Query, setQuery] = useState("");
+    
     const GetUsersFromApi = (subbed) => {
+        
         if(subbed) {
-            fetch((Query.length) ? `${api}/query?q=${Query}` : `${api}/query`, {
-            headers: {
-                "content-type": "application/json",
-            },
-            method: "GET"
+            fetch((Query.length) ? `${api}/query?q=${Query}&uuid=${CurrUserId}` : `${api}/query?uuid=${CurrUserId}`, {
+                headers: {
+                    "content-type": "application/json",
+                },
+
+                method: "GET"
             })
             
             .then((res) => {
@@ -33,18 +39,25 @@ const AccountsSearchPannel = ({
             })
             
             .then((jsonData) => {
+                
                 if(jsonData.code == 200) {
                     var users = [...jsonData.data];
+                    
+                    console.log(users[1]);
+                    
                     if(HOST) {
+                        
                         users.map((v) => {
                             v.img = v.img.replace("localhost", HOST);
                             v.bg = v.bg.replace("localhost", HOST);
                         });
+
                     }
 
                     setUsers(users);
                     users = null;
                 }
+
             }).catch(e => {
                 console.log(e);
             })
@@ -77,10 +90,12 @@ const AccountsSearchPannel = ({
                     (Users) ? Users.map((v, i) => {
                         return (CurrUserId != v.id_) ? (
                             <UserUI
+                                CurrUserId_={CurrUserId}
                                 id_={v.id_}
                                 img={v.img}
                                 UserName={v.UserName}
                                 key={v.id_}
+                                Followed={v.isfollowed}
                             />
                         ) : ""
                     }) : (
