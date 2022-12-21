@@ -67,6 +67,7 @@ const AccountsSearchPannel = ({
     useEffect(() => {
         // an onmount event to fetch everything from the database/server once the page is loaded
         var subscribed = true;
+       
         GetUsersFromApi(subscribed)
         
         return () => { 

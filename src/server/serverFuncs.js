@@ -292,6 +292,21 @@ async function GetUserFollowers(uuid) {
     return response;
 }
 
+async function GetUserFollowings(uuid) {
+    
+    const response = await fetch(`${api}/getFollowings/${uuid}`, {
+
+        headers: {
+            "content-type": "application/json",
+        },
+
+        method: "GET"
+    })
+
+    return response;
+}
+
+
 export {
 	GetUserById,
 	GetUserPostsById,
@@ -308,5 +323,6 @@ export {
     unLike,
     addFollow,
     removeFollow,
-    GetUserFollowers
+    GetUserFollowers,
+    GetUserFollowings
 };

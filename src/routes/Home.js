@@ -77,7 +77,6 @@ const Home = ({
 	        			if(HOST) {
 	        				posts.map((v, i) => {
 	        					v.user.img = v.user.img.replace("localhost", HOST)
-	        					console.log(v.user.img)
 								v.img = v.img.replace("localhost", HOST)
 	        				})
 	        			}

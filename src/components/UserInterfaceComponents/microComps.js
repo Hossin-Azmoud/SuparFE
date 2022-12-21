@@ -24,20 +24,25 @@ const Paragraphs = ({ Text, Class="" }) => {
 
 const Notify = ({ msg, StyleKey }) => {
 
+
 	const Map_ = {
 		info: {
 			T: "text-slate-900 bg-white",
 			icon: faInfoCircle
 		},
+		
 		error: {
 			T: "text-white bg-rose-500",
 			icon: faWarning
 		},
+
 		success: {
 			T: "text-white bg-green-500",
 			icon: faCircleCheck
 		}
 	}
+
+	if(!(StyleKey in Map_)) StyleKey = "error"
 
 	const frame = useRef(null);
 	

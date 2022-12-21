@@ -9,8 +9,7 @@ const UserSlice = createSlice({
 	name: 'Auth',
 	
 	initialState: {
-		User: false,
-		followers: false
+		User: false
 	},
 	
 	reducers: {
@@ -18,22 +17,6 @@ const UserSlice = createSlice({
 		login: (state, action) => {
 			// Gets the token using the payload.
 			// state.User = action.payload;
-			state.followers = [];
-
-			GetUserFollowers(action.payload.id_)
-			.then(r => {
-				return r.json()
-			})
-			.then(json => {
-				
-				if(json.code === 200) {
-					console.log(json)
-					if(json.data != null) {
-						state.followers = json.data;
-					}
-				}
-
-			})
 
 			if(action.payload.token) {
 				SetAuthCookie(action.payload.token);
@@ -41,15 +24,7 @@ const UserSlice = createSlice({
 
 			state.User = action.payload;
 		},
-
-		// unfollow: (state, action) => {
-
-		// },
-
-		// follow: (state, action) => {
-
-		// },
-
+		
 		updateUser: (state, action) => {
 			// doc: update a field.
 

@@ -1,18 +1,18 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useEffect, useState, useRef } from 'react';
-import { faEdit, faCopy, faLocationDot } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faCopy, faLocationDot, faClose } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon as Fa } from '@fortawesome/react-fontawesome';
 import { api, HOST } from "../server/Var";
 import Post from "../components/UserInterfaceComponents/Post";
 import { copytoclip as cp, JWT } from "../server/functions";
-import { GetUserById, GetUserPostsById, updateProfileImage, updateBackgroundImage, update } from "../server/serverFuncs";
+import { GetUserById, GetUserPostsById, updateProfileImage, updateBackgroundImage, update, GetUserFollowers, GetUserFollowings } from "../server/serverFuncs";
 import { useParams } from "react-router-dom";
 import { Paragraphs, Iframe } from "../components/UserInterfaceComponents/microComps";
 import Loader from "../components/UserInterfaceComponents/Loader";
 import { 
   updateUser
 } from '../store/userStore';
-
+import UserUI from "../components/UserInterfaceComponents/UserUI"
 const ProfileRenderer = ({ 
 	User,
 	NotificationFunc = () => {}	
@@ -27,6 +27,16 @@ const ProfileRenderer = ({
 	const [Edit, setEdit] = useState(false)
 	const [bioRef, addrRedd, UnameRef] = [useRef(null), useRef(null), useRef(null)]	
 	const [EditState, setEditState] = useState({})
+	const [followers, setfollowers] = useState([]);
+	const [following, setfollowing] = useState([]);
+	const [followersNumber, setfollowersNumber] = useState(0);
+	const [followingNumber, setfollowingNumber] = useState(0);
+	
+	const [InterfaceUsers, setInterfaceUsers] = useState({
+		list: [],
+		title: ""
+	});
+
 	const Dispatch = useDispatch();
 
 	useEffect(() => {
@@ -38,6 +48,80 @@ const ProfileRenderer = ({
 		}
 
 	}, [Edit])
+
+	const getUsersData = (idArray) => {
+		var temp = []
+	
+		if(idArray.length > 0) {
+			
+			for(let i = 0;i < idArray.length;i++) {
+				GetUserById(idArray[i])
+				.then(req => req.json())
+				.then(j => {
+					if(j.code === 200 && j.data != null) {
+						temp.push(j.data)
+					} else {
+						alert(j.data)
+					}
+				})				
+				.catch(e => console.log("error accured while fetching user."))
+			}	
+		}
+		
+		return temp;
+	}
+
+	const Fetchfollowers = () => {
+		var Data = [];
+
+		GetUserFollowers(User.id_)
+		.then(r => r.json())
+		.then(json => {
+			if (json.code === 200) {
+				if(json.data != null) {
+					const identifiers = json.data;
+					setfollowersNumber(identifiers.length);
+					Data = getUsersData(identifiers);
+				}
+			}
+		})
+
+		.finally(() => {
+			setfollowers(Data);
+		})
+
+		.catch(e => {
+			NotificationFunc({
+    		msg: `an error accured while getting data: ${e}`,
+    		StyleKey: "error"
+    	})
+	  })
+	}
+
+	const Fetchfollowings = () => {
+		
+		var Data = [];
+		GetUserFollowings(User.id_)
+		.then(r => r.json())
+		.then(json => {
+			if (json.code === 200) {
+				if(json.data != null) {
+					const identifiers = json.data;
+					setfollowingNumber(identifiers.length)
+					Data = getUsersData(identifiers);
+				}
+			}
+		})
+		.finally(() => {
+			setfollowing(Data);
+		})
+		.catch(e => {
+			NotificationFunc({
+    		msg: `an error accured while getting data: ${e}`,
+    		StyleKey: "error"
+    	})
+	  })
+	}
 
 	const profileImageOnClick = () => {
 		if(CurrentUser.id_ === User.id_) {
@@ -55,6 +139,7 @@ const ProfileRenderer = ({
 			})
 		}			
 	}
+
 
 	const backGroundImageOnClick = () => {
 		if(CurrentUser.id_ === User.id_) {
@@ -78,7 +163,6 @@ const ProfileRenderer = ({
 		e.preventDefault();
 		var state = EditState;
 		state.token = JWT;
-		console.log(JWT);
 		
 		update(state)
 		.then((res) => {
@@ -125,7 +209,7 @@ const ProfileRenderer = ({
 	        			
 	        			if(HOST) {
 	        				posts.map((v, i) => {
-								v.img = v.img.replace("localhost", HOST)
+										v.img = v.img.replace("localhost", HOST)
 	        				})
 	        			}
 
@@ -150,17 +234,45 @@ const ProfileRenderer = ({
 		}
 	}
 
+	const visualize = (a, title) => {
+		if(a.length > 0) {
+			
+			if(HOST) {
+				a.map(v => {
+					v.img = v.img.replace("localhost", HOST)
+				})
+      }
+
+			setInterfaceUsers({list: a, title});
+		}
+	}
+
+	useEffect(() => {
+		console.log("followers: ", followers.length)
+		console.log("following: ", following.length)
+	}, [followers, following])
+
 	useEffect(() => {
 		
 		var subscribed = true;
-		
-		FetchUserPosts(subscribed);
-		
+	
+		if(subscribed) {
+			FetchUserPosts(subscribed);
+			if(!Loading) setLoading(true);
+		 	Fetchfollowers()
+		 	Fetchfollowings()
+			setLoading(false);
+		}
+
 		return () => {
 			subscribed = false
+			setLoading(false);
+			setfollowers([]);
+			setfollowing([]);
 		}
 
 	}, []);
+
 
 	
 	return (
@@ -209,7 +321,14 @@ const ProfileRenderer = ({
 							}
 							
 						</div>
-						
+
+
+						<div className="flex flex-row flex-wrap my-4"> 
+
+							<p onClick={() => visualize(followers, `${User.UserName}\'s followers`)} className="cursor-pointer bg-neutral-900 shadow-2xl border rounded px-4 py-1 border-sky text-white font-thin text-md"> followers <span> { followersNumber } </span> </p>
+							<p onClick={() => visualize(following, `${User.UserName}\'s followings`)} className="cursor-pointer bg-neutral-900 shadow-2xl border rounded px-4 py-1 mx-4 border-sky text-white font-thin text-md"> following <span> { followingNumber } </span> </p>
+
+						</div>
 
 
 						<p className="text-sky-600 font-thin my-2">
@@ -224,6 +343,7 @@ const ProfileRenderer = ({
 									</>
 								)
 							}
+
 						</p>
 					
 						{	
@@ -299,10 +419,43 @@ const ProfileRenderer = ({
 								)
 							}
 						</div>
-						
 					)
 				}
 			</div>
+
+			{/* a frame to visualize things in the ui. */}
+
+			{
+				(InterfaceUsers.list.length > 0) ? (
+					<div className="overflow-y-scroll py-4 border rounded border-sky-400 w-[90%] md:w-[500px] h-[600px] fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black">
+						
+						<div className="left-0 top-0 fixed w-full flex items-center rounded-b-md shadow-xl justify-between px-4 bg-sky-900">
+							
+							<button onClick={() => setInterfaceUsers({ list:[], title: "" })} className="p-4 rounded-full flex justify-center items-center h-[30px] w-[30px]">
+								<Fa icon={faClose} className="text-white" size="lg" />
+							</button>
+							<h1 className="text-white"> {InterfaceUsers.title} </h1>
+
+						</div>
+						
+						<div className="flex flex-col items-center justify-center mt-5">
+							{
+								InterfaceUsers.list.map((v, i) => {
+									return  <UserUI
+                      CurrUserId_={User.id_}
+                      id_={v.id_}
+                      img={v.img}
+                      UserName={v.UserName}
+                      key={i}
+                      Followed=""
+                  />
+								})
+							}
+						</div>
+					</div>
+				) : ""
+			}
+			
 		</div>
 
 
