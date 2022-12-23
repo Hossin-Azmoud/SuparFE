@@ -14,7 +14,8 @@ import {
 } from './store/userStore';
 import NavBar from "./components/UserInterfaceComponents/NavBar";
 import Loader from "./components/UserInterfaceComponents/Loader";
-import AccountsSearchPannel from "./components/UserInterfaceComponents/SearchPannel";
+import AccountsSearchPannel from "./routes/Search";
+import UserNotifications from "./routes/UserNotifications";
 import { SubmitJWT } from "./server/serverFuncs";
 import { Notify } from "./components/UserInterfaceComponents/microComps";
 import { HOST } from "./server/Var";
@@ -28,7 +29,6 @@ const App = () => {
     useEffect(() => {
 
         if(JWT) {
-            console.log(JWT);
             SubmitJWT(JWT)
             .then((res) => {
                 return res.json()
@@ -42,19 +42,22 @@ const App = () => {
                         user.img = user.img.replace("localhost", HOST)
                         user.bg = user.bg.replace("localhost", HOST)
                     }
-
+                   
                     dispatch(login(user));
         
                 } else {
                     console.log(Json);
                 }
-
-                console.log(Json)
-
             })
             .finally(() => {
                 setLoading(false); 
-            });
+            })
+            .catch(e => {
+                setNotification({
+                    text: "Could not login.",
+                    status: "error"
+                })
+            })
         } else {
             setLoading(false);
         }
@@ -75,6 +78,7 @@ const App = () => {
                                     <Route path="/Login" element={<Login NotificationFunc={setNotification} />} />
                                     <Route path="/Signup" element={<SignUp NotificationFunc={setNotification}/>} />
                                     <Route path="/profile" element={<CurrentUserProfile NotificationFunc={setNotification}/>}/>
+                                    <Route path="/Notifications" element={<UserNotifications />} />
                                     <Route path="/i" element={<Icons />} />
                                     <Route path="/Accounts" element={<AccountsSearchPannel CurrUserId={User.id_} NotificationFunc={setNotification} />}/>
                        

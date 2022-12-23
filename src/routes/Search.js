@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
-import { api, goApi, HOST } from "../../server/Var";
-import UserUI from "./UserUI";
-import Loader from "./Loader";
+import { api, goApi, HOST } from "../server/Var";
+import UserUI from "../components/UserInterfaceComponents/UserUI";
+import Loader from "../components/UserInterfaceComponents/Loader";
 import { useSelector } from 'react-redux';
-
 
 const AccountsSearchPannel = ({ 
     CurrUserId, 

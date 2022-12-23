@@ -8,9 +8,8 @@ import { useState, useEffect, useRef } from "react"
 import { useSelector } from 'react-redux';
 import { api } from "../server/Var";
 import { convertBase64 } from "../server/functions";
-import { GetAllPosts } from "../server/serverFuncs";
+import { GetAllPosts, NewPost } from "../server/serverFuncs";
 import Post from "../components/UserInterfaceComponents/Post";
-
 import Loader from "../components/UserInterfaceComponents/Loader";
 import { JWT } from "../server/functions";
 import { HOST } from "../server/Var";
@@ -47,7 +46,6 @@ const Home = ({
 		}
 
 		setState({
-			token: JWT,
 			uuid: User.id_,
 			img: Image,
 			text: Text
@@ -151,28 +149,31 @@ const Home = ({
 
 	const OnSubmit = (e) => {
 		e.preventDefault();
-		
+		/*
+			PostID int `json:"id_"`
+			Token string `json:"token"`
+			Uuid  int `json:"uuid"`	
+			Text  string `json:"text"`
+			Img   string `json:"img"`
+		*/	
+	
+
 		if(state.text || state.img) {
-			fetch(`${api}/NewPost`, {
-				headers: {
-					"content-type": "application/json",
-				},
-				method: "POST",
-				body: JSON.stringify(state)
-			})
+			state.token = JWT;
 
-			.then((res) => {
-				return res.json()
-			})
+			console.table(state);
 
+			NewPost(state)
+			
+			.then((r) => r.json())
 			.then((Json) => {
 				if(Json.code === 200) {
 					NotificationFunc({
 						text: "Post added!",
 						status: "success"
 					});
-					
 					resetAll();
+
 				} else {
 					NotificationFunc({
 						text: "Could not add your post",

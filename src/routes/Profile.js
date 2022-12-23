@@ -13,6 +13,7 @@ import {
   updateUser
 } from '../store/userStore';
 import UserUI from "../components/UserInterfaceComponents/UserUI"
+
 const ProfileRenderer = ({ 
 	User,
 	NotificationFunc = () => {}	
@@ -49,31 +50,34 @@ const ProfileRenderer = ({
 
 	}, [Edit])
 
-	const getUsersData = (idArray) => {
-		var temp = []
 	
+
+	const getUsersData = (idArray, callback) => {
+		let tempArray = [];
+		let Data;
 		if(idArray.length > 0) {
-			
-			for(let i = 0;i < idArray.length;i++) {
-				GetUserById(idArray[i])
+			for (var i = 0; i < idArray.length; i++) {
+				GetUserById(idArray[i], CurrentUser.id_)
 				.then(req => req.json())
 				.then(j => {
 					if(j.code === 200 && j.data != null) {
-						temp.push(j.data)
+						Data = j.data
 					} else {
 						alert(j.data)
 					}
-				})				
+				})
+				.finally(() => {
+					tempArray.push(Data)
+					if(tempArray.length === idArray.length){
+						callback(tempArray)
+					}
+				})
 				.catch(e => console.log("error accured while fetching user."))
-			}	
+			}
 		}
-		
-		return temp;
 	}
 
 	const Fetchfollowers = () => {
-		var Data = [];
-
 		GetUserFollowers(User.id_)
 		.then(r => r.json())
 		.then(json => {
@@ -81,26 +85,20 @@ const ProfileRenderer = ({
 				if(json.data != null) {
 					const identifiers = json.data;
 					setfollowersNumber(identifiers.length);
-					Data = getUsersData(identifiers);
+					getUsersData(identifiers, setfollowers);
 				}
 			}
 		})
 
-		.finally(() => {
-			setfollowers(Data);
-		})
-
 		.catch(e => {
 			NotificationFunc({
-    		msg: `an error accured while getting data: ${e}`,
+    		msg: "could not get the followers. try again..",
     		StyleKey: "error"
     	})
 	  })
 	}
 
 	const Fetchfollowings = () => {
-		
-		var Data = [];
 		GetUserFollowings(User.id_)
 		.then(r => r.json())
 		.then(json => {
@@ -108,16 +106,13 @@ const ProfileRenderer = ({
 				if(json.data != null) {
 					const identifiers = json.data;
 					setfollowingNumber(identifiers.length)
-					Data = getUsersData(identifiers);
+					getUsersData(identifiers, setfollowing);
 				}
 			}
 		})
-		.finally(() => {
-			setfollowing(Data);
-		})
 		.catch(e => {
 			NotificationFunc({
-    		msg: `an error accured while getting data: ${e}`,
+    		msg: "could not get the following, try again.",
     		StyleKey: "error"
     	})
 	  })
@@ -236,7 +231,7 @@ const ProfileRenderer = ({
 
 	const visualize = (a, title) => {
 		if(a.length > 0) {
-			
+
 			if(HOST) {
 				a.map(v => {
 					v.img = v.img.replace("localhost", HOST)
@@ -267,11 +262,9 @@ const ProfileRenderer = ({
 		return () => {
 			subscribed = false
 			setLoading(false);
-			setfollowers([]);
-			setfollowing([]);
 		}
 
-	}, []);
+	}, [setfollowers, setfollowers]);
 
 
 	
@@ -325,8 +318,8 @@ const ProfileRenderer = ({
 
 						<div className="flex flex-row flex-wrap my-4"> 
 
-							<p onClick={() => visualize(followers, `${User.UserName}\'s followers`)} className="cursor-pointer bg-neutral-900 shadow-2xl border rounded px-4 py-1 border-sky text-white font-thin text-md"> followers <span> { followersNumber } </span> </p>
-							<p onClick={() => visualize(following, `${User.UserName}\'s followings`)} className="cursor-pointer bg-neutral-900 shadow-2xl border rounded px-4 py-1 mx-4 border-sky text-white font-thin text-md"> following <span> { followingNumber } </span> </p>
+							<p onClick={() => visualize(followers, `${User.UserName}\'s followers`)} className="cursor-pointer bg-neutral-900 shadow-2xl rounded px-4 py-1 text-white font-thin text-md"> followers <span> { followersNumber } </span> </p>
+							<p onClick={() => visualize(following, `${User.UserName}\'s followings`)} className="cursor-pointer bg-neutral-900 shadow-2xl rounded px-4 py-1 mx-4 text-white font-thin text-md"> following <span> { followingNumber } </span> </p>
 
 						</div>
 
@@ -363,7 +356,7 @@ const ProfileRenderer = ({
 					</div>
 
 					<div className="w-[30%] flex flex-col justify-center items-center">
-						<img onClick={profileImageOnClick} src={User.img} alt="user_avatar" className="rounded-full shadow-lg hover:ring shadow-xl w-full cursor-pointer" />
+						<img onClick={profileImageOnClick} src={User.img} alt="user_avatar" className="rounded-full shadow-lg hover:ring shadow-xl w-full cursor-pointer w-[150px]" />
 					
 						{
 							(Edit) ? (
@@ -427,28 +420,29 @@ const ProfileRenderer = ({
 
 			{
 				(InterfaceUsers.list.length > 0) ? (
-					<div className="overflow-y-scroll py-4 border rounded border-sky-400 w-[90%] md:w-[500px] h-[600px] fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black">
+					<div className="overflow-y-scroll pt-12 border rounded border-sky-400 w-[90%] md:w-[500px] h-[600px] fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black">
 						
-						<div className="left-0 top-0 fixed w-full flex items-center rounded-b-md shadow-xl justify-between px-4 bg-sky-900">
+						<div className="left-0 top-0 w-full flex items-center shadow-xl justify-between p-3 bg-sky-900 fixed">
 							
 							<button onClick={() => setInterfaceUsers({ list:[], title: "" })} className="p-4 rounded-full flex justify-center items-center h-[30px] w-[30px]">
 								<Fa icon={faClose} className="text-white" size="lg" />
 							</button>
 							<h1 className="text-white"> {InterfaceUsers.title} </h1>
-
 						</div>
 						
 						<div className="flex flex-col items-center justify-center mt-5">
 							{
 								InterfaceUsers.list.map((v, i) => {
+									
 									return  <UserUI
                       CurrUserId_={User.id_}
                       id_={v.id_}
                       img={v.img}
                       UserName={v.UserName}
                       key={i}
-                      Followed=""
+                      Followed={v.isfollowed}
                   />
+
 								})
 							}
 						</div>
@@ -475,10 +469,12 @@ const Account = ({
 	NotificationFunc = () => {}
 }) => {
 	let { id } = useParams();
-	
+	var CurrentUser = useSelector(state => state.User);
 	const [ User, setUser ] = useState()
+	
 	useEffect(() => {
-		GetUserById(id)
+
+		GetUserById(id, CurrentUser.id_)
 		.then((res) => {
 			return res.json()
 		})

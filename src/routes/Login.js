@@ -66,13 +66,14 @@ const Login = ({
 				if(Json.code === 200) {
 					dispatch(login(Json.data));
 						
-					console.log(Json.data)
+					
 					NotificationFunc({
 						text: "Welcome to your account, " + Json.data.UserName + "!",
 						status: "info"
 					});
 
 				} else {
+					console.log(Json)
 					NotificationFunc({
 						text: Json.data,
 						status: "error"

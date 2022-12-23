@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { faInfoCircle, faWarning, faCircleCheck, faEdit } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon as Fa } from '@fortawesome/react-fontawesome';
 import { convertBase64 } from "../../server/functions";
@@ -24,6 +24,7 @@ const Paragraphs = ({ Text, Class="" }) => {
 
 const Notify = ({ msg, StyleKey }) => {
 
+	const [show, setShow] = useState(false);
 
 	const Map_ = {
 		info: {
@@ -44,38 +45,33 @@ const Notify = ({ msg, StyleKey }) => {
 
 	if(!(StyleKey in Map_)) StyleKey = "error"
 
-	const frame = useRef(null);
 	
-	const initialize = () => {
-		frame.current.style.display = "flex";
-		frame.current.style.transform = "translate(-50%, 0)";
-		frame.current.style.opacity = "1";
-	}
-
-	const hide = () => {
-		
-		frame.current.style.transform = "translate(0, -20px)";
-		frame.current.style.opacity = "0";
-		setTimeout(() => {
-			frame.current.style.display = "none";
-		}, 2000);
-	}
+	
 	
 	// For developement.
-	useEffect(() => {
-		initialize();
-	}, [StyleKey, msg])
+	
+	useLayoutEffect(() => {
+		
+		setShow(true); 
+		
+		const TimeOut = setTimeout(() => setShow(false), 5 * 1000);
 
-	useEffect(() => {
-		initialize();
-		setTimeout(hide, 7 * 1000);
-	}, [])
+		return () => {
+			setShow(false)
+			clearTimeout(TimeOut);
+		};
+
+	}, [msg, StyleKey])
 
 	return (
-		<div ref={frame} className={`centerX flex flex-row items-center justify-center shadow visible SlideFromTop fixed top-5 p-3 rounded ${Map_[StyleKey].T}`}> 
-			<span className="mx-2"> { msg } </span>
-			<Fa icon={Map_[StyleKey].icon} />
-		</div>
+			((StyleKey in Map_) && msg) ? (
+			
+				<div className={`${show ? "translate-y-2 opacity-100" : "-translate-y-16 opacity-0"} flex flex-row items-center justify-center shadow visible fixed top-1 p-3 rounded transition-all -translate-x-1/2 left-1/2 ${Map_[StyleKey].T}`}> 
+					<span className="mx-2"> { msg } </span>
+					<Fa icon={Map_[StyleKey].icon} />
+				</div>
+
+			) : ""
 	)
 }
 
@@ -171,7 +167,7 @@ const Iframe = ({ Obj, NotificationFunc = () => {} }) => {
 			<img 
 				src={imgData} 
 				alt="img" 
-				className="sm:w-[700px] w-[70%] rounded"
+				className="sm:w-[400px] w-[70%] rounded"
 			/>
 
 			{

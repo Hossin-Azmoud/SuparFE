@@ -301,7 +301,7 @@ const Post = ({
 			</div>
 		) : (
 		
-			<div className="w-full flex-col justify-center bg-neutral-900 my-4 rounded p-2"> 
+			<div className="w-full mx-auto flex-col justify-center bg-neutral-900 my-4 rounded p-2"> 
 				
 				{
 					(imgcmp) ? (

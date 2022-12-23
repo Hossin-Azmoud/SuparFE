@@ -5,10 +5,26 @@ IT AIMS TOWARDS SEPERATING THE UI RENDERING AND THE DATA REQUESTING..
 
 import { api } from "./Var";
 import { JWT } from "./functions";
+import { useSelector, useDispatch } from 'react-redux';
 
+async function NewPost(state) {
 
-async function GetUserById(id) {
-	const response = await fetch(`${api}/${id}`,{
+    const response = await fetch(`${api}/NewPost`, {
+        headers: {
+            "content-type": "application/json",
+        },
+        method: "POST",
+        body: JSON.stringify({
+            ...state,
+            token: JWT,
+        })
+    })
+
+    return response;
+}
+
+async function GetUserById(id, CurrentLoggedUserId) {
+    const response = await fetch(`${api}/getUser?uuid=${id}&user=${CurrentLoggedUserId}`,{
 		headers: {
             "content-type": "application/json",
         },
@@ -26,7 +42,6 @@ async function GetAllPosts() {
         method: "GET"
     })
 }
-
 async function DeletePost(UserId, PostId) {
     
     return await fetch(`${api}/DeletePost`, {
@@ -41,7 +56,6 @@ async function DeletePost(UserId, PostId) {
         })
     })
 }
-
 async function getComments(pid) {
    
     const response = await fetch(`${api}/getComments/${pid}`, {
@@ -54,7 +68,6 @@ async function getComments(pid) {
 
     return response;
 }
-
 async function getLikes(pid) {
    
     const response = await fetch(`${api}/getLikes/${pid}`, {
@@ -67,7 +80,6 @@ async function getLikes(pid) {
 
     return response;
 }
-
 async function Comment(post_id, uuid, text) {
     const response = await fetch(`${api}/comment`, {
         headers: {
@@ -85,8 +97,6 @@ async function Comment(post_id, uuid, text) {
 
     return response;
 }
-
-
 async function Like(post_id, uuid) {
     const response = await fetch(`${api}/like`, {
         headers: {
@@ -103,8 +113,6 @@ async function Like(post_id, uuid) {
 
     return response;
 }
-
-
 async function unLike(post_id, uuid) {
     const response = await fetch(`${api}/like/remove`, {
         headers: {
@@ -121,8 +129,6 @@ async function unLike(post_id, uuid) {
 
     return response;
 }
-
-
 async function updateProfileImage(img) {
     
     const response = await fetch(`${api}/update`, {
@@ -139,7 +145,6 @@ async function updateProfileImage(img) {
 
     return response;
 }
-
 async function updateBackgroundImage(img) {
     const response = await fetch(`${api}/update`, {
         headers: {
@@ -156,7 +161,6 @@ async function updateBackgroundImage(img) {
 
     return response;
 }
-
 async function UpdateBio(bio_) {
     const response = await fetch(`${api}/update`, {
         headers: {
@@ -172,7 +176,6 @@ async function UpdateBio(bio_) {
 
     return response;
 }
-
 async function update(state) {
     
     if(!("token" in state)) {
@@ -190,7 +193,6 @@ async function update(state) {
         body: JSON.stringify(state)
     })
 }
-
 async function updateALL(img_, bg_, bio_, addr_) { 
     const response = await fetch(`${api}/update`, {
         
@@ -209,7 +211,6 @@ async function updateALL(img_, bg_, bio_, addr_) {
     })
     return response;
 }
-
 async function GetUserPostsById(id) {
 	const response = await fetch(`${api}/getUserPosts?id_=${id}`, {
         headers: {
@@ -220,7 +221,6 @@ async function GetUserPostsById(id) {
 
     return response;
 }
-
 async function SubmitJWT(Token) {
     const response = await fetch(`${api}/login`, {
         headers: {
@@ -234,7 +234,6 @@ async function SubmitJWT(Token) {
 
     return response;
 }
-
 async function addFollow(follower_id, followed_id) {
     const response = await fetch(`${api}/follow`, {
         
@@ -254,8 +253,6 @@ async function addFollow(follower_id, followed_id) {
 
     return response;
 }
-
-
 async function removeFollow(follower_id, followed_id) {
     
     const response = await fetch(`${api}/unfollow`, {
@@ -276,8 +273,6 @@ async function removeFollow(follower_id, followed_id) {
 
     return response;
 }
-
-
 async function GetUserFollowers(uuid) {
     
     const response = await fetch(`${api}/getFollowers/${uuid}`, {
@@ -291,7 +286,6 @@ async function GetUserFollowers(uuid) {
 
     return response;
 }
-
 async function GetUserFollowings(uuid) {
     
     const response = await fetch(`${api}/getFollowings/${uuid}`, {
@@ -305,7 +299,6 @@ async function GetUserFollowings(uuid) {
 
     return response;
 }
-
 
 export {
 	GetUserById,
@@ -324,5 +317,6 @@ export {
     addFollow,
     removeFollow,
     GetUserFollowers,
-    GetUserFollowings
+    GetUserFollowings,
+    NewPost
 };

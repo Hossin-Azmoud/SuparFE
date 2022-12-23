@@ -35,7 +35,7 @@ const NavBar = ({ UserImg }) => {
 				<Fa icon={ faHouse } className="hover:text-blue-500 transition-all text-white" size="md"/>
 			</Link>		
 
-			<Link to="/">
+			<Link to="/Notifications">
 				<Fa icon={ faBell } className="hover:text-blue-500 transition-all text-white" size="md"/>
 			</Link>
 
