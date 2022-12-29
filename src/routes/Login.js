@@ -30,11 +30,7 @@ const Login = ({
 		setState(NewState);
 	}
 	
-	useEffect(() => {
-		// if(User) {
-		// 	alert(JSON.stringify(User));
-		// }
-	}, []);
+	
 
 	const submitData = (e) => {
 		e.preventDefault();
@@ -61,7 +57,6 @@ const Login = ({
 			})
 
 			.then((Json) => {
-				console.log(Json.data)
 				
 				if(Json.code === 200) {
 					dispatch(login(Json.data));

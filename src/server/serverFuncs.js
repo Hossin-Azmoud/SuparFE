@@ -42,6 +42,7 @@ async function GetAllPosts() {
         method: "GET"
     })
 }
+
 async function DeletePost(UserId, PostId) {
     
     return await fetch(`${api}/DeletePost`, {
@@ -56,6 +57,7 @@ async function DeletePost(UserId, PostId) {
         })
     })
 }
+
 async function getComments(pid) {
    
     const response = await fetch(`${api}/getComments/${pid}`, {
@@ -211,6 +213,7 @@ async function updateALL(img_, bg_, bio_, addr_) {
     })
     return response;
 }
+
 async function GetUserPostsById(id) {
 	const response = await fetch(`${api}/getUserPosts?id_=${id}`, {
         headers: {

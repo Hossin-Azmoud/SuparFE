@@ -107,8 +107,6 @@ const SignUp = ({
 
 		});
 
-		
-
 		if(Problematics.length === 0) {
 			fetch(`${api}/signup`, {
 				headers: {
@@ -150,6 +148,7 @@ const SignUp = ({
 				setErrorContent(v.index, v.errMsg)
 			});
 		}
+		
 		setLoading(false);
 	}
 
@@ -184,7 +183,6 @@ const SignUp = ({
 								Next
 							</button>
 						</div>
-						<img src="/img/sculp.jpg" className="sm:w-[250px] hidden sm:block rounded-r-md rounded-xl" alt="Image" />
 					</form>
 				) : (
 					

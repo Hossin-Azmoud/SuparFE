@@ -1,8 +1,14 @@
-import { api } from "../server/Var";
-const SocketEndPoint = `${api}/NotificationSock`
+import { socket_base } from "../server/Var";
+const NotEndPoint = "/NotificationSock"
 
-const useNotificationSocket = (uuid) => {
-	const socketUrl = SocketEndPoint.replace("http", "ws")
+// twitter.com/saaafe_mkvl/status/1608214713036570624
+
+
+
+
+const useNotificationSocket = (uuid, callback) => {
+	const socketUrl = `${socket_base}${NotEndPoint}`
+
 	var s = new WebSocket(socketUrl);
 
 	s.onopen = () => {
@@ -10,11 +16,12 @@ const useNotificationSocket = (uuid) => {
 		s.send(uuid)
 		console.log("Id was sent :)")
 	}
-
+	s.onmessage = callback;
 	s.onclose = () => console.log("socket at", socketUrl ,"closed")
 	s.onerror = (e) => console.log("socket at ", socketUrl, "had an error", e)
 	
 	return s;
+
 }
 
 export {
