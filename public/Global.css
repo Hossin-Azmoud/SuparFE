@@ -103,3 +103,20 @@ body::-webkit-scrollbar-track {
 		opacity: 1;
 	}
 }
+
+.reveal {
+	animation: reveal 1s ease;
+}
+
+@keyframes reveal {
+	from {
+		opacity: 0;
+		transform: translateY(5px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0px);
+	}
+}
+
+

@@ -71,7 +71,7 @@ const Post = ({
 
 		setPostComments(New);
 
-		Comment(PostId, User.id_, commentText)
+		Comment(PostId, User.id_, commentText, Userid_)
 		.then(r => r.json())
 		.then(json => {
 			if(json.code === 200) {
@@ -135,7 +135,7 @@ const Post = ({
 
 		setPostLikes(New)
 
-		Like(PostId, User.id_)
+		Like(PostId, User.id_, Userid_)
 		
 		.then(r => r.json())
 		.then(json => {

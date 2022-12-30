@@ -82,15 +82,16 @@ async function getLikes(pid) {
 
     return response;
 }
-async function Comment(post_id, uuid, text) {
+
+async function Comment(post_id, uuid, text, PostOwnerId) {
     const response = await fetch(`${api}/comment`, {
         headers: {
             "content-type": "application/json",
         },
-
         method: "POST",
         body: JSON.stringify({
             token: JWT,
+            post_owner_id: PostOwnerId,
             post_id,
             uuid,
             text
@@ -99,7 +100,8 @@ async function Comment(post_id, uuid, text) {
 
     return response;
 }
-async function Like(post_id, uuid) {
+
+async function Like(post_id, uuid, PostOwnerId) {
     const response = await fetch(`${api}/like`, {
         headers: {
             "content-type": "application/json",
@@ -108,13 +110,16 @@ async function Like(post_id, uuid) {
         method: "POST",
         body: JSON.stringify({
             token: JWT,
+            post_owner_id: PostOwnerId,
             post_id,
-            uuid
+            uuid,
+
         })
     })
 
     return response;
 }
+
 async function unLike(post_id, uuid) {
     const response = await fetch(`${api}/like/remove`, {
         headers: {
@@ -276,8 +281,8 @@ async function removeFollow(follower_id, followed_id) {
 
     return response;
 }
-async function GetUserFollowers(uuid) {
-    
+
+async function GetUserFollowers(uuid) { 
     const response = await fetch(`${api}/getFollowers/${uuid}`, {
 
         headers: {
@@ -303,6 +308,15 @@ async function GetUserFollowings(uuid) {
     return response;
 }
 
+async function GetUserNotifications(uuid) {
+    const response = await fetch(`${api}/getUserNotifications/${uuid}`, { 
+        headers: { "content-type": "application/json" }, 
+        method: "GET" 
+    })
+
+    return response;
+}
+
 export {
 	GetUserById,
 	GetUserPostsById,
@@ -321,5 +335,6 @@ export {
     removeFollow,
     GetUserFollowers,
     GetUserFollowings,
-    NewPost
+    NewPost,
+    GetUserNotifications
 };

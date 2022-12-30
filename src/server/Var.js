@@ -1,3 +1,4 @@
+import { faHeart, faComment } from "@fortawesome/free-solid-svg-icons";
 
 var goApi = `http://${location.hostname}:5000`;
 var api = `http://${location.hostname}:8888/v2`; // Dev 
@@ -10,9 +11,15 @@ if(location.port === '8888') {
 	api = `/v2` // Production
 }
 
+const notificationIconMap = {
+	1 : faHeart, 
+	2 : faComment
+}
+
 export { 
 	api, 
 	goApi,
 	HOST,
-	socket_base
+	socket_base,
+	notificationIconMap
 };

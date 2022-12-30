@@ -16,15 +16,49 @@ import NavBar from "./components/UserInterfaceComponents/NavBar";
 import Loader from "./components/UserInterfaceComponents/Loader";
 import AccountsSearchPannel from "./routes/Search";
 import UserNotifications from "./routes/UserNotifications";
-import { SubmitJWT } from "./server/serverFuncs";
+import { SubmitJWT, GetUserNotifications } from "./server/serverFuncs";
 import { Notify } from "./components/UserInterfaceComponents/microComps";
 import { HOST } from "./server/Var";
+import { useNotificationSocket } from "./server/socketOps"
 
 const App = () => {    
     const User = useSelector(state => state.User);
     const dispatch = useDispatch();
     const [Loading, setLoading] = useState(true);
     const [Notification, setNotification] = useState(null);
+    const [NewNots, setNewNots] = useState([])
+    const [FetchedNotifications, setFetchedNotifications] = useState([]);
+    const onMessageCallback = (m) => {
+        // incoming notifications.
+        var New = JSON.parse(m.data)
+        
+        if(HOST) {                    
+            New.User.img = New.User.img.replace("localhost", HOST);
+            New.User.bg = New.User.bg.replace("localhost", HOST);
+        }
+
+        setNewNots([...NewNots, New]);
+    }
+    
+    var NotificationSocket = null;
+
+
+    if(User && !Loading) {
+        NotificationSocket = useNotificationSocket(User.id_, onMessageCallback);
+        GetUserNotifications(User.id_)
+        .then(r => r.json())
+        .then(Json => {
+            if(Json.code === 200) { 
+                if(Json.data !== null) {
+                    setFetchedNotifications(Json.data);
+                }
+
+                console.log(Json.data);
+            }
+        })
+        .catch(e => console.log(e))    
+    }
+
 
     useEffect(() => {
 
@@ -61,7 +95,6 @@ const App = () => {
         } else {
             setLoading(false);
         }
-
     }, []);
 
     return (
@@ -70,7 +103,7 @@ const App = () => {
                 (User && !Loading) ? (
                             <>
                            
-                                <NavBar UserImg={User.img}/>
+                                <NavBar UserImg={User.img} NewNotificationCount={NewNots.length}/>
                                 <Routes>
                                     
                                     <Route path="/" element={<Home NotificationFunc={setNotification}/>} />
@@ -78,7 +111,7 @@ const App = () => {
                                     <Route path="/Login" element={<Login NotificationFunc={setNotification} />} />
                                     <Route path="/Signup" element={<SignUp NotificationFunc={setNotification}/>} />
                                     <Route path="/profile" element={<CurrentUserProfile NotificationFunc={setNotification}/>}/>
-                                    <Route path="/Notifications" element={<UserNotifications />} />
+                                    <Route path="/Notifications" element={<UserNotifications Notifications={FetchedNotifications} NewNotifications={NewNots}/>} />
                                     <Route path="/i" element={<Icons />} />
                                     <Route path="/Accounts" element={<AccountsSearchPannel CurrUserId={User.id_} NotificationFunc={setNotification} />}/>
                        
