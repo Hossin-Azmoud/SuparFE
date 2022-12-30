@@ -3,7 +3,7 @@ import { FontAwesomeIcon as Fa } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
 import { notificationIconMap } from "../server/Var";
 import { useState, useEffect } from "react"
-const UserNotifications = ({ Notifications, NewNotifications }) => {
+const UserNotifications = ({ Notifications, NewNotifications, socketConn }) => {
 	//TODO get notifications from server.
 	// if connected we will get everything in realtime. once something happens we ship it to this place if the user is online.
 	// if the u is not online we keep everything pending in the server. once connected we send everything..
@@ -37,6 +37,14 @@ const UserNotifications = ({ Notifications, NewNotifications }) => {
 		
 		setAll([...NewNotifications, ...Notifications]);
 		
+		if(All.length > 0) {
+			All.map((notification) => {
+				if(!Boolean(notification.seen)) {
+					socketConn.send(JSON.stringify({ id: notification.id, uuid: notification.uuid}));	
+				}
+			});
+		}
+
 		return () => {
 			setAll([]);
 		};
@@ -55,7 +63,7 @@ const UserNotifications = ({ Notifications, NewNotifications }) => {
 						All.map((notification, i) => {
 							return (
 								<li key={i} 
-									className={`${!Boolean(notification.seen) ? "bg-sky-900 bg-opacity-10" : "bg-black"} cursor-pointer w-full flex flex-row justify-start items-center hover:bg-neutral-900 transition-all hover:bg-opacity-10 border-b border-b-neutral-800 p-4 reveal`}> 
+									className={`${!Boolean(notification.seen) ? "bg-violet-900 bg-opacity-20" : "bg-black"} cursor-pointer w-full flex flex-row justify-start items-center hover:bg-neutral-900 transition-all hover:bg-opacity-10 border-b border-b-neutral-800 p-4 reveal`}> 
 									
 									<Link to={`/Accounts/${notification.actorid}`} className="flex flex-row items-start">
 										<img className="shadow-xl w-10 rounded-md h-10" src={(notification.User.img) ? notification.User.img : "/img/defUser.jpg"} />

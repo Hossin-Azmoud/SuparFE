@@ -28,6 +28,7 @@ const App = () => {
     const [Notification, setNotification] = useState(null);
     const [NewNots, setNewNots] = useState([])
     const [FetchedNotifications, setFetchedNotifications] = useState([]);
+   
     const onMessageCallback = (m) => {
         // incoming notifications.
         var New = JSON.parse(m.data)
@@ -40,33 +41,53 @@ const App = () => {
         setNewNots([...NewNots, New]);
     }
     
-    var NotificationSocket = null;
+    var [NotificationSocket, setNotificationSocket] = useState(null);
 
-
-    if(User && !Loading) {
-        NotificationSocket = useNotificationSocket(User.id_, onMessageCallback);
+    const fetchOldNotifications = () => {
+        var Data = [];
+        
         GetUserNotifications(User.id_)
         .then(r => r.json())
         .then(Json => {
-            if(Json.code === 200) { 
-                if(Json.data !== null) {
-                    setFetchedNotifications(Json.data);
-                }
+            if(Json.code === 200) {
 
-                console.log(Json.data);
+                if(Json.data !== null) {
+                    Data = Json.data;
+                    Data.map(u => {
+                        if(HOST) {                    
+                            u.User.img = u.User.img.replace("localhost", HOST);
+                            u.User.bg = u.User.bg.replace("localhost", HOST);
+                        }
+                    });
+                }
             }
         })
-        .catch(e => console.log(e))    
-    }
+        .finally(() => {
+            var tmp = [];
 
+            for(let i = 0; i < Data.length; i++) {
+                const NotificationObj = Data[i];
+                if(!Boolean(NotificationObj.seen)) {
+                    tmp.push();
+                    Data = Data.filter(j => j.id !== NotificationObj.id);
+                }
+            }
+
+            setFetchedNotifications(Data);
+            setNewNots([...NewNots, ...tmp]);
+        })
+        .catch(e => console.log(e))
+    }
 
     useEffect(() => {
 
         if(JWT) {
             SubmitJWT(JWT)
+            
             .then((res) => {
                 return res.json()
             })
+
             .then((Json) => {
                 
                 if(Json.code === 200) {
@@ -84,7 +105,7 @@ const App = () => {
                 }
             })
             .finally(() => {
-                setLoading(false); 
+                setLoading(false);
             })
             .catch(e => {
                 setNotification({
@@ -95,7 +116,28 @@ const App = () => {
         } else {
             setLoading(false);
         }
+
+        return () => setLoading(false);
+
     }, []);
+
+    useEffect(() => {
+        
+        if(User) {
+            if(NotificationSocket === null) {
+                var s = useNotificationSocket(User.id_, onMessageCallback);
+                setNotificationSocket(s);    
+            }
+            
+            fetchOldNotifications();
+        }
+
+        return () => {
+            setNotificationSocket(null);
+            setFetchedNotifications([]);
+        }
+                
+    }, [User])
 
     return (
         <>
@@ -111,7 +153,7 @@ const App = () => {
                                     <Route path="/Login" element={<Login NotificationFunc={setNotification} />} />
                                     <Route path="/Signup" element={<SignUp NotificationFunc={setNotification}/>} />
                                     <Route path="/profile" element={<CurrentUserProfile NotificationFunc={setNotification}/>}/>
-                                    <Route path="/Notifications" element={<UserNotifications Notifications={FetchedNotifications} NewNotifications={NewNots}/>} />
+                                    <Route path="/Notifications" element={<UserNotifications socketConn={NotificationSocket} Notifications={FetchedNotifications} NewNotifications={NewNots}/>} />
                                     <Route path="/i" element={<Icons />} />
                                     <Route path="/Accounts" element={<AccountsSearchPannel CurrUserId={User.id_} NotificationFunc={setNotification} />}/>
                        

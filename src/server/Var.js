@@ -1,6 +1,5 @@
-import { faHeart, faComment } from "@fortawesome/free-solid-svg-icons";
+import { faHeart, faComment, faUserPlus } from "@fortawesome/free-solid-svg-icons";
 
-var goApi = `http://${location.hostname}:5000`;
 var api = `http://${location.hostname}:8888/v2`; // Dev 
 var HOST = location.hostname;
 var socket_base = `ws://${location.hostname}:8888/v2`
@@ -12,13 +11,13 @@ if(location.port === '8888') {
 }
 
 const notificationIconMap = {
+	0 : faUserPlus,
 	1 : faHeart, 
 	2 : faComment
 }
 
 export { 
-	api, 
-	goApi,
+	api,
 	HOST,
 	socket_base,
 	notificationIconMap

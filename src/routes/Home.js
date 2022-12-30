@@ -195,7 +195,9 @@ const Home = ({
 		<>
 			<div className="flex w-[90%] sm:w-[600px] flex-col justify-start items-start">
 				<form className="mt-2 flex rounded py-6 px-2 flex-col justify-center items-start my-2 w-full transition-all">
+					
 					<input type="file" id="image" className="hidden" onChange={OnImageSelected}/>
+					<img  />
                 	<textarea cols="81" rows={rows} ref={textField} onChange={OnTypingText} className="NoBar w-full focus:border-b-sky-700 border-b-neutral-700 border-b resize-none p-3 text-white bg-none px-2 outline-none bg-black p-2" type="text" placeholder="say something" /> 
                 	<div className="flex flex-row items-center justify-center mt-2">
                 		<button onClick={OpenFileDialogue} title="Attach image" className="text-white p-2 hover:bg-neutral-800 bg-neutral-900 rounded">
