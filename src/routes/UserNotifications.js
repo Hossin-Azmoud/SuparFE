@@ -1,9 +1,10 @@
 
 import { FontAwesomeIcon as Fa } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
-import { notificationIconMap } from "../server/Var";
+import { notificationIconMap, LIKE, COMMENT, FOLLOW, NOTIFICATION } from "../server/Var";
 import { useState, useEffect } from "react"
-const UserNotifications = ({ Notifications, NewNotifications, socketConn }) => {
+
+const UserNotifications = ({ Notifications, NewNotifications, socketConn, CountCallback }) => {
 	//TODO get notifications from server.
 	// if connected we will get everything in realtime. once something happens we ship it to this place if the user is online.
 	// if the u is not online we keep everything pending in the server. once connected we send everything..
@@ -37,14 +38,6 @@ const UserNotifications = ({ Notifications, NewNotifications, socketConn }) => {
 		
 		setAll([...NewNotifications, ...Notifications]);
 		
-		if(All.length > 0) {
-			All.map((notification) => {
-				if(!Boolean(notification.seen)) {
-					socketConn.send(JSON.stringify({ id: notification.id, uuid: notification.uuid}));	
-				}
-			});
-		}
-
 		return () => {
 			setAll([]);
 		};
@@ -60,36 +53,74 @@ const UserNotifications = ({ Notifications, NewNotifications, socketConn }) => {
 				{
 					
 					(All.length > 0) ? (
-						All.map((notification, i) => {
-							return (
-								<li key={i} 
-									className={`${!Boolean(notification.seen) ? "bg-violet-900 bg-opacity-20" : "bg-black"} cursor-pointer w-full flex flex-row justify-start items-center hover:bg-neutral-900 transition-all hover:bg-opacity-10 border-b border-b-neutral-800 p-4 reveal`}> 
-									
-									<Link to={`/Accounts/${notification.actorid}`} className="flex flex-row items-start">
-										<img className="shadow-xl w-10 rounded-md h-10" src={(notification.User.img) ? notification.User.img : "/img/defUser.jpg"} />
-										
-										{
-											(notification.type in notificationIconMap) ? <Fa icon={notificationIconMap[notification.type]} size="sm" className="text-white relative z-30 -left-3 -top-0 shadow"/> : ""
-										}
-
-									</Link>
-										
-									<p className="mx-6"> { notification.text } </p>
-	
-
-								</li>
-							)	
-						})
-						
+						All.map((notification, i) => <UserNotificationUI CountCallback={CountCallback} key={i} NotificationOBJ={notification} socketConn={socketConn}/> )
 					) : ""
 				}
+
 			</ul>	
 		</>
 	)
 }
 
 
+const UserNotificationUI = ({ NotificationOBJ, socketConn, CountCallback }) => {
+	const [notificationObject, setNotificationObject] = useState(NotificationOBJ);
+
+	useEffect(() => {
+		
+		return () => {
+			setNotificationObject(null);
+		}
+
+	}, [])
+
+	const seen = () => {
+
+		const ob = JSON.stringify({
+			action: NOTIFICATION,
+			code: 200,
+			data: { 
+				id: notificationObject.id 
+			}
+		})
+		
+		if(!Boolean(notificationObject.seen)) {
+			setTimeout(() => socketConn.send(ob), 2000);
+			notificationObject.seen = 1;
+			CountCallback(p => p - 1);
+		}
+	}
+
+	return (
+		(notificationObject) ? (
+			<li
+				className={`${!Boolean(notificationObject.seen) ? "bg-violet-900 bg-opacity-20" : "bg-black"} cursor-pointer w-full flex flex-row justify-start items-center hover:bg-neutral-900 transition-all hover:bg-opacity-10 border-b border-b-neutral-800 p-4 reveal`}
+				onClick={seen}
+			> 
+			
+				<Link to={`/Accounts/${notificationObject.actorid}`} className="flex flex-row items-start">
+					<img className="shadow-xl w-10 rounded-md h-10" src={(notificationObject.User.img) ? notificationObject.User.img : "/img/defUser.jpg"} />
+					
+					{
+						(notificationObject.type in notificationIconMap) ? <Fa icon={notificationIconMap[notificationObject.type]} size="sm" className="text-white relative z-30 -left-3 -top-0 shadow"/> : ""
+					}
+
+				</Link>
+
+				<Link to={(notificationObject.type === COMMENT || notificationObject.type === LIKE) ? `/Post/${notificationObject.post_id}` : `/Accounts/${notificationObject.actorid}`} className="mx-6"> { notificationObject.text } </Link>
+
+			</li>
+
+		) : ""
+	)
+
+}
+
 export default UserNotifications;
+/*
+
+
+*/
 
 
 

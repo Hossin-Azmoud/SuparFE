@@ -1,7 +1,7 @@
 import "./CustomStyles/Animations.css";
-import Loader from "../components/UserInterfaceComponents/Loader";
+import Loader from "../components/Loader";
 
-import UserUI from "../components/UserInterfaceComponents/UserUI";
+import UserUI from "../components/UserUI";
 import { api } from "../server/Var";
 import { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from 'react-redux';
@@ -156,8 +156,8 @@ const SignUp = ({
 		<div className="w-full h-screen flex flex-col justify-center items-center">
 			{
 				(Index === 0) ? (
-					<form className="slideRight w-[90%] flex flex-row justify-between items-center w-11/12 sm:w-[700px] rounded-md shadow-md bg-neutral-900">
-						<div className="flex w-full sm:w-1/2 flex-col justify-center p-4 px-6">
+					<form className="slideRight blue-shadow w-[90%] flex flex-row justify-between items-center w-11/12 sm:w-[400px] rounded-md bg-neutral-900">
+						<div className="flex w-full flex-col justify-center p-4 px-6">
 							<h1 className="text-xl font-semibold text-sky-200 my-3"> Make an account using you Email. </h1>
 							<p className="my-2 text-sky-100 text-normal"> Required are marked with <span className="text-red-300"> * </span> </p>
 							
@@ -186,7 +186,7 @@ const SignUp = ({
 					</form>
 				) : (
 					
-					<form className="slideLeft p-4 sm:w-[400px] w-[90%] flex flex-col justify-start items-start w-11/12 sm:w-[700px] rounded-md shadow-md bg-neutral-900">
+					<form className="transition-all duration-500 blue-shadow slideLeft p-4 sm:w-[400px] w-[90%] flex flex-col justify-start items-start w-11/12 sm:w-[700px] rounded-md bg-neutral-900 origin-left">
 						
 						<input type="file" id="img" className="hidden" onChange={OnImgSelected} />
 						<input type="file" id="bg" className="hidden" onChange={OnbgSelected} />
@@ -198,7 +198,7 @@ const SignUp = ({
 						</label>
 						
 						<button onClick={(e) => {
-							OpenFileDialogue(e, "img")}} className="w-full bg-transparent border border-white transition-all duration-500 my-2 rounded border-box py-2 px-4 text-white cursor-pointer hover:shadow-md">
+							OpenFileDialogue(e, "img")}} className="w-full bg-transparent border border-white my-2 rounded border-box py-2 px-4 text-white cursor-pointer hover:shadow-md">
 							
 							<div>
 								upload avatar
@@ -217,7 +217,7 @@ const SignUp = ({
 
 						</button>
 
-						<button onClick={(e) => {OpenFileDialogue(e, "bg")}} className="w-full bg-transparent border border-white transition-all duration-500 my-2 rounded border-box py-2 px-4 text-white cursor-pointer hover:shadow-md flex-col justify-center items-center flex">
+						<button onClick={(e) => {OpenFileDialogue(e, "bg")}} className="w-full bg-transparent border border-white my-2 rounded border-box py-2 px-4 text-white cursor-pointer hover:shadow-md flex-col justify-center items-center flex">
 							
 							<div>
 								upload Background image
@@ -232,10 +232,10 @@ const SignUp = ({
 						</button>
 
 						<div >
-							<button className="hover:bg-blue-700 bg-blue-900 transition-all duration-500 my-2 w-[100px] rounded border-box py-2 px-4 text-white cursor-pointer hover:shadow-md" onClick={() => {setIndex(0)}}>
+							<button className="hover:bg-blue-700 bg-blue-900 my-2 w-[100px] rounded border-box py-2 px-4 text-white cursor-pointer hover:shadow-md" onClick={() => {setIndex(0)}}>
 								previous
 							</button>
-							<button onClick={submitData} className="hover:bg-blue-700 bg-blue-900 transition-all duration-500 my-2 w-[100px] rounded border-box py-2 px-4 text-white cursor-pointer hover:shadow-md mx-2">
+							<button onClick={submitData} className="hover:bg-blue-700 bg-blue-900 my-2 w-[100px] rounded border-box py-2 px-4 text-white cursor-pointer hover:shadow-md mx-2">
 								submit
 							</button>
 							{
@@ -247,9 +247,7 @@ const SignUp = ({
 						
 					</form>
 
-				)
-		
-				
+				)	
 			}
 		</div>
 	)

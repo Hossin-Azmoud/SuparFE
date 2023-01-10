@@ -1,4 +1,5 @@
-import "../Css/Loader.css";
+import "./Css/Loader.css";
+import Logo from "./Logo"
 
 const Loader = ({
 	color="white",
@@ -9,4 +10,11 @@ const Loader = ({
 	height: `${size}px`
 }} className={`show border-t-${color} ${Class}`}></div>);
 
+const AppMainLoader = () => <Logo class_="w-24" />
+
+
 export default Loader;
+
+export {
+	AppMainLoader
+};

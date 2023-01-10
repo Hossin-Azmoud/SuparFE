@@ -1,12 +1,7 @@
 import { socket_base } from "../server/Var";
-const NotEndPoint = "/NotificationSock"
+const NotEndPoint = "/WSoc"
 
-// twitter.com/saaafe_mkvl/status/1608214713036570624
-
-
-
-
-const useNotificationSocket = (uuid, callback) => {
+const useSocket = (uuid, callback) => {
 	const socketUrl = `${socket_base}${NotEndPoint}`
 
 	var s = new WebSocket(socketUrl);
@@ -21,9 +16,8 @@ const useNotificationSocket = (uuid, callback) => {
 	s.onerror = (e) => console.log("socket at ", socketUrl, "had an error", e)
 	
 	return s;
-
 }
 
 export {
-	useNotificationSocket
+	useSocket
 };

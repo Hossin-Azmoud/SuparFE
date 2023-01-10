@@ -2,7 +2,6 @@ import "./index.css";
 import Home from "./routes/Home";
 import Login from "./routes/Login";
 import SignUp from "./routes/SignUp";
-
 import { Routes, Route, useParams } from "react-router-dom";
 import Icons from "./routes/Icons";
 import CurrentUserProfile, { Account } from "./routes/Profile";
@@ -12,14 +11,15 @@ import { SetAuthCookie, JWT } from "./server/functions";
 import { 
     login
 } from './store/userStore';
-import NavBar from "./components/UserInterfaceComponents/NavBar";
-import Loader from "./components/UserInterfaceComponents/Loader";
+import NavBar from "./components/NavBar";
+import {AppMainLoader as Loader} from "./components/Loader";
 import AccountsSearchPannel from "./routes/Search";
 import UserNotifications from "./routes/UserNotifications";
 import { SubmitJWT, GetUserNotifications } from "./server/serverFuncs";
-import { Notify } from "./components/UserInterfaceComponents/microComps";
-import { HOST } from "./server/Var";
-import { useNotificationSocket } from "./server/socketOps"
+import { ApplicationNotification } from "./components/microComps";
+import { PostPage } from "./components/Post";
+import { HOST, NOTIFICATION } from "./server/Var";
+import { useSocket } from "./server/socketOps"
 
 const App = () => {    
     const User = useSelector(state => state.User);
@@ -27,18 +27,27 @@ const App = () => {
     const [Loading, setLoading] = useState(true);
     const [Notification, setNotification] = useState(null);
     const [NewNots, setNewNots] = useState([])
+    const [notCount, setnotCount] = useState(0);
     const [FetchedNotifications, setFetchedNotifications] = useState([]);
-   
-    const onMessageCallback = (m) => {
-        // incoming notifications.
-        var New = JSON.parse(m.data)
-        
+    
+    const HandleNewNotification = (ob) => {
         if(HOST) {                    
-            New.User.img = New.User.img.replace("localhost", HOST);
-            New.User.bg = New.User.bg.replace("localhost", HOST);
+            ob.User.img = ob.User.img.replace("localhost", HOST);
+            ob.User.bg = ob.User.bg.replace("localhost", HOST);
         }
 
-        setNewNots([...NewNots, New]);
+        // alert("New Notification");
+        setNewNots([...NewNots, ob]);
+        setnotCount(p => p + 1);
+    }
+
+    const onMessageCallback = (m) => {
+        var SockMsg = JSON.parse(m.data)
+        console.log(SockMsg);
+        
+        if(SockMsg.action === NOTIFICATION) {
+            HandleNewNotification(SockMsg.data)
+        }
     }
     
     var [NotificationSocket, setNotificationSocket] = useState(null);
@@ -53,12 +62,14 @@ const App = () => {
 
                 if(Json.data !== null) {
                     Data = Json.data;
+                    
                     Data.map(u => {
                         if(HOST) {                    
                             u.User.img = u.User.img.replace("localhost", HOST);
                             u.User.bg = u.User.bg.replace("localhost", HOST);
                         }
                     });
+
                 }
             }
         })
@@ -68,12 +79,14 @@ const App = () => {
             for(let i = 0; i < Data.length; i++) {
                 const NotificationObj = Data[i];
                 if(!Boolean(NotificationObj.seen)) {
-                    tmp.push();
+                    tmp.push(NotificationObj);
                     Data = Data.filter(j => j.id !== NotificationObj.id);
                 }
             }
 
             setFetchedNotifications(Data);
+            setnotCount(p => tmp.length + p);
+            console.log(tmp.length);
             setNewNots([...NewNots, ...tmp]);
         })
         .catch(e => console.log(e))
@@ -125,7 +138,7 @@ const App = () => {
         
         if(User) {
             if(NotificationSocket === null) {
-                var s = useNotificationSocket(User.id_, onMessageCallback);
+                var s = useSocket(User.id_, onMessageCallback);
                 setNotificationSocket(s);    
             }
             
@@ -143,51 +156,62 @@ const App = () => {
         <>
             {
                 (User && !Loading) ? (
-                            <>
-                           
-                                <NavBar UserImg={User.img} NewNotificationCount={NewNots.length}/>
-                                <Routes>
-                                    
-                                    <Route path="/" element={<Home NotificationFunc={setNotification}/>} />
-                                    <Route path="/Home" element={<Home NotificationFunc={setNotification}/>} />
-                                    <Route path="/Login" element={<Login NotificationFunc={setNotification} />} />
-                                    <Route path="/Signup" element={<SignUp NotificationFunc={setNotification}/>} />
-                                    <Route path="/profile" element={<CurrentUserProfile NotificationFunc={setNotification}/>}/>
-                                    <Route path="/Notifications" element={<UserNotifications socketConn={NotificationSocket} Notifications={FetchedNotifications} NewNotifications={NewNots}/>} />
-                                    <Route path="/i" element={<Icons />} />
-                                    <Route path="/Accounts" element={<AccountsSearchPannel CurrUserId={User.id_} NotificationFunc={setNotification} />}/>
-                       
-                                    <Route
-                                        path="/Accounts/:id"
-                                        loader={({ params }) => {
-                                            alert(params.id);
-                                        }}
-                                      
-                                        action={({ params }) => {}}
-            
-                                        element={<Account NotificationFunc={setNotification} />}
-                                    />
-            
-                               </Routes>
-                           </>
+                        <>
+                            <NavBar UserImg={User.img} NewNotificationCount={notCount}/>
+                            
+                            <Routes>
+                                
+                                <Route path="/" element={<Home NotificationFunc={setNotification}/>} />
+                                <Route path="/Home" element={<Home NotificationFunc={setNotification}/>} />
+                                <Route path="/Login" element={<Login NotificationFunc={setNotification} />} />
+                                <Route path="/Signup" element={<SignUp NotificationFunc={setNotification}/>} />
+                                <Route path="/profile" element={<CurrentUserProfile NotificationFunc={setNotification}/>}/>
+                                <Route path="/Notifications" element={<UserNotifications socketConn={NotificationSocket} Notifications={FetchedNotifications} CountCallback={setnotCount} NewNotifications={NewNots}/>} />
+                                <Route path="/i" element={<Icons />} />
+                                <Route path="/Accounts" element={<AccountsSearchPannel CurrUserId={User.id_} NotificationFunc={setNotification} />}/>
+                                <Route
+                                    path="/Accounts/:id"
+                                    loader={({ params }) => {
+                                        alert(params.id);
+                                    }}
+                                  
+                                    action={({ params }) => {}}
+        
+                                    element={<Account NotificationFunc={setNotification} />}
+                                />
+                                <Route
+                                    path="/Post/:id"
+                                    loader={({ params }) => {
+                                        alert(params.id);
+                                    }}
+                                  
+                                    action={({ params }) => {}}
+        
+                                    element={<PostPage NotificationFunc={setNotification} />}
+                                />
+                                
+
+
+                           </Routes>
+                       </>
+                    ) : (
+                        (Loading) ? (
+        
+                            <div className="w-screen h-screen flex justify-center items-center absolute top-0 left-0">
+                                <Loader size="30" color="blue-500" />
+                            </div>
+        
                         ) : (
-                            (Loading) ? (
-            
-                                <div className="w-screen h-screen flex justify-center items-center absolute top-0 left-0">
-                                    <Loader size="40" color="blue-500" />
-                                </div>
-            
-                            ) : (
-                                <Routes>
-                                    <Route path="/i" element={<Icons />} />
-                                    <Route path="/" element={<Login NotificationFunc={setNotification} />} />
-                                    <Route path="/Signup" element={<SignUp NotificationFunc={setNotification} />} />
-                                    <Route path="/Login" element={<Login NotificationFunc={setNotification} />} />
-                                </Routes>
-                            )
-                        )}
+                            <Routes>
+                                <Route path="/i" element={<Icons />} />
+                                <Route path="/" element={<Login NotificationFunc={setNotification} />} />
+                                <Route path="/Signup" element={<SignUp NotificationFunc={setNotification} />} />
+                                <Route path="/Login" element={<Login NotificationFunc={setNotification} />} />
+                            </Routes>
+                        )
+                    )}
             <div>
-                { (Notification) ? <Notify msg={Notification.text} StyleKey={Notification.status}/> : ("") }
+                { (Notification) ? <ApplicationNotification msg={Notification.text} StyleKey={Notification.status}/> : ("") }
             </div>
         </>
     );

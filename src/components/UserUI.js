@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { addFollow, removeFollow, GetUserById } from "../../server/serverFuncs"
+import { addFollow, removeFollow, GetUserById } from "../server/serverFuncs"
 
 const UserUI = ({
 	CurrUserId_,
@@ -106,4 +106,21 @@ const UserUI = ({
 	)	
 }
 
+const UserDisplay= ({Userid_, UserName, UserImg}) => {
+	return (
+		<div className="flex flex-row items-start justify-start">
+			<Link to={`/Accounts/${Userid_}`}>
+				<img src={UserImg ? UserImg : "/img/defUser.jpg"} alt="user avatar" className="rounded-full w-10 h-10" />
+			</Link>
+			<span className="ml-2">
+				<h5 className="font-semibold text-base text-sky-100"> { UserName } </h5>
+				<h5 className="font-thin text-sm text-green-700 "> #{ Userid_ } </h5>
+			</span>	
+		</div>
+	)
+}
+
 export default UserUI;
+export {
+	UserDisplay
+};

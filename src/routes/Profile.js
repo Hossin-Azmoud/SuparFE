@@ -3,16 +3,16 @@ import { useEffect, useState, useRef } from 'react';
 import { faEdit, faCopy, faLocationDot, faClose } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon as Fa } from '@fortawesome/react-fontawesome';
 import { api, HOST } from "../server/Var";
-import Post from "../components/UserInterfaceComponents/Post";
+import Post from "../components/Post";
 import { copytoclip as cp, JWT } from "../server/functions";
 import { GetUserById, GetUserPostsById, updateProfileImage, updateBackgroundImage, update, GetUserFollowers, GetUserFollowings } from "../server/serverFuncs";
 import { useParams } from "react-router-dom";
-import { Paragraphs, Iframe } from "../components/UserInterfaceComponents/microComps";
-import Loader from "../components/UserInterfaceComponents/Loader";
+import { Paragraphs, Iframe } from "../components/microComps";
+import Loader from "../components/Loader";
 import { 
   updateUser
 } from '../store/userStore';
-import UserUI from "../components/UserInterfaceComponents/UserUI"
+import UserUI from "../components/UserUI"
 
 const ProfileRenderer = ({ 
 	User,

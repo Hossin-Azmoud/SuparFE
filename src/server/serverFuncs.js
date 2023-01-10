@@ -7,6 +7,33 @@ import { api } from "./Var";
 import { JWT } from "./functions";
 import { useSelector, useDispatch } from 'react-redux';
 
+
+async function Poster(EndPoint, Payload) {
+     const response = await fetch(EndPoint, {
+        headers: {
+            "content-type": "application/json",
+        },
+        method: "POST",
+        body: JSON.stringify(Payload)
+    })
+
+    return response;
+}
+
+
+async function Getter(EndPoint, Payload) {
+     const response = await fetch(EndPoint, {
+        headers: {
+            "content-type": "application/json",
+        },
+        method: "GET"
+    })
+
+    return response;
+}
+
+const NewPostArrow = async (state) => await Poster(`${api}/NewPost`, state);
+
 async function NewPost(state) {
 
     const response = await fetch(`${api}/NewPost`, {
@@ -30,6 +57,18 @@ async function GetUserById(id, CurrentLoggedUserId) {
         },
         method: "GET"
 	});
+
+    return response;
+}
+
+async function getPostById(post_id) {
+    //TODO: change this endpoint to => v2//:pid
+    const response = await fetch(`${api}/getPostById/${post_id}`, {
+        headers: {
+            "content-type": "application/json",
+        },
+        method: "GET"
+    });
 
     return response;
 }
@@ -59,8 +98,9 @@ async function DeletePost(UserId, PostId) {
 }
 
 async function getComments(pid) {
+
    
-    const response = await fetch(`${api}/getComments/${pid}`, {
+    const response = await fetch(`${api}/getPostCommentsById/${pid}`, {
         headers: {
             "content-type": "application/json",
         },
@@ -72,7 +112,7 @@ async function getComments(pid) {
 }
 async function getLikes(pid) {
    
-    const response = await fetch(`${api}/getLikes/${pid}`, {
+    const response = await fetch(`${api}/getPostLikesById/${pid}`, {
         headers: {
             "content-type": "application/json",
         },
@@ -324,6 +364,7 @@ export {
     updateProfileImage,
     updateBackgroundImage,
     GetAllPosts,
+    getPostById,
     update,
     DeletePost,
     getComments,

@@ -7,57 +7,25 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState, useEffect, useRef } from "react"
 import { useSelector } from 'react-redux';
 import { api } from "../server/Var";
-import { convertBase64 } from "../server/functions";
-import { GetAllPosts, NewPost } from "../server/serverFuncs";
-import Post from "../components/UserInterfaceComponents/Post";
-import Loader from "../components/UserInterfaceComponents/Loader";
+import { GetAllPosts } from "../server/serverFuncs";
+import Post from "../components/Post";
+import Loader from "../components/Loader";
 import { JWT } from "../server/functions";
 import { HOST } from "../server/Var";
+import { Link } from "react-router-dom";
+import { Retry } from "../components/microComps";
+import { PostFormUI } from "../components/Post"
 
 const Home = ({
 	NotificationFunc = () => {}
 }) => {
 	
 	const User = useSelector(state => state.User);
-	const [Image, setImage] = useState(null);
-	const [Text, setText] = useState("");
-	const [rows, setRows] = useState(3);
-	const [state, setState] = useState({});
 	const [Posts, setPosts] = useState(null);
-	const [refresh, setRefresh] = useState(true);
 	const [isLoading, setisLoading] = useState(true);
-	const textField = useRef(null);
-
-	const resetAll = () => {
-		setImage(null);
-		setText(null);
-		setState(null);
-		setPosts(null);
-		setRefresh(true);
-		textField.current.value = "";
-	}
-
-	const countLines = (t) => t.split('\n').length;
-
-	useEffect(() => {
-		// TODO count lines in the Text, then set row/line number.
-		if(Text) {
-			setRows(countLines(Text));
-		}
-
-		setState({
-			uuid: User.id_,
-			img: Image,
-			text: Text
-		});
-
-	}, [Image, Text]);
-
 	const FetchPosts = (isSubscribed) => {
-		
-
 		if(isSubscribed) {
-			
+				
 			if(!isLoading){
 				setisLoading(true);
 			}
@@ -97,7 +65,6 @@ const Home = ({
 					status: "error"
 				});
 	        }).finally(() => {
-	       		setRefresh(false);
 	        	setisLoading(false); 	
 	        })
 		}
@@ -105,128 +72,19 @@ const Home = ({
 
 	useEffect(() => {
 		var subscribed = true;
+		FetchPosts(subscribed);
 		
-		FetchPosts(subscribed)
-
 		return () => {
 			subscribed = false;
+			setPosts(null);
 		}
-
-	}, [refresh])
-
-	const OnTypingText = (e) => {
-		setText(e.target.value);
-	}
-
-	const OpenFileDialogue = (e) => {
-		e.preventDefault();
-		document.getElementById("image").click()
-	};
-
-	const OnImageSelected = (e) => {
-		const Files = e.target.files;
-		if(Files.length === 1) {
-			convertBase64(Files[0])
-			.then((Data) => {
-				setImage(Data);	
-			})
-		} else if (Files.length > 1) {
-			const FilesData = [];
-			for (let i = 0; i < Files.length; i++) {
-				convertBase64(Files[i])
-				.then((Data) => {
-					FilesData.push(Data);	
-				})
-			}
-			setImage(FilesData);
-		} else {
-			NotificationFunc({
-				text: "No images were selected!",
-				status: "info"
-			});
-		}
-	}
-
-	const OnSubmit = (e) => {
-		e.preventDefault();
-		/*
-			PostID int `json:"id_"`
-			Token string `json:"token"`
-			Uuid  int `json:"uuid"`	
-			Text  string `json:"text"`
-			Img   string `json:"img"`
-		*/	
-	
-
-		if(state.text || state.img) {
-			state.token = JWT;
-
-			console.table(state);
-
-			NewPost(state)
-			
-			.then((r) => r.json())
-			.then((Json) => {
-				if(Json.code === 200) {
-					NotificationFunc({
-						text: "Post added!",
-						status: "success"
-					});
-					resetAll();
-
-				} else {
-					NotificationFunc({
-						text: "Could not add your post",
-						status: "error"
-					});
-				}
-			}).catch((e) => {
-				NotificationFunc({
-					text: "could not add post",
-					status: "error"
-				});
-			})
-		}
-
-		return;
-	}
+	}, [])
 
 	return (
 		<>
 			<div className="flex w-[90%] sm:w-[600px] flex-col justify-start items-start">
-				<form className="mt-2 flex rounded py-6 px-2 flex-col justify-center items-start my-2 w-full transition-all">
-					
-					<input type="file" id="image" className="hidden" onChange={OnImageSelected}/>
-					<img  />
-                	<textarea cols="81" rows={rows} ref={textField} onChange={OnTypingText} className="NoBar w-full focus:border-b-sky-700 border-b-neutral-700 border-b resize-none p-3 text-white bg-none px-2 outline-none bg-black p-2" type="text" placeholder="say something" /> 
-                	<div className="flex flex-row items-center justify-center mt-2">
-                		<button onClick={OpenFileDialogue} title="Attach image" className="text-white p-2 hover:bg-neutral-800 bg-neutral-900 rounded">
-              				<p className=""> add image </p>
-	              		</button>
-
-						<button onClick={OnSubmit} title="Send post" className="text-white p-2 hover:bg-sky-500 bg-sky-600 rounded mx-2">
-		              		<p className=""> post </p>
-		              	</button>
-                	</div>
-
-            	</form>
-            	
-            	{
-            		(Image) ? (
-            			<div className="text-white flex justify-center items-start flex-row flex-wrap p-2">
-	            			{
-	            				(typeof Image === "string") ? (
-	            					<img src={Image} className="rounded-md h-30" alt='imgUploaded' />
-	            				) : (
-	            				
-            						Image.map((v, i) => {
-			        					return <img key={i} src={v} className="rounded-md h-24" alt='imgUploaded' />	
-            						})
-	            				)
-	            			}
-						</div>
-            		) : ""
-            	}
+				            	
+           		<PostFormUI setPosts={setPosts} NotificationFunc={NotificationFunc}/>
             	
 				<div className="w-full flex-col justify-start items-center pb-14">
 
@@ -249,28 +107,11 @@ const Home = ({
 							
 							) : (
 								<div className="text-white flex flex-col justify-center items-center h-24">
-									{
-										(isLoading) ? (<Loader />) : (
-										
-												(typeof Posts === "string") ? (
-													<p className="text-white"> { Posts } </p>
-
-												) : (
-													<>
-														<h1 className="my-2"> Failed to load data! </h1>
-														<button
-															className="hover:text-slate-700 hover:bg-white p-2 bg-neutral-900 rounded-md"
-															onClick={FetchPosts}
-														>
-															try again
-														</button>
-													</>
-												)
-										)
-									}
+									{ (isLoading) ? <Loader /> : (typeof Posts === "string") ? <p className="text-white"> { Posts } </p> : <Retry func={FetchPosts}/> }
 								</div>
 							)
-					}	
+					}
+
 				</div>
 			</div>
 
@@ -278,6 +119,5 @@ const Home = ({
 	)
 
 }
-
 
 export default Home;

@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { faInfoCircle, faWarning, faCircleCheck, faEdit } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon as Fa } from '@fortawesome/react-fontawesome';
-import { convertBase64 } from "../../server/functions";
+import { convertBase64 } from "../server/functions";
 import { useSelector, useDispatch } from 'react-redux';
 import { 
   updateUser
-} from '../../store/userStore';
+} from '../store/userStore';
 
 const Paragraphs = ({ Text, Class="" }) => {
 	
@@ -22,7 +22,7 @@ const Paragraphs = ({ Text, Class="" }) => {
 }
 
 
-const Notify = ({ msg, StyleKey }) => {
+const ApplicationNotification = ({ msg, StyleKey }) => {
 
 	const [show, setShow] = useState(false);
 
@@ -181,8 +181,24 @@ const Iframe = ({ Obj, NotificationFunc = () => {} }) => {
 	)
 }
 
+const Retry = ({ func }) => {
+	return (
+		<>
+			<h1 className="my-2"> Failed to load data! </h1>
+			<button
+				className="hover:text-slate-700 hover:bg-white p-2 bg-neutral-900 rounded-md"
+				onClick={func}
+			>
+				try again
+			</button>
+		</>
+	)
+}
+
+
 export {
 	Paragraphs, 
-	Notify,
-	Iframe
+	ApplicationNotification,
+	Iframe,
+	Retry
 };
