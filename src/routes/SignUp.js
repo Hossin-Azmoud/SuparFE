@@ -198,7 +198,7 @@ const SignUp = ({
 						</label>
 						
 						<button onClick={(e) => {
-							OpenFileDialogue(e, "img")}} className="w-full bg-transparent border border-white my-2 rounded border-box py-2 px-4 text-white cursor-pointer hover:shadow-md">
+							OpenFileDialogue(e, "img")}} className="w-full bg-transparent border border-white my-2 rounded flex flex-col gap-4 justify-center items-center border-box py-2 px-4 text-white cursor-pointer hover:shadow-md">
 							
 							<div>
 								upload avatar
@@ -206,11 +206,11 @@ const SignUp = ({
 							</div>
 							{
 								(img) ? (
-									
 									<UserUI
 		                                id_="001"
 		                                img={img}
-		                                UserName="User 001" 
+		                                UserName={state.UserName}
+		                                class_="border border-slate-800 p-4"
                             		/>
 								) : ""
 							}
@@ -225,7 +225,7 @@ const SignUp = ({
 							</div>
 							{
 								(bg) ? (
-									<img src={bg} className="rounded m-4 shad" />
+									<img src={bg} className="rounded m-4 shadow w-64" />
 								) : ""
 							}
 

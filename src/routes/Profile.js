@@ -5,7 +5,7 @@ import { FontAwesomeIcon as Fa } from '@fortawesome/react-fontawesome';
 import { api, HOST } from "../server/Var";
 import Post from "../components/Post";
 import { copytoclip as cp, JWT } from "../server/functions";
-import { GetUserById, GetUserPostsById, updateProfileImage, updateBackgroundImage, update, GetUserFollowers, GetUserFollowings } from "../server/serverFuncs";
+import { GetUserById, GetUserPostsById, updateProfileImage, updateBackgroundImage, update, GetUserFollowers, GetUserFollowings, removeFollow, addFollow } from "../server/serverFuncs";
 import { useParams } from "react-router-dom";
 import { Paragraphs, Iframe } from "../components/microComps";
 import Loader from "../components/Loader";
@@ -39,6 +39,49 @@ const ProfileRenderer = ({
 	});
 
 	const Dispatch = useDispatch();
+	
+	const [followed, setfollowed] = useState(User.isfollowed);
+
+	
+
+	const follow = () => {
+    	// TODO Wanna add an api call.
+		if(followed) {
+			setfollowed(false);
+			removeFollow(CurrentUser.id_, User.id_)
+			.then(r => r.json())
+			.then(d => {
+				if(d.code === 200) {
+					console.log(d.data)
+				} else {
+					setfollowed(p => !p)
+				}
+			})
+			.catch(e => {
+				console.log("error: ", e);
+			})
+		} else {
+			setfollowed(true);
+			addFollow(CurrentUser.id_, User.id_)
+			.then(r => r.json())
+			.then(d => {
+				if(d.code === 200) {
+					console.log(d.data)
+				} else {
+					setfollowed(p => !p)
+				}
+			})
+			.catch(e => {
+				console.log("error: ", e);
+			})
+		}
+		
+    	
+    	return () => {
+    		setfollowed(false)
+    	};
+    }
+
 
 	useEffect(() => {
 		
@@ -47,7 +90,6 @@ const ProfileRenderer = ({
 			addrRedd.current.value = CurrentUser.addr;
 			UnameRef.current.value = CurrentUser.UserName;
 		}
-
 	}, [Edit])
 
 	
@@ -236,7 +278,7 @@ const ProfileRenderer = ({
 				a.map(v => {
 					v.img = v.img.replace("localhost", HOST)
 				})
-      }
+      	}
 
 			setInterfaceUsers({list: a, title});
 		}
@@ -300,7 +342,11 @@ const ProfileRenderer = ({
 						 			<button onClick={ToggleEdit} className="cursor-pointer hover:bg-sky-400 text-white mx-2  rounded bg-sky-500 p-2">
 						 				Edit
 						 			</button>
-						 		) : "" 
+						 		) : (
+									<button className={`font-semibold p-2 text-white shadow-md rounded duration-50 mx-2 ${ (!followed) ? " hover:bg-sky-400 bg-sky-500" : "bg-slate-900 border border-white" }`} onClick={follow}>
+											{ (followed) ? "unfollow" : "follow" }
+									</button>
+						 		) 
 						 	}
 						</div>
 

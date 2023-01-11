@@ -1,4 +1,4 @@
-import { faHeart, faComment, faShare, faEllipsisVertical, faTrashCan, faClose } from "@fortawesome/free-solid-svg-icons";
+import { faHeart, faComment, faShare, faEllipsisVertical, faTrashCan, faClose, faAdd } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon as Fa } from "@fortawesome/react-fontawesome";
 import { useState, useEffect, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -244,7 +244,7 @@ const Post = ({
 			</div>
 		) : (
 		
-			<div className="md:w-[70%] w-full mx-auto flex-col justify-center bg-neutral-900 my-4 rounded p-2"> 
+			<div className="md:w-[80%] w-full mx-auto flex-col justify-center bg-neutral-900 my-4 rounded p-2"> 
 				
 				{
 					(imgcmp) ? (
@@ -492,13 +492,11 @@ const PostFormUI = ({ setPosts, NotificationFunc }) => {
 
 	const resetAll = (New) => {
 		setImage(null);
-		setText(null);
+		setText("");
 
-		setPosts(p => [...p, New]);
+		setPosts(p => [New, ...p]);
 
-		consle.log(New);
-
-		setState(null);
+		setState({});
 		textField.current.value = "";
 	}
 
@@ -565,19 +563,22 @@ const PostFormUI = ({ setPosts, NotificationFunc }) => {
 					
 					New.id = Json.data;
 					New.user = User;
-
 					resetAll(New);
+
 				} else {
 					NotificationFunc({
-						text: "Could not add your post",
+						text: "Could not add your post, " + Json.data,
 						status: "error"
 					});
 				}
 			}).catch((e) => {
+				
+				console.log(e);
 				NotificationFunc({
-					text: "could not add post",
+					text: "could not add post due to a technical problem, please try again later.",
 					status: "error"
 				});
+
 			})
 		}
 
@@ -586,18 +587,13 @@ const PostFormUI = ({ setPosts, NotificationFunc }) => {
 
 
 	return (
-		<form className="mt-2 flex rounded py-6 px-2 flex-col justify-center items-start my-2 w-full transition-all">
+		<form className="mx-auto border border-slate-900 mt-2 flex rounded py-6 px-2 flex-col justify-center items-start my-2 w-full md:w-[80%]  transition-all">
 					
 			<input type="file" id="image" className="hidden" onChange={OnImageSelected}/>
 
         	<textarea cols="81" rows={rows} ref={textField} onChange={OnTypingText} className="NoBar w-full focus:border-b-sky-700 border-b-neutral-700 border-b resize-none p-3 text-white bg-none px-2 outline-none bg-black p-2" type="text" placeholder="say something" /> 
         	
-        	<div className="flex flex-row items-center justify-center mt-2">
-              	
-              	<Link to='/profile'>
-               	    <img src={User.img} alt="avatar" className="w-10 h-10 rounded border border-yellow-800"/>
-              	</Link>
-
+        	<div className="flex flex-row items-center justify-between mt-2 w-full">
               	<div>
               		<button onClick={OpenFileDialogue} title="Attach image" className="text-white p-2 hover:bg-neutral-800 mx-2 bg-neutral-900 rounded">
       				<p className=""> add image </p>
@@ -606,6 +602,9 @@ const PostFormUI = ({ setPosts, NotificationFunc }) => {
 	              		<p className=""> post </p>
 	              	</button>
               	</div>
+              	<Link to='/profile'>
+               	    <img src={User.img} alt="avatar" className="w-10 h-10 rounded-full shadow-2xl"/>
+              	</Link>
         	</div>
 
         	{
@@ -630,5 +629,46 @@ const PostFormUI = ({ setPosts, NotificationFunc }) => {
 }
 
 
-export { PostPage, PostFormUI };
+const FloatingPostFormUI = ({
+	
+	isOpenFlag = false,
+	setPosts,
+	NotificationFunc
+
+}) => {
+
+	//TODO: floating form handler. if someone wants to post something from across the app, they may??
+	
+	// 1. Make the UI. --
+	// 2. Update a posts mechanism so we prevent calling the database again for data. --
+	// 3. Integrate the UI. --
+
+	const [isOpen, setIsOpen] = useState(isOpenFlag);
+	const Close = () => setIsOpen(false)
+	const Open = () => setIsOpen(true)
+
+	return (	
+		(isOpen) ? (
+			<>
+				<div className="fixed w-screen h-screen left-0 top-0 bg-black opacity-50" onClick={Close}>
+				</div>
+				<div className="border border-neutral-900 fixed bg-black -translate-y-1/2 -translate-x-1/2 left-1/2 top-1/2 rounded p-6">
+					<Fa icon={ faClose } className="h-4 w-4 cursor-pointer flex justify-center items-center hover:ring rounded-full right-4 bg-sky-500 rounded-full p-2 text-white" size="sm" onClick={Close}/>
+					
+					
+					<PostFormUI 
+						setPosts={setPosts} 
+						NotificationFunc={NotificationFunc}
+					/>
+
+				</div>
+			</>
+			
+			
+		) : <Fa icon={ faAdd } className="bg-sky-500 cursor-pointer p-2 text-white rounded fixed bottom-4 right-4" size="2xl" onClick={Open}/>
+	)
+}
+
+export { PostPage, PostFormUI, FloatingPostFormUI };
+
 export default Post;

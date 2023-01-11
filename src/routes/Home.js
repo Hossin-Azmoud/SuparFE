@@ -17,7 +17,8 @@ import { Retry } from "../components/microComps";
 import { PostFormUI } from "../components/Post"
 
 const Home = ({
-	NotificationFunc = () => {}
+	NotificationFunc = () => {},
+	funcPoolManager
 }) => {
 	
 	const User = useSelector(state => state.User);
@@ -73,7 +74,8 @@ const Home = ({
 	useEffect(() => {
 		var subscribed = true;
 		FetchPosts(subscribed);
-		
+		funcPoolManager({ setPosts });
+
 		return () => {
 			subscribed = false;
 			setPosts(null);

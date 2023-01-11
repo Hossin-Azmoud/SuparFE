@@ -12,7 +12,8 @@ import {
     login
 } from './store/userStore';
 import NavBar from "./components/NavBar";
-import {AppMainLoader as Loader} from "./components/Loader";
+import { AppMainLoader as Loader } from "./components/Loader";
+import { FloatingPostFormUI } from "./components/Post";
 import AccountsSearchPannel from "./routes/Search";
 import UserNotifications from "./routes/UserNotifications";
 import { SubmitJWT, GetUserNotifications } from "./server/serverFuncs";
@@ -29,7 +30,14 @@ const App = () => {
     const [NewNots, setNewNots] = useState([])
     const [notCount, setnotCount] = useState(0);
     const [FetchedNotifications, setFetchedNotifications] = useState([]);
+    const [FuncPool, setFuncPool] = useState({});
     
+    const AddToPool = (Obj) => {
+        setFuncPool(p => {
+            return { ...p, ...Obj };
+        })
+    }
+
     const HandleNewNotification = (ob) => {
         if(HOST) {                    
             ob.User.img = ob.User.img.replace("localhost", HOST);
@@ -80,17 +88,18 @@ const App = () => {
                 const NotificationObj = Data[i];
                 if(!Boolean(NotificationObj.seen)) {
                     tmp.push(NotificationObj);
+                    console.log(NotificationObj);
                     Data = Data.filter(j => j.id !== NotificationObj.id);
                 }
             }
 
             setFetchedNotifications(Data);
             setnotCount(p => tmp.length + p);
-            console.log(tmp.length);
             setNewNots([...NewNots, ...tmp]);
         })
         .catch(e => console.log(e))
     }
+
 
     useEffect(() => {
 
@@ -158,11 +167,13 @@ const App = () => {
                 (User && !Loading) ? (
                         <>
                             <NavBar UserImg={User.img} NewNotificationCount={notCount}/>
+                            { ("setPosts" in FuncPool) ? <FloatingPostFormUI setPosts={FuncPool["setPosts"]} NotificationFunc={setNotification} /> : "" }
                             
+
                             <Routes>
                                 
                                 <Route path="/" element={<Home NotificationFunc={setNotification}/>} />
-                                <Route path="/Home" element={<Home NotificationFunc={setNotification}/>} />
+                                <Route path="/Home" element={<Home NotificationFunc={setNotification} funcPoolManager={AddToPool} />} />
                                 <Route path="/Login" element={<Login NotificationFunc={setNotification} />} />
                                 <Route path="/Signup" element={<SignUp NotificationFunc={setNotification}/>} />
                                 <Route path="/profile" element={<CurrentUserProfile NotificationFunc={setNotification}/>}/>
