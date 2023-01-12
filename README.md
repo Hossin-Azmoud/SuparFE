@@ -1,4 +1,4 @@
-# ReactJs front-end interface.
+# A front-end interface for Supar app.
 
 ### Quick start
 
