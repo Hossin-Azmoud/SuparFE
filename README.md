@@ -1,6 +1,6 @@
 ![LOGO](.\public\img\SuparLogoFav.svg)
-# A front-end interface for Supar app.
 
+# A front-end interface for Supar app.
 ### Quick start
 
 #### Start dev server

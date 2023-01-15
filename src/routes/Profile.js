@@ -13,6 +13,7 @@ import {
   updateUser
 } from '../store/userStore';
 import UserUI from "../components/UserUI"
+import { Retry } from "../components/microComps";
 
 const ProfileRenderer = ({ 
 	User,
@@ -39,10 +40,7 @@ const ProfileRenderer = ({
 	});
 
 	const Dispatch = useDispatch();
-	
 	const [followed, setfollowed] = useState(User.isfollowed);
-
-	
 
 	const follow = () => {
     	// TODO Wanna add an api call.
@@ -90,11 +88,13 @@ const ProfileRenderer = ({
 			addrRedd.current.value = CurrentUser.addr;
 			UnameRef.current.value = CurrentUser.UserName;
 		}
+
 	}, [Edit])
 
 	
 
 	const getUsersData = (idArray, callback) => {
+		
 		let tempArray = [];
 		let Data;
 		if(idArray.length > 0) {
@@ -117,6 +117,7 @@ const ProfileRenderer = ({
 				.catch(e => console.log("error accured while fetching user."))
 			}
 		}
+
 	}
 
 	const Fetchfollowers = () => {
@@ -199,8 +200,7 @@ const ProfileRenderer = ({
 		// Set the token then ship the changes.
 		e.preventDefault();
 		var state = EditState;
-		state.token = JWT;
-		
+
 		update(state)
 		.then((res) => {
 			return res.json()
@@ -230,9 +230,7 @@ const ProfileRenderer = ({
 	const ToggleEdit = () => setEdit(true)
 
 	const FetchUserPosts = (subscribed) => {
-		
 		if(!Loading) setLoading(true);
-
 		if(subscribed) {
 			GetUserPostsById(User.id_)
 			.then(res => {
@@ -315,7 +313,7 @@ const ProfileRenderer = ({
 		<div className="w-[90%] sm:w-[600px] flex flex-col justify-start items-start">
 			
 			{ (imgCmp) ? <Iframe Obj={{ onclick: setimgCmp, variables: imgCmp }} /> : "" }
-			<header className="rounded-b-xl bg-neutral-800 flex flex-col justify-center items-center w-full">
+			<header className="rounded-b-xl bg-neutral-800 flex flex-col justify-center items-center md:w-[80%] w-full mx-auto">
 				
 				<div 
 					className="h-28 w-full cursor-pointer"
@@ -364,8 +362,8 @@ const ProfileRenderer = ({
 
 						<div className="flex flex-row flex-wrap my-4"> 
 
-							<p onClick={() => visualize(followers, `${User.UserName}\'s followers`)} className="cursor-pointer bg-neutral-900 shadow-2xl rounded px-4 py-1 text-white font-thin text-md"> followers <span> { followersNumber } </span> </p>
-							<p onClick={() => visualize(following, `${User.UserName}\'s followings`)} className="cursor-pointer bg-neutral-900 shadow-2xl rounded px-4 py-1 mx-4 text-white font-thin text-md"> following <span> { followingNumber } </span> </p>
+							<p onClick={() => visualize(followers, `${User.UserName}\'s followers`)} className="border border-neutral-700 cursor-pointer bg-neutral-900 shadow-2xl rounded px-4 py-1 text-white font-thin text-md"> followers <span> { followersNumber } </span> </p>
+							<p onClick={() => visualize(following, `${User.UserName}\'s followings`)} className="border border-neutral-700 cursor-pointer bg-neutral-900 shadow-2xl rounded px-4 py-1 mx-4 text-white font-thin text-md"> following <span> { followingNumber } </span> </p>
 
 						</div>
 
@@ -401,8 +399,15 @@ const ProfileRenderer = ({
 
 					</div>
 
-					<div className="w-[30%] flex flex-col justify-center items-center">
-						<img onClick={profileImageOnClick} src={User.img} alt="user_avatar" className="rounded-full shadow-lg hover:ring shadow-xl w-full cursor-pointer w-[150px]" />
+					<div className="w-[30%] flex flex-col justify-center border border-neutral-700 rounded px-4 py-2 items-center" style={{
+						boxShadow: "10px 10px 100px -10px rgba(0, 0, 0, .5)"
+					}}>
+						<img 
+							onClick={profileImageOnClick} 
+							src={User.img} 
+							alt="user_avatar" 
+							className="rounded-full shadow-lg w-full cursor-pointer w-28" 
+						/>
 					
 						{
 							(Edit) ? (
@@ -437,24 +442,12 @@ const ProfileRenderer = ({
 						})
 
 					) : (
-						<div className="text-white flex flex-col justify-center items-center h-24">
-							{
-								(Loading) ? (<Loader />) : (
-								
+						<div className="text-white flex flex-col justify-center items-center h-24">							
+							{	
+								(Loading) ? ( <Loader /> ) : (
 									(typeof Posts === "string") ? (
 										<p className="text-white"> { Posts } </p>
-
-									) : (
-										<>
-											<h1 className="my-2"> Failed to load data! </h1>
-											<button
-												className="hover:text-slate-700 hover:bg-white p-2 bg-neutral-900 rounded-md"
-												onClick={FetchUserPosts}
-											>
-												try again
-											</button>
-										</>
-									)
+									) : ( <Retry func={FetchUserPosts}/> )
 								)
 							}
 						</div>

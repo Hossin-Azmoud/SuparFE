@@ -18,12 +18,27 @@ import { PostFormUI } from "../components/Post"
 
 const Home = ({
 	NotificationFunc = () => {},
-	funcPoolManager
+	funcPoolManager = null,
+	NewPosts = [],
+	setNewPosts
 }) => {
 	
 	const User = useSelector(state => state.User);
 	const [Posts, setPosts] = useState(null);
 	const [isLoading, setisLoading] = useState(true);
+	
+
+
+	useEffect(() => {
+		
+		if(NewPosts.length > 0) {
+			// TODO: Clean after consumption.
+			setPosts(p => [...NewPosts, ...p])
+			setNewPosts([]);
+		}		
+
+	}, [NewPosts.length])
+
 	const FetchPosts = (isSubscribed) => {
 		if(isSubscribed) {
 				
@@ -72,14 +87,21 @@ const Home = ({
 	}
 
 	useEffect(() => {
+		
 		var subscribed = true;
 		FetchPosts(subscribed);
-		funcPoolManager({ setPosts });
-
+		
+		if(funcPoolManager) {
+			funcPoolManager(
+				{ setPosts }
+			);
+		}
+	
 		return () => {
 			subscribed = false;
 			setPosts(null);
 		}
+
 	}, [])
 
 	return (

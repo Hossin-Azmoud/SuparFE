@@ -19,11 +19,14 @@ import UserNotifications from "./routes/UserNotifications";
 import { SubmitJWT, GetUserNotifications } from "./server/serverFuncs";
 import { ApplicationNotification } from "./components/microComps";
 import { PostPage } from "./components/Post";
-import { HOST, NOTIFICATION } from "./server/Var";
+import { HOST, NOTIFICATION, NEWPOST } from "./server/Var";
 import { useSocket } from "./server/socketOps"
 
 const App = () => {    
+    
     const User = useSelector(state => state.User);
+    const PostPool = useSelector(state => state.PostPool);
+    const [NewPosts, setNewPosts] = useState([]);
     const dispatch = useDispatch();
     const [Loading, setLoading] = useState(true);
     const [Notification, setNotification] = useState(null);
@@ -39,6 +42,7 @@ const App = () => {
     }
 
     const HandleNewNotification = (ob) => {
+        
         if(HOST) {                    
             ob.User.img = ob.User.img.replace("localhost", HOST);
             ob.User.bg = ob.User.bg.replace("localhost", HOST);
@@ -49,13 +53,46 @@ const App = () => {
         setnotCount(p => p + 1);
     }
 
-    const onMessageCallback = (m) => {
-        var SockMsg = JSON.parse(m.data)
-        console.log(SockMsg);
+    const HandleNewPost = (ob) => {
         
-        if(SockMsg.action === NOTIFICATION) {
-            HandleNewNotification(SockMsg.data)
+        if(HOST) {                    
+            console.log(ob);
+            ob.user.img = ob.user.img.replace("localhost", HOST);
+            ob.user.bg = ob.user.bg.replace("localhost", HOST);
+            ob.img = ob.img.replace("localhost", HOST);
         }
+
+        setNewPosts(p => [ob, ...p]);
+    }
+
+    const HandlePostChange = (ob) => {
+        console.log(ob);
+    }
+
+    const onMessageCallback = (m) => {
+        
+        var SockMsg = JSON.parse(m.data)
+
+        if(SockMsg.action === NOTIFICATION) {
+            HandleNewNotification(SockMsg.data);
+            return
+        }
+        
+        if(SockMsg.action === NEWPOST) {
+            HandleNewPost(SockMsg.data);
+            return
+        }
+
+        if(SockMsg.action === POSTCHANGE) {
+            HandlePostChange(SockMsg.data);
+            return
+        }
+
+        console.log("-------------------------------------------------------------------")
+        console.log("Unsupported action: ")
+        console.log(        SockMsg       )
+        console.log("-------------------------------------------------------------------")
+
     }
     
     var [NotificationSocket, setNotificationSocket] = useState(null);
@@ -172,14 +209,15 @@ const App = () => {
 
                             <Routes>
                                 
-                                <Route path="/" element={<Home NotificationFunc={setNotification}/>} />
-                                <Route path="/Home" element={<Home NotificationFunc={setNotification} funcPoolManager={AddToPool} />} />
+                                <Route path="/" element={<Home NewPosts={NewPosts} setNewPosts={setNewPosts} NotificationFunc={setNotification} funcPoolManager={AddToPool} />} />
+                                <Route path="/Home" element={<Home NewPosts={NewPosts} setNewPosts={setNewPosts} NotificationFunc={setNotification} funcPoolManager={AddToPool} />} />
                                 <Route path="/Login" element={<Login NotificationFunc={setNotification} />} />
                                 <Route path="/Signup" element={<SignUp NotificationFunc={setNotification}/>} />
                                 <Route path="/profile" element={<CurrentUserProfile NotificationFunc={setNotification}/>}/>
                                 <Route path="/Notifications" element={<UserNotifications socketConn={NotificationSocket} Notifications={FetchedNotifications} CountCallback={setnotCount} NewNotifications={NewNots}/>} />
                                 <Route path="/i" element={<Icons />} />
                                 <Route path="/Accounts" element={<AccountsSearchPannel CurrUserId={User.id_} NotificationFunc={setNotification} />}/>
+                                
                                 <Route
                                     path="/Accounts/:id"
                                     loader={({ params }) => {
@@ -190,6 +228,7 @@ const App = () => {
         
                                     element={<Account NotificationFunc={setNotification} />}
                                 />
+                                
                                 <Route
                                     path="/Post/:id"
                                     loader={({ params }) => {

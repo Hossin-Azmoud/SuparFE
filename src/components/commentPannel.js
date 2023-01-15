@@ -45,6 +45,7 @@ const CommentPannel = ({
 			if(json.code === 200) {
 				// Success.
 				commentField.current.value = "";
+				
 				NotificationFunc({
 					text: "comment was added!",
 					status: "success"
@@ -82,9 +83,7 @@ const CommentPannel = ({
             	</div>
 
 
-            	{ 
-            		(Comments.length > 0) ? Comments.map((v, i) => <CommentUI key={i} obj={v} />) : "" 
-            	}
+            	{ (Comments.length > 0) ? Comments.map((v, i) => <CommentUI key={i} obj={v} />) : "" }
 
 			</div>
 
@@ -93,6 +92,7 @@ const CommentPannel = ({
 }
 
 const CommentUI = ({ obj }) => {
+	
 	return (
 		<div className="bg-neutral-900 w-full my-2 rounded-md p-2">
 			<UserDisplay Userid_={obj.user.id_} UserName={obj.user.UserName} UserImg={obj.user.img}/>

@@ -566,6 +566,7 @@ const PostFormUI = ({ setPosts, NotificationFunc }) => {
 					resetAll(New);
 
 				} else {
+					console.log(Json);
 					NotificationFunc({
 						text: "Could not add your post, " + Json.data,
 						status: "error"
@@ -660,12 +661,11 @@ const FloatingPostFormUI = ({
 						setPosts={setPosts} 
 						NotificationFunc={NotificationFunc}
 					/>
-
 				</div>
 			</>
 			
 			
-		) : <Fa icon={ faAdd } className="bg-sky-500 cursor-pointer p-2 text-white rounded fixed bottom-4 right-4" size="2xl" onClick={Open}/>
+		) : <Fa title="Add post" icon={ faAdd } className="bg-sky-500 cursor-pointer p-2 text-white rounded fixed bottom-16 right-4" size="2xl" onClick={Open}/>
 	)
 }
 
