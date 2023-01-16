@@ -55,49 +55,63 @@ const App = () => {
 
     const HandleNewPost = (ob) => {
         
-        if(HOST) {                    
-            console.log(ob);
+        if(HOST) {
             ob.user.img = ob.user.img.replace("localhost", HOST);
             ob.user.bg = ob.user.bg.replace("localhost", HOST);
             ob.img = ob.img.replace("localhost", HOST);
         }
+        
+        setNewPosts(
+            p => [ob, ...p]
+        );
 
-        setNewPosts(p => [ob, ...p]);
     }
 
-    const HandlePostChange = (ob) => {
-        console.log(ob);
+    const HandlePostChange = (ob) => console.log(ob)
+
+    const LogUnknownActionData = (data) => {
+        console.log("-------------------------------------------------------------------")
+        console.log("Unsupported action: ")
+        console.log(        data       )
+        console.log("-------------------------------------------------------------------")
     }
+
+
+    const HandleShatNewMsg = (msgObject) => console.log(msgObject);
 
     const onMessageCallback = (m) => {
         
         var SockMsg = JSON.parse(m.data)
-
-        if(SockMsg.action === NOTIFICATION) {
-            HandleNewNotification(SockMsg.data);
-            return
-        }
+        const MSG = "m"
         
-        if(SockMsg.action === NEWPOST) {
-            HandleNewPost(SockMsg.data);
-            return
-        }
+        switch (SockMsg.action) {
+            case NOTIFICATION:
+                HandleNewNotification(SockMsg.data);
+                break
 
-        if(SockMsg.action === POSTCHANGE) {
-            HandlePostChange(SockMsg.data);
-            return
-        }
+            case NEWPOST:
+                HandleNewPost(SockMsg.data);
+                break
+            case POSTCHANGE:
+                HandlePostChange(SockMsg.data);    
+                break
 
-        console.log("-------------------------------------------------------------------")
-        console.log("Unsupported action: ")
-        console.log(        SockMsg       )
-        console.log("-------------------------------------------------------------------")
+            case MSG:
+                HandleShatNewMsg(SockMsg.data)
+                break
+
+            default:
+                LogUnknownActionData(SockMsg)
+                break
+        }
 
     }
     
     var [NotificationSocket, setNotificationSocket] = useState(null);
+    var NotsFetched = false;
 
     const fetchOldNotifications = () => {
+        
         var Data = [];
         
         GetUserNotifications(User.id_)
@@ -118,6 +132,7 @@ const App = () => {
                 }
             }
         })
+
         .finally(() => {
             var tmp = [];
 
@@ -134,9 +149,10 @@ const App = () => {
             setnotCount(p => tmp.length + p);
             setNewNots([...NewNots, ...tmp]);
         })
-        .catch(e => console.log(e))
-    }
 
+        .catch(e => console.log(e))
+
+    }
 
     useEffect(() => {
 
@@ -167,18 +183,22 @@ const App = () => {
                 setLoading(false);
             })
             .catch(e => {
+                
                 setNotification({
                     text: "Could not login.",
                     status: "error"
                 })
+
             })
         } else {
             setLoading(false);
         }
 
-        return () => setLoading(false);
+        return () => setLoading(true);
 
     }, []);
+
+    
 
     useEffect(() => {
         
@@ -187,13 +207,15 @@ const App = () => {
                 var s = useSocket(User.id_, onMessageCallback);
                 setNotificationSocket(s);    
             }
-            
+
             fetchOldNotifications();
         }
 
         return () => {
             setNotificationSocket(null);
             setFetchedNotifications([]);
+            setNewNots([]);
+            setnotCount(0);
         }
                 
     }, [User])

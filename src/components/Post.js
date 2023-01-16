@@ -1,4 +1,4 @@
-import { faHeart, faComment, faShare, faEllipsisVertical, faTrashCan, faClose, faAdd } from "@fortawesome/free-solid-svg-icons";
+import { faHeart, faComment, faEdit, faShare, faEllipsisVertical, faTrashCan, faClose, faAdd } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon as Fa } from "@fortawesome/react-fontawesome";
 import { useState, useEffect, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -18,6 +18,7 @@ import {
 } from "../server/serverFuncs";
 import { convertBase64 } from "../server/functions";
 import { HOST } from "../server/Var";
+import { format } from 'timeago.js';
 
 const Post = ({
 	Userid_,
@@ -27,9 +28,11 @@ const Post = ({
 	PostImg=null,
 	PostText,
 	NotificationFunc = () => {},
+	CreatedDate = new Date(),
 	expanded = false
 }) => {
 	
+
 	const [PostLikes, setPostLikes] = useState([]);
 	const [PostComments, setPostComments] = useState([]);
 	const User = useSelector(state => state.User);
@@ -183,8 +186,13 @@ const Post = ({
 	}, [PostLikes]);
 
 	useEffect(() => {
+		
+		
+		setPostComments([]);
+		setPostLikes([]);			
 		UpdateLikes();
 		UpdateComments();
+		
 		return () => {
 			setPostComments([]);
 			setPostLikes([]);
@@ -231,7 +239,7 @@ const Post = ({
 		
 		setEditPos({
 			x: e.pageX - 120, 
-			y: e.pageY + 30
+			y: e.pageY
 		});
 
 		setShowEdit(prev => !prev);
@@ -270,13 +278,20 @@ const Post = ({
 							<>
 								<Fa icon={faEllipsisVertical} title="edit post." className="transition-all cursor-pointer text-white" onClick={onEditPost}/>
 						
-								<div className={`text-white border border-yellow shadow-xl bg-black p-2 rounded absolute ${(ShowEdit) ? "flex flex-col" : "hidden"}`} style={{
+								<div className={`text-white shadow-xl bg-neutral-800 px-4 rounded absolute ${(ShowEdit) ? "flex flex-col" : "hidden"}`} style={{
 									top: `${EditPos.y}px`,
 									left: `${EditPos.x}px`
 								}}>
-									<button className="hover:bg-sky-700 my-1 bg-sky-800 p-1" onClick={Delete}>
-										<span> Delete </span> <Fa icon={faTrashCan} className="transition-all cursor-pointer text-white ml-6"/> 
+									<button className="flex flex-row justify-between items-center my-1 hover:underline cursor-pointer" title="delete the post" onClick={Delete}>
+										<span> Delete </span> 
+										<Fa icon={faTrashCan} className="ml-4 transition-all text-white"/> 
 									</button>
+									
+									<button className="flex flex-row justify-between items-center my-1 hover:underline cursor-pointer" title="edit the post" onClick={Delete}>
+										<span> Edit </span> 
+										<Fa icon={ faEdit } className="ml-4 transition-all text-white"/> 
+									</button>
+
 								</div>
 							</>
 						) : ""
@@ -298,24 +313,28 @@ const Post = ({
 
 				</main>
 
-				<div className="pl-2 pb-2 flex flex-row items-center justify-start">
+				<div className="pl-2 pb-2 flex flex-row items-center justify-between px-2">
+				
+					<div className="flex flex-row items-center justify-start">
+						<div className="flex flex-row items-center justify-start rounded shadow-2xl">
+							<Fa icon={ faHeart } className={`cursor-pointer transition-all ${(Liked) ? "text-rose-700" : "text-white"}`} size="md" onClick={like}/>
+							<span className="font-base text-slate-400 ml-2"> { PostLikes.length } </span>
+						</div>
+						
+						<div className="ml-5 flex flex-row items-center justify-start rounded shadow-2xl">
+							<Fa icon={ faComment } className="cursor-pointer transition-all text-white" size="md" onClick={ToggleExpandPost}/>
+							<span className="font-thin text-white ml-2"> { PostComments.length } </span>
+						</div>
 
-					<div className="flex flex-row items-center justify-start rounded shadow-2xl">
-						<Fa icon={ faHeart } className={`cursor-pointer transition-all ${(Liked) ? "text-rose-700" : "text-white"}`} size="lg" onClick={like}/>
-						<span className="font-base text-slate-400 ml-2"> { PostLikes.length } </span>
-					</div>
-					
-					<div className="ml-5 flex flex-row items-center justify-start rounded shadow-2xl">
-						<Fa icon={ faComment } className="cursor-pointer transition-all text-white" size="lg" onClick={ToggleExpandPost}/>
-						<span className="font-thin text-white ml-2"> { PostComments.length } </span>
+						<div className="ml-5 flex flex-row items-center justify-start rounded shadow-2xl">
+							<Fa icon={ faShare } className="cursor-pointer transition-all text-white" size="md" />
+							<span className="font-thin text-white ml-2"> 0 </span>
+						</div>
 					</div>
 
-					<div className="ml-5 flex flex-row items-center justify-start rounded shadow-2xl">
-						<Fa icon={ faShare } className="cursor-pointer transition-all text-white" size="lg" />
-						<span className="font-thin text-white ml-2"> 0 </span>
-					</div>
-
+					<p className="flex flex-row items-center justify-center rounded shadow-2xl text-sm text-slate-500"> { format(CreatedDate) } </p>
 				</div>
+
 				
 				{
 					(ExpandPost) ? (
@@ -419,6 +438,7 @@ const PostPage = ({ NotificationFunc }) => {
 	let { id } = useParams();
 	const [PostObj, setPost] = useState(null)
 	const [IsLoading, setLoading] = useState(true)
+	
 	useEffect(() => {
 		if(!IsLoading) setLoading(true);
 		var tmp = {};
@@ -474,6 +494,7 @@ const PostPage = ({ NotificationFunc }) => {
 				UserImg={PostObj.user.img}
 				PostImg={PostObj.img}
 				PostText={PostObj.text}
+				CreatedDate={PostObj.date}
 				NotificationFunc={NotificationFunc}
 				expanded={ true }
 			/>
@@ -563,7 +584,8 @@ const PostFormUI = ({ setPosts, NotificationFunc }) => {
 					
 					New.id = Json.data;
 					New.user = User;
-					resetAll(New);
+					
+					resetAll(New); // TODO this is fishy !!
 
 				} else {
 					console.log(Json);
@@ -653,10 +675,9 @@ const FloatingPostFormUI = ({
 			<>
 				<div className="fixed w-screen h-screen left-0 top-0 bg-black opacity-50" onClick={Close}>
 				</div>
-				<div className="border border-neutral-900 fixed bg-black -translate-y-1/2 -translate-x-1/2 left-1/2 top-1/2 rounded p-6">
+
+				<div className="w-[90%] sm:w-[600px] border border-neutral-900 fixed bg-black -translate-y-1/2 -translate-x-1/2 left-1/2 top-1/2 rounded p-2">
 					<Fa icon={ faClose } className="h-4 w-4 cursor-pointer flex justify-center items-center hover:ring rounded-full right-4 bg-sky-500 rounded-full p-2 text-white" size="sm" onClick={Close}/>
-					
-					
 					<PostFormUI 
 						setPosts={setPosts} 
 						NotificationFunc={NotificationFunc}

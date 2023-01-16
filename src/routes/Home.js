@@ -123,6 +123,7 @@ const Home = ({
 										UserImg={v.user.img}
 										PostImg={v.img}
 										PostText={v.text}
+										CreatedDate={v.date}
 										key={i}
 										NotificationFunc={NotificationFunc}
 									/>

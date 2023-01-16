@@ -436,6 +436,7 @@ const ProfileRenderer = ({
 									UserImg={User.img}
 									PostImg={v.img}
 									PostText={v.text}
+									CreatedDate={v.date}
 									key={i}
 								/>
 							)

@@ -24,19 +24,9 @@ const Icons = () => {
 			let i = 0;
 			
 			for (i; i < len ; i++) {
-				
-				if(keys[i].toUpperCase().includes(q)) {
-					temp[keys[i]] = OB[keys[i]];
-				}
-
+				if(keys[i].toUpperCase().includes(q)) temp[keys[i]] = OB[keys[i]]
 			}
 			
-			// Object.keys(OB).map(k => {
-			// 	if(k.toUpperCase().includes(q)) {
-			// 		temp[k] = OB[k];
-			// 	}
-			// });
-
 			setIcons(temp);
 			
 		} else {
@@ -48,11 +38,14 @@ const Icons = () => {
 	}
 
 	return (
-		<>
-			<div class="w-[300px] mx-auto my-2 p-1">
-	            <input onChange={OnTyping} type="text" class="bg-neutral-900 outline-none border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-neutral-800 focus:border-neutral-800 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-yellow-500 dark:focus:border-yellow-500" placeholder="Look for an icon!" required> 
+		<div className="absolute top-0 left-0 z-50 bg-black">
+			<div className="w-[300px] mx-auto my-2 p-1">
+	            <input onChange={OnTyping} type="text" className="bg-neutral-900 outline-none border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-neutral-800 focus:border-neutral-800 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-yellow-500 dark:focus:border-yellow-500" placeholder="Look for an icon!" required> 
 	            </input>
 			</div>
+
+			<h1 className="text-white text-3xl text-center"> Look for icons! </h1>
+			
 			{
 				(!Loading) ? (
 					<>
@@ -60,19 +53,17 @@ const Icons = () => {
 							{
 								Object.keys(icons).map((k) => {
 									return (
-					              		<span className="w-[200px] bg-neutral-900 flex flex-row p-4 overflow-dots justify-between items-center m-2 rounded-md" title={k} key={k}>
-											<p className="font-bold text-neutral-100 text-sm font-thin"> {k} </p>
-											<Fa icon={icons[k]} size="lg" className="mx-1 text-yellow-500" />
+					              		<span onClick={ () => alert(k) } className="w-20 cursor-pointer bg-neutral-900 flex flex-row p-4 overflow-dots justify-center items-center m-2 rounded-md transition-all hover:shadow-sm hover:shadow-white" title={k} key={k}>
+											<Fa icon={icons[k]} size="lg" className="mx-1 text-white" />
 					              		</span>
 									)
 								})
 							}
 						</section>
 					</>
-			) : <h1 className="font-thin text-white text-xl"> Loading... </h1>
+			) : <h1 className="font-thin text-white text-xl p-6"> Loading... </h1>
 			}
-		</>
-
+		</div>
 	)
 }
 
