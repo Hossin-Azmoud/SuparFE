@@ -313,7 +313,7 @@ const ProfileRenderer = ({
 		<div className="w-[90%] sm:w-[600px] flex flex-col justify-start items-start">
 			
 			{ (imgCmp) ? <Iframe Obj={{ onclick: setimgCmp, variables: imgCmp }} /> : "" }
-			<header className="rounded-b-xl bg-neutral-800 flex flex-col justify-center items-center md:w-[80%] w-full mx-auto">
+			<header className="border border-neutral-700 rounded-b-xl bg-neutral-800 flex flex-col justify-center items-center md:w-[80%] w-full mx-auto shadow-white shadow-sm">
 				
 				<div 
 					className="h-28 w-full cursor-pointer"
@@ -399,14 +399,15 @@ const ProfileRenderer = ({
 
 					</div>
 
-					<div className="w-[30%] flex flex-col justify-center border border-neutral-700 rounded px-4 py-2 items-center" style={{
-						boxShadow: "10px 10px 100px -10px rgba(0, 0, 0, .5)"
-					}}>
+					<div className="w-[30%] flex flex-col justify-center rounded px-4 py-2 items-center">
 						<img 
 							onClick={profileImageOnClick} 
 							src={User.img} 
-							alt="user_avatar" 
-							className="rounded-full shadow-lg w-full cursor-pointer w-28" 
+							alt="user_avatar"
+							style={{
+								boxShadow: "10px 10px 100px -10px rgba(0, 0, 0, .5)",
+							}}
+							className="hover:rounded-md duration-[2s] transition-all ease-in-out rounded-full shadow-lg w-full cursor-pointer w-28" 
 						/>
 					
 						{

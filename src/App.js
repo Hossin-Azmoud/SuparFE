@@ -2,6 +2,7 @@ import "./index.css";
 import Home from "./routes/Home";
 import Login from "./routes/Login";
 import SignUp from "./routes/SignUp";
+import ChatUI from "./routes/ChatUI";
 import { Routes, Route, useParams } from "react-router-dom";
 import Icons from "./routes/Icons";
 import CurrentUserProfile, { Account } from "./routes/Profile";
@@ -42,29 +43,14 @@ const App = () => {
     }
 
     const HandleNewNotification = (ob) => {
-        
-        if(HOST) {                    
-            ob.User.img = ob.User.img.replace("localhost", HOST);
-            ob.User.bg = ob.User.bg.replace("localhost", HOST);
-        }
-
-        // alert("New Notification");
         setNewNots([...NewNots, ob]);
         setnotCount(p => p + 1);
     }
 
     const HandleNewPost = (ob) => {
-        
-        if(HOST) {
-            ob.user.img = ob.user.img.replace("localhost", HOST);
-            ob.user.bg = ob.user.bg.replace("localhost", HOST);
-            ob.img = ob.img.replace("localhost", HOST);
-        }
-        
         setNewPosts(
             p => [ob, ...p]
         );
-
     }
 
     const HandlePostChange = (ob) => console.log(ob)
@@ -121,14 +107,6 @@ const App = () => {
 
                 if(Json.data !== null) {
                     Data = Json.data;
-                    
-                    Data.map(u => {
-                        if(HOST) {                    
-                            u.User.img = u.User.img.replace("localhost", HOST);
-                            u.User.bg = u.User.bg.replace("localhost", HOST);
-                        }
-                    });
-
                 }
             }
         })
@@ -167,12 +145,6 @@ const App = () => {
                 
                 if(Json.code === 200) {
                     var user = Json.data;
-
-                    if(HOST) {
-                        user.img = user.img.replace("localhost", HOST)
-                        user.bg = user.bg.replace("localhost", HOST)
-                    }
-                   
                     dispatch(login(user));
         
                 } else {
@@ -184,7 +156,7 @@ const App = () => {
             })
             .catch(e => {
                 
-                setNotification({
+                dispatchNotificationEvent({
                     text: "Could not login.",
                     status: "error"
                 })
@@ -220,25 +192,37 @@ const App = () => {
                 
     }, [User])
 
+    const [ID, setID] = useState(0);
+
+    const dispatchNotificationEvent = (ob) => {
+        
+        setNotification({
+            ...ob,
+            id: ID
+        });
+
+        setID(o => o + 1)
+    }
+
     return (
         <>
             {
                 (User && !Loading) ? (
                         <>
                             <NavBar UserImg={User.img} NewNotificationCount={notCount}/>
-                            { ("setPosts" in FuncPool) ? <FloatingPostFormUI setPosts={FuncPool["setPosts"]} NotificationFunc={setNotification} /> : "" }
+                            { ("setPosts" in FuncPool) ? <FloatingPostFormUI setPosts={FuncPool["setPosts"]} NotificationFunc={dispatchNotificationEvent} /> : "" }
                             
 
                             <Routes>
-                                
-                                <Route path="/" element={<Home NewPosts={NewPosts} setNewPosts={setNewPosts} NotificationFunc={setNotification} funcPoolManager={AddToPool} />} />
-                                <Route path="/Home" element={<Home NewPosts={NewPosts} setNewPosts={setNewPosts} NotificationFunc={setNotification} funcPoolManager={AddToPool} />} />
-                                <Route path="/Login" element={<Login NotificationFunc={setNotification} />} />
-                                <Route path="/Signup" element={<SignUp NotificationFunc={setNotification}/>} />
-                                <Route path="/profile" element={<CurrentUserProfile NotificationFunc={setNotification}/>}/>
+                                <Route path="/" element={<Home NewPosts={NewPosts} setNewPosts={setNewPosts} NotificationFunc={dispatchNotificationEvent} funcPoolManager={AddToPool} />} />
+                                <Route path="/chat" element={<ChatUI User={User} NotificationFunc={dispatchNotificationEvent}/>} />
+                                <Route path="/Home" element={<Home NewPosts={NewPosts} setNewPosts={setNewPosts} NotificationFunc={dispatchNotificationEvent} funcPoolManager={AddToPool} />} />
+                                <Route path="/Login" element={<Login NotificationFunc={dispatchNotificationEvent} />} />
+                                <Route path="/Signup" element={<SignUp NotificationFunc={dispatchNotificationEvent}/>} />
+                                <Route path="/profile" element={<CurrentUserProfile NotificationFunc={dispatchNotificationEvent}/>}/>
                                 <Route path="/Notifications" element={<UserNotifications socketConn={NotificationSocket} Notifications={FetchedNotifications} CountCallback={setnotCount} NewNotifications={NewNots}/>} />
-                                <Route path="/i" element={<Icons />} />
-                                <Route path="/Accounts" element={<AccountsSearchPannel CurrUserId={User.id_} NotificationFunc={setNotification} />}/>
+                                <Route path="/i" element={<Icons NotificationFunc={dispatchNotificationEvent} />} />
+                                <Route path="/Accounts" element={<AccountsSearchPannel CurrUserId={User.id_} NotificationFunc={dispatchNotificationEvent} />}/>
                                 
                                 <Route
                                     path="/Accounts/:id"
@@ -248,7 +232,7 @@ const App = () => {
                                   
                                     action={({ params }) => {}}
         
-                                    element={<Account NotificationFunc={setNotification} />}
+                                    element={<Account NotificationFunc={dispatchNotificationEvent} />}
                                 />
                                 
                                 <Route
@@ -259,7 +243,7 @@ const App = () => {
                                   
                                     action={({ params }) => {}}
         
-                                    element={<PostPage NotificationFunc={setNotification} />}
+                                    element={<PostPage NotificationFunc={dispatchNotificationEvent} />}
                                 />
                                 
 
@@ -276,14 +260,14 @@ const App = () => {
                         ) : (
                             <Routes>
                                 <Route path="/i" element={<Icons />} />
-                                <Route path="/" element={<Login NotificationFunc={setNotification} />} />
-                                <Route path="/Signup" element={<SignUp NotificationFunc={setNotification} />} />
-                                <Route path="/Login" element={<Login NotificationFunc={setNotification} />} />
+                                <Route path="/" element={<Login NotificationFunc={dispatchNotificationEvent} />} />
+                                <Route path="/Signup" element={<SignUp NotificationFunc={dispatchNotificationEvent} />} />
+                                <Route path="/Login" element={<Login NotificationFunc={dispatchNotificationEvent} />} />
                             </Routes>
                         )
                     )}
             <div>
-                { (Notification) ? <ApplicationNotification msg={Notification.text} StyleKey={Notification.status}/> : ("") }
+                { (Notification) ? <ApplicationNotification msg={Notification.text} StyleKey={Notification.status} id={ID}/> : ("") }
             </div>
         </>
     );

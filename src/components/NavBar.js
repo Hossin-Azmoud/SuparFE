@@ -41,7 +41,7 @@ const NavBar = ({ UserImg, NewNotificationCount = 0 }) => {
 				}
 			</Link>
 			
-			<Link to="#" className="flex items-start justify-start"> 
+			<Link to="/chat" className="flex items-start justify-start"> 
 				<Fa icon={ faMessage } className="hover:text-blue-500 transition-all text-white" size="lg"/>
 				{
 					(NewNotificationCount > 0) ?  <span className="border-2 border-black p-2 flex z-30 items-center justify-center -top-1 right-2.5 rounded-full relative bg-sky-500 my-auto mx-auto text-white w-2.5 h-2.5 text-center" style={{ fontSize: "9px" }}> {NewNotificationCount} </span> : ""

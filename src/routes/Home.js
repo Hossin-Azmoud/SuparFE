@@ -55,14 +55,6 @@ const Home = ({
 	        	if(Json.code == 200) {
 	        		if(Json.data.length > 0) {
 	        			var posts = Json.data;
-	        			
-	        			if(HOST) {
-	        				posts.map((v, i) => {
-	        					v.user.img = v.user.img.replace("localhost", HOST)
-								v.img = v.img.replace("localhost", HOST)
-	        				})
-	        			}
-
 	        			setPosts(posts);
 
 	        		} else {

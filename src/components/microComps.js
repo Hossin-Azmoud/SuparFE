@@ -22,7 +22,7 @@ const Paragraphs = ({ Text, Class="" }) => {
 }
 
 
-const ApplicationNotification = ({ msg, StyleKey }) => {
+const ApplicationNotification = ({ msg, StyleKey, id }) => {
 
 	const [show, setShow] = useState(false);
 
@@ -44,13 +44,9 @@ const ApplicationNotification = ({ msg, StyleKey }) => {
 	}
 
 	if(!(StyleKey in Map_)) StyleKey = "error"
-
-	
-	
-	
 	// For developement.
 	
-	useLayoutEffect(() => {
+	useEffect(() => {
 		
 		setShow(true); 
 		
@@ -61,12 +57,12 @@ const ApplicationNotification = ({ msg, StyleKey }) => {
 			clearTimeout(TimeOut);
 		};
 
-	}, [msg, StyleKey])
+	}, [id])
 
 	return (
 			((StyleKey in Map_) && msg) ? (
 			
-				<div className={`${show ? "translate-y-2 opacity-100" : "-translate-y-16 opacity-0"} flex flex-row items-center justify-center shadow visible fixed top-1 p-3 rounded transition-all -translate-x-1/2 left-1/2 ${Map_[StyleKey].T}`}> 
+				<div className={`${show ? "translate-y-2 opacity-100" : "-translate-y-16 opacity-0"} z-50 flex flex-row items-center justify-center shadow visible fixed top-1 p-3 rounded transition-all -translate-x-1/2 left-1/2 ${Map_[StyleKey].T}`}> 
 					<span className="mx-2"> { msg } </span>
 					<Fa icon={Map_[StyleKey].icon} />
 				</div>
@@ -76,6 +72,7 @@ const ApplicationNotification = ({ msg, StyleKey }) => {
 }
 
 const Iframe = ({ Obj, NotificationFunc = () => {} }) => {
+	
 	const MainContainer = useRef(null);
 	const Dispatch = useDispatch();
 	const [Notification, setNotification] = useState(null);

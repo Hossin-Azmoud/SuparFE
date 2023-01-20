@@ -41,22 +41,9 @@ const AccountsSearchPannel = ({
                 
                 if(jsonData.code == 200) {
                     var users = [...jsonData.data];
-                    
-                    console.log(users[1]);
-                    
-                    if(HOST) {
-                        
-                        users.map((v) => {
-                            v.img = v.img.replace("localhost", HOST);
-                            v.bg = v.bg.replace("localhost", HOST);
-                        });
-
-                    }
-
                     setUsers(users);
-                    users = null;
                 }
-
+                
             }).catch(e => {
                 console.log(e);
             })

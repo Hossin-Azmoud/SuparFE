@@ -17,7 +17,7 @@ import {
 	NewPost
 } from "../server/serverFuncs";
 import { convertBase64 } from "../server/functions";
-import { HOST } from "../server/Var";
+// import { HOST } from "../server/Var";
 // import { format } from 'timeago.js';
 import { timeAgo } from "../Util/time";
 
@@ -133,7 +133,6 @@ const Post = ({
 				// alert(JSON.stringify(json));
 				if(json.data != null) {
 					var comments = json.data;
-					if(HOST) comments.map((v) => v.user.img = v.user.img.replace("localhost", HOST))
 					setPostComments(comments)
 				}
 			}
@@ -244,12 +243,12 @@ const Post = ({
 
 	return (
 		(deletedflag) ? (
-			<div className="w-full flex-col items-center justify-center bg-neutral-800 my-4 rounded p-2 border border-white ">
+			<div className="md:w-[80%] w-full flex-col items-center justify-center bg-neutral-800 my-4 mx-auto rounded p-2 border border-neutral-700">
 				<p className="text-white p-2"> This post was deleted! </p>
 			</div>
 		) : (
 		
-			<div className="md:w-[80%] w-full mx-auto flex-col justify-center bg-neutral-900 my-4 rounded p-2"> 
+			<div className="md:w-[80%] w-full mx-auto flex-col justify-center bg-neutral-900 my-4 rounded p-2 border border-neutral-700"> 
 				
 				{
 					(imgcmp) ? (
@@ -329,7 +328,7 @@ const Post = ({
 						</div>
 					</div>
 
-					<p className="flex flex-row items-center justify-center rounded shadow-2xl text-sm text-slate-500"> { timeAgo.format(CreatedDate) } </p>
+					<p className="flex flex-row items-center justify-center rounded shadow-2xl text-sm text-slate-500"> { timeAgo.format(new Date(CreatedDate)) } </p>
 				</div>
 
 				
@@ -444,12 +443,6 @@ const PostPage = ({ NotificationFunc }) => {
 		.then(json => {
 			if(json.code === 200) {
 				tmp = json.data
-				
-				if(HOST) {
-					tmp.img = tmp.img.replace("localhost", HOST);
-					tmp.user.img = tmp.user.img.replace("localhost", HOST);
-					tmp.user.bg = tmp.user.bg.replace("localhost", HOST);
-				}
 			}
 		})
 		.finally(() => {
@@ -580,9 +573,7 @@ const PostFormUI = ({ setPosts, NotificationFunc }) => {
 					var New = state;
 					
 
-					New.id = Json.data + 1;
-
-					console.log(Json.data)
+					New.id = Json.data - 1;
 					New.user = User;
 					
 					resetAll(New); // TODO this is fishy !!
