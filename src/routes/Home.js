@@ -124,7 +124,7 @@ const Home = ({
 										PostImg={v.img}
 										PostText={v.text}
 										CreatedDate={v.date}
-										key={i}
+										key={v.id}
 										NotificationFunc={NotificationFunc}
 									/>
 								)

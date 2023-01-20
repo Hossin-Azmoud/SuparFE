@@ -18,7 +18,8 @@ import {
 } from "../server/serverFuncs";
 import { convertBase64 } from "../server/functions";
 import { HOST } from "../server/Var";
-import { format } from 'timeago.js';
+// import { format } from 'timeago.js';
+import { timeAgo } from "../Util/time";
 
 const Post = ({
 	Userid_,
@@ -31,7 +32,6 @@ const Post = ({
 	CreatedDate = new Date(),
 	expanded = false
 }) => {
-	
 
 	const [PostLikes, setPostLikes] = useState([]);
 	const [PostComments, setPostComments] = useState([]);
@@ -47,12 +47,13 @@ const Post = ({
 
 	const [ExpandPost, setExpandPost] = useState(expanded);
 	const [deletedflag, setdeletedflag] = useState(null); // it will be set once we delete a post successfully, substituting the content of the current post.
-	
+
 	const ToggleExpandPost = (e) => {
 		setExpandPost(!ExpandPost);
 	}
 
 	const removeLike = () => {
+		
 		const temp = PostLikes;
 		var New = PostLikes.filter(s => s.uuid != User.id_);
 		setPostLikes(New);
@@ -60,12 +61,8 @@ const Post = ({
 		unLike(PostId, User.id_)
 		.then(r => r.json())
 		.then(json => {
-			
-			if(json.code === 200) {
-				// Success.
-				console.log(PostLikes.length)
-			} else {
-				console.log(json.data);
+			if(json.code !== 200) {
+				// failed.
 				setPostLikes(temp);
 				setLike(true);
 			}
@@ -78,9 +75,11 @@ const Post = ({
 	const addLike = () => {
 		const temp = PostLikes;
 		var New = PostLikes;
+		
 		const ob = {
 			uuid: User.id_
 		}
+
 		New.push(ob);
 
 		setPostLikes(New)
@@ -90,15 +89,10 @@ const Post = ({
 		.then(r => r.json())
 		.then(json => {
 			
-			if(json.code === 200) {
+			if(json.code !== 200) {
 				// Success.
-				
-				// New.push(json.data)
-				console.log(PostLikes.length)
-			} else {
 				setPostLikes(temp);
 				setLike(false);
-				console.log(json.data);
 			}
 		})
 		.catch(e => {
@@ -186,16 +180,14 @@ const Post = ({
 	}, [PostLikes]);
 
 	useEffect(() => {
-		
-		
-		setPostComments([]);
-		setPostLikes([]);			
+
 		UpdateLikes();
 		UpdateComments();
 		
 		return () => {
 			setPostComments([]);
 			setPostLikes([]);
+			setLike(false);
 		}
 
 	}, [])
@@ -208,6 +200,9 @@ const Post = ({
 	}
 
 	const Delete = () => {
+		
+		console.log(Userid_, PostId);
+
 		DeletePost(Userid_, PostId)
 		.then(response => { return response.json() })
 		.then(json => {
@@ -220,7 +215,9 @@ const Post = ({
 				});
 
 			}
-			else { 
+			else {
+				console.log(json);
+
 				NotificationFunc({
 					text: `post Was not deleted, ${json.data}`,
 					status: "info"
@@ -332,7 +329,7 @@ const Post = ({
 						</div>
 					</div>
 
-					<p className="flex flex-row items-center justify-center rounded shadow-2xl text-sm text-slate-500"> { format(CreatedDate) } </p>
+					<p className="flex flex-row items-center justify-center rounded shadow-2xl text-sm text-slate-500"> { timeAgo.format(CreatedDate) } </p>
 				</div>
 
 				
@@ -582,7 +579,10 @@ const PostFormUI = ({ setPosts, NotificationFunc }) => {
 					});
 					var New = state;
 					
-					New.id = Json.data;
+
+					New.id = Json.data + 1;
+
+					console.log(Json.data)
 					New.user = User;
 					
 					resetAll(New); // TODO this is fishy !!
