@@ -1,6 +1,6 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useEffect, useState, useRef } from 'react';
-import { faEdit, faCopy, faLocationDot, faClose } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faCopy, faLocationDot, faClose, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon as Fa } from '@fortawesome/react-fontawesome';
 import { api, HOST } from "../server/Var";
 import Post from "../components/Post";
@@ -13,7 +13,7 @@ import {
   updateUser
 } from '../store/userStore';
 import UserUI from "../components/UserUI"
-import { Retry } from "../components/microComps";
+import { Retry, UIWrapper } from "../components/microComps";
 
 const ProfileRenderer = ({ 
 	User,
@@ -309,8 +309,7 @@ const ProfileRenderer = ({
 
 	
 	return (
-
-		<div className="w-[90%] sm:w-[600px] flex flex-col justify-start items-start">
+		<UIWrapper>
 			
 			{ (imgCmp) ? <Iframe Obj={{ onclick: setimgCmp, variables: imgCmp }} /> : "" }
 			<header className="border border-neutral-700 rounded-b-xl bg-neutral-800 flex flex-col justify-center items-center md:w-[80%] w-full mx-auto shadow-white shadow-sm">
@@ -341,13 +340,16 @@ const ProfileRenderer = ({
 						 				Edit
 						 			</button>
 						 		) : (
-									<button className={`font-semibold p-2 text-white shadow-md rounded duration-50 mx-2 ${ (!followed) ? " hover:bg-sky-400 bg-sky-500" : "bg-slate-900 border border-white" }`} onClick={follow}>
+						 			<>
+										<button className={`hover:bg-red-700 transition-all ease-in-out font-semibold p-2 text-white shadow-md rounded duration-50 mx-2 ${ (!followed) ? " hover:bg-sky-400 bg-sky-500" : "bg-slate-900" }`} onClick={follow}>
 											{ (followed) ? "unfollow" : "follow" }
-									</button>
+										</button>
+										<Fa icon={faEnvelope} size="lg" 
+											className="transition-all ease-in-out hover:bg-sky-500 absolute top-3 translate-x-[395px] cursor-pointer text-white bg-slate-900 mx-2 p-3 rounded-full shadow-md"/>
+									</>
 						 		) 
 						 	}
 						</div>
-
 						<div>
 							{
 								Edit ?  (
@@ -359,12 +361,9 @@ const ProfileRenderer = ({
 							
 						</div>
 
-
 						<div className="flex flex-row flex-wrap my-4"> 
-
 							<p onClick={() => visualize(followers, `${User.UserName}\'s followers`)} className="border border-neutral-700 cursor-pointer bg-neutral-900 shadow-2xl rounded px-4 py-1 text-white font-thin text-md"> followers <span> { followersNumber } </span> </p>
 							<p onClick={() => visualize(following, `${User.UserName}\'s followings`)} className="border border-neutral-700 cursor-pointer bg-neutral-900 shadow-2xl rounded px-4 py-1 mx-4 text-white font-thin text-md"> following <span> { followingNumber } </span> </p>
-
 						</div>
 
 
@@ -490,10 +489,7 @@ const ProfileRenderer = ({
 					</div>
 				) : ""
 			}
-			
-		</div>
-
-
+		</UIWrapper>
 	)
 }
 

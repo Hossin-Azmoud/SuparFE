@@ -6,7 +6,7 @@ import { Paragraphs, Iframe } from "./microComps";
 import { useSelector, useDispatch } from 'react-redux';
 import { CommentPannel as CommentPannelUI } from "./commentPannel";
 import { UserDisplay } from "./UserUI";
-import { 
+import {
 	getPostById,
 	DeletePost, 
 	getComments, 

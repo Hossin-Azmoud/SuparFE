@@ -3,6 +3,7 @@ import { api, goApi, HOST } from "../server/Var";
 import UserUI from "../components/UserUI";
 import Loader from "../components/Loader";
 import { useSelector } from 'react-redux';
+import { UIWrapper } from "../components/microComps";
 
 const AccountsSearchPannel = ({ 
     CurrUserId, 
@@ -65,8 +66,7 @@ const AccountsSearchPannel = ({
     }, [Query])
 
     return (
-        <section className="flex sm:w-[500px] w-full flex-col flex-row justify-center items-center">
-            
+        <UIWrapper>
             <form className="w-full my-2">
                 <input onChange={(e) => setQuery(e.target.value)} className="text-white bg-none border-b border-b-yellow-500 focus:border-sky-400 py-2 px-2 w-full outline-none my-2 bg-black" type="query" placeholder="search">
                 </input>
@@ -92,10 +92,8 @@ const AccountsSearchPannel = ({
                         </div>
                     )
                 }
-
             </div>
-
-        </section>
+        </UIWrapper>
     )
 }
 

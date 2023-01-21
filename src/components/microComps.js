@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import { useState, useEffect, useRef, useLayoutEffect, Children } from "react";
 import { faInfoCircle, faWarning, faCircleCheck, faEdit } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon as Fa } from '@fortawesome/react-fontawesome';
 import { convertBase64 } from "../server/functions";
@@ -21,6 +21,13 @@ const Paragraphs = ({ Text, Class="" }) => {
 
 }
 
+const UIWrapper = ({ children, ExtendStyles="" }) => {
+	return (
+		<div className={`flex w-[90%] sm:w-[600px] flex-col justify-start items-start my-2 ${ExtendStyles}`}>
+			{ Children.map(children, child => child) }
+		</div>
+	)
+}
 
 const ApplicationNotification = ({ msg, StyleKey, id }) => {
 
@@ -197,5 +204,6 @@ export {
 	Paragraphs, 
 	ApplicationNotification,
 	Iframe,
-	Retry
+	Retry,
+	UIWrapper
 };

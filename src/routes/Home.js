@@ -13,7 +13,7 @@ import Loader from "../components/Loader";
 import { JWT } from "../server/functions";
 import { HOST } from "../server/Var";
 import { Link } from "react-router-dom";
-import { Retry } from "../components/microComps";
+import { Retry, UIWrapper } from "../components/microComps";
 import { PostFormUI } from "../components/Post"
 
 const Home = ({
@@ -96,43 +96,39 @@ const Home = ({
 
 	}, [])
 
-	return (
-		<>
-			<div className="flex w-[90%] sm:w-[600px] flex-col justify-start items-start">
-				            	
-           		<PostFormUI setPosts={setPosts} NotificationFunc={NotificationFunc}/>
-            	
-				<div className="w-full flex-col justify-start items-center pb-14">
+	return (	
+		<UIWrapper>
+       		<PostFormUI setPosts={setPosts} NotificationFunc={NotificationFunc}/>
+        	
+			<div className="w-full flex-col justify-start items-center pb-14">
 
-	         		{
-						(Posts && (typeof Posts === "object")) ? (
-							Posts.map((v, i) => {
-								return (
-									<Post 
-										Userid_={v.user.id_}
-										PostId={v.id}
-										UserName={v.user.UserName}
-										UserImg={v.user.img}
-										PostImg={v.img}
-										PostText={v.text}
-										CreatedDate={v.date}
-										key={v.id}
-										NotificationFunc={NotificationFunc}
-									/>
-								)
-							})
-							
-							) : (
-								<div className="text-white flex flex-col justify-center items-center h-24">
-									{ (isLoading) ? <Loader /> : (typeof Posts === "string") ? <p className="text-white"> { Posts } </p> : <Retry func={FetchPosts}/> }
-								</div>
+         		{
+					(Posts && (typeof Posts === "object")) ? (
+						Posts.map((v, i) => {
+							return (
+								<Post 
+									Userid_={v.user.id_}
+									PostId={v.id}
+									UserName={v.user.UserName}
+									UserImg={v.user.img}
+									PostImg={v.img}
+									PostText={v.text}
+									CreatedDate={v.date}
+									key={v.id}
+									NotificationFunc={NotificationFunc}
+								/>
 							)
-					}
-
-				</div>
+						})
+						
+						) : (
+							<div className="text-white flex flex-col justify-center items-center h-24">
+								{ (isLoading) ? <Loader /> : (typeof Posts === "string") ? <p className="text-white"> { Posts } </p> : <Retry func={FetchPosts}/> }
+							</div>
+						)
+				}
 			</div>
-
-		</>
+			
+		</UIWrapper>
 	)
 
 }

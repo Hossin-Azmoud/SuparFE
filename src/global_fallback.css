@@ -1,0 +1,126 @@
+* {
+	box-sizing: border-box;
+	scroll-behavior: smooth;
+}
+
+html, body {
+	padding: 0;
+	margin: 0;
+	background: black;
+}
+
+body, #root {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;	
+}
+
+body {
+	width: 100%;
+}
+
+#root {
+	width: 95%;
+	padding: 0;
+	margin: 0;
+}
+
+
+body::-webkit-scrollbar {
+	scrollbar-color: none;
+  scrollbar-width: 10px;
+}
+
+
+body::-webkit-scrollbar-thumb {
+	background: red;
+
+}
+
+body::-webkit-scrollbar-track {
+	background: none;
+}
+
+.NoBar::-webkit-scrollbar {
+  display: none;
+}
+
+.centerX {
+	left: 50%;
+	top: 15px;
+}
+
+.blue-shadow {
+	box-shadow: 10px 10px 90px -20px rgba(0, 0, 140, .5);
+}
+
+/* ANIMATIONS  */
+.slideRight {
+	animation: slideRight 1s ease-in-out;
+	transition: transform 1s ease;
+}
+
+.slideLeft {
+	animation: slideLeft 1s ease-in-out;
+	transition: All 1s ease;
+}
+
+.SlideFromTop {
+	animation: SlideFromTop 1s ease-in-out;
+	transition: All 1s ease;
+}
+
+@keyframes slideRight {
+	from {
+		transform: translateX(20px);
+		opacity: 0;
+	}	
+
+	to {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+
+@keyframes SlideFromTop {
+	from {
+		transform: translate(-20px, -50%);
+		opacity: 0;
+	}	
+
+	to {
+		transform: translate(0, -50%);
+		opacity: 1;
+	}
+}
+
+
+@keyframes slideLeft {
+	from {
+		transform: translateX(20px);
+		opacity: 0;
+	}	
+
+	to {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+
+.reveal {
+	animation: reveal 1s ease;
+}
+
+@keyframes reveal {
+	from {
+		opacity: 0;
+		transform: translateY(5px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0px);
+	}
+}
+
+

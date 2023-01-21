@@ -1,8 +1,10 @@
 import "./index.css";
+import "./global_fallback.css";
+
 import Home from "./routes/Home";
 import Login from "./routes/Login";
 import SignUp from "./routes/SignUp";
-import ChatUI from "./routes/ChatUI";
+import ChatUI, { ConversationUI } from "./routes/ChatUI";
 import { Routes, Route, useParams } from "react-router-dom";
 import Icons from "./routes/Icons";
 import CurrentUserProfile, { Account } from "./routes/Profile";
@@ -223,7 +225,13 @@ const App = () => {
                                 <Route path="/Notifications" element={<UserNotifications socketConn={NotificationSocket} Notifications={FetchedNotifications} CountCallback={setnotCount} NewNotifications={NewNots}/>} />
                                 <Route path="/i" element={<Icons NotificationFunc={dispatchNotificationEvent} />} />
                                 <Route path="/Accounts" element={<AccountsSearchPannel CurrUserId={User.id_} NotificationFunc={dispatchNotificationEvent} />}/>
-                                
+                                <Route 
+                                    path="/chat/:conversation_id" 
+                                    action={({ params }) => {}}
+                                    loader={({ params }) => {}}
+                                    element={<ConversationUI CurrUserId={User.id_} Conn={NotificationSocket} NotificationFunc={dispatchNotificationEvent}/>} 
+                                />
+
                                 <Route
                                     path="/Accounts/:id"
                                     loader={({ params }) => {

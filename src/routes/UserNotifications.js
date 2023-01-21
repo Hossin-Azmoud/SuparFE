@@ -46,9 +46,8 @@ const UserNotifications = ({ Notifications, NewNotifications, socketConn, CountC
 	}, [])
 
 	return (
-		<>
-		
-			<ul className="border-r-neutral-800 border-l-neutral-800 border-r border-l text-white bg-black my-2 w-full sm:w-[600px] h-screen overflow-y-scroll">
+		<UIWrapper>
+			<ul className="border-r-neutral-800 border-l-neutral-800 border-r border-l text-white bg-black my-2 w-full h-screen overflow-y-scroll">
 				<h1 className="text-white text-2xl font-bold py-4 w-full text-center border-b border-b-neutral-800"> User notifications </h1>		
 				
 				{
@@ -57,9 +56,9 @@ const UserNotifications = ({ Notifications, NewNotifications, socketConn, CountC
 						All.map((notification, i) => <UserNotificationUI CountCallback={CountCallback} key={i} NotificationOBJ={notification} socketConn={socketConn}/> )
 					) : ""
 				}
-
 			</ul>	
-		</>
+		</UIWrapper>
+
 	)
 }
 
@@ -77,6 +76,7 @@ const UserNotificationUI = ({ NotificationOBJ, socketConn, CountCallback }) => {
 	const seen = () => {
 
 		const ob = JSON.stringify({
+
 			action: NOTIFICATION,
 			code: 200,
 			data: { 
@@ -169,11 +169,6 @@ const UserNotificationUI_ = ({ NotificationOBJ, socketConn, CountCallback }) => 
 
 
 export default UserNotifications;
-/*
-
-
-*/
-
 
 
 
