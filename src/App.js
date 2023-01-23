@@ -22,7 +22,7 @@ import UserNotifications from "./routes/UserNotifications";
 import { SubmitJWT, GetUserNotifications } from "./server/serverFuncs";
 import { ApplicationNotification } from "./components/microComps";
 import { PostPage } from "./components/Post";
-import { HOST, NOTIFICATION, NEWPOST } from "./server/Var";
+import { HOST, NOTIFICATION, NEWPOST, MSG } from "./server/Var";
 import { useSocket } from "./server/socketOps"
 
 const App = () => {    
@@ -37,7 +37,8 @@ const App = () => {
     const [notCount, setnotCount] = useState(0);
     const [FetchedNotifications, setFetchedNotifications] = useState([]);
     const [FuncPool, setFuncPool] = useState({});
-    
+    const [NewMsgs, setNewMsgs] = useState([]);
+
     const AddToPool = (Obj) => {
         setFuncPool(p => {
             return { ...p, ...Obj };
@@ -65,12 +66,13 @@ const App = () => {
     }
 
 
-    const HandleShatNewMsg = (msgObject) => console.log(msgObject);
+    const HandleShatNewMsg = (msgObject) => {
+        console.log(msgObject);
+    };
 
     const onMessageCallback = (m) => {
         
         var SockMsg = JSON.parse(m.data)
-        const MSG = "m"
         
         switch (SockMsg.action) {
             case NOTIFICATION:
@@ -80,9 +82,10 @@ const App = () => {
             case NEWPOST:
                 HandleNewPost(SockMsg.data);
                 break
-            case POSTCHANGE:
-                HandlePostChange(SockMsg.data);    
-                break
+           
+            // case POSTCHANGE:
+            //     HandlePostChange(SockMsg.data);    
+            //     break
 
             case MSG:
                 HandleShatNewMsg(SockMsg.data)
@@ -95,7 +98,7 @@ const App = () => {
 
     }
     
-    var [NotificationSocket, setNotificationSocket] = useState(null);
+    var [SocketConn, setSocketConn] = useState(null);
     var NotsFetched = false;
 
     const fetchOldNotifications = () => {
@@ -177,16 +180,16 @@ const App = () => {
     useEffect(() => {
         
         if(User) {
-            if(NotificationSocket === null) {
+            if(SocketConn === null) {
                 var s = useSocket(User.id_, onMessageCallback);
-                setNotificationSocket(s);    
+                setSocketConn(s);    
             }
 
             fetchOldNotifications();
         }
 
         return () => {
-            setNotificationSocket(null);
+            setSocketConn(null);
             setFetchedNotifications([]);
             setNewNots([]);
             setnotCount(0);
@@ -213,23 +216,21 @@ const App = () => {
                         <>
                             <NavBar UserImg={User.img} NewNotificationCount={notCount}/>
                             { ("setPosts" in FuncPool) ? <FloatingPostFormUI setPosts={FuncPool["setPosts"]} NotificationFunc={dispatchNotificationEvent} /> : "" }
-                            
-
                             <Routes>
                                 <Route path="/" element={<Home NewPosts={NewPosts} setNewPosts={setNewPosts} NotificationFunc={dispatchNotificationEvent} funcPoolManager={AddToPool} />} />
-                                <Route path="/chat" element={<ChatUI User={User} NotificationFunc={dispatchNotificationEvent}/>} />
+                                <Route path="/chat" element={<ChatUI User={User} NotificationFunc={dispatchNotificationEvent} Conn={SocketConn} />} />
                                 <Route path="/Home" element={<Home NewPosts={NewPosts} setNewPosts={setNewPosts} NotificationFunc={dispatchNotificationEvent} funcPoolManager={AddToPool} />} />
                                 <Route path="/Login" element={<Login NotificationFunc={dispatchNotificationEvent} />} />
                                 <Route path="/Signup" element={<SignUp NotificationFunc={dispatchNotificationEvent}/>} />
                                 <Route path="/profile" element={<CurrentUserProfile NotificationFunc={dispatchNotificationEvent}/>}/>
-                                <Route path="/Notifications" element={<UserNotifications socketConn={NotificationSocket} Notifications={FetchedNotifications} CountCallback={setnotCount} NewNotifications={NewNots}/>} />
+                                <Route path="/Notifications" element={<UserNotifications socketConn={SocketConn} Notifications={FetchedNotifications} CountCallback={setnotCount} NewNotifications={NewNots}/>} />
                                 <Route path="/i" element={<Icons NotificationFunc={dispatchNotificationEvent} />} />
                                 <Route path="/Accounts" element={<AccountsSearchPannel CurrUserId={User.id_} NotificationFunc={dispatchNotificationEvent} />}/>
                                 <Route 
                                     path="/chat/:conversation_id" 
                                     action={({ params }) => {}}
                                     loader={({ params }) => {}}
-                                    element={<ConversationUI CurrUserId={User.id_} Conn={NotificationSocket} NotificationFunc={dispatchNotificationEvent}/>} 
+                                    element={<ConversationUI CurrUserId={User.id_} Conn={SocketConn} NotificationFunc={dispatchNotificationEvent}/>} 
                                 />
 
                                 <Route

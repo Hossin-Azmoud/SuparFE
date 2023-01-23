@@ -29,6 +29,9 @@ const removeFollow = async (follower_id, followed_id) => await Post(`${api}/unfo
 const GetUserFollowers = async (uuid) => await Get(`${api}/getFollowers/${uuid}`);
 const GetUserFollowings = async (uuid) => await Get(`${api}/getFollowings/${uuid}`);
 const GetUserNotifications = async (uuid) => await Get(`${api}/getUserNotifications/${uuid}`);
+const GetUserConversations = async (uuid) => await Post(`${api}/chat/getUserConversations`, { token: JWT, uuid: uuid })
+const GetUserConversationbyId = async (uuid, conversation_id) => await Post(`${api}/chat/getUserConversationById`, { token: JWT, uuid: uuid, conversation_id: conversation_id })
+const NewConversation = async (topic_id, other_id) => await Post(`${api}/chat/NewConversation`, { other_id: other_id, topic_id: topic_id})
 
 export {
 	GetUserById,
@@ -50,5 +53,9 @@ export {
     GetUserFollowers,
     GetUserFollowings,
     NewPost,
-    GetUserNotifications
+    GetUserNotifications,
+    GetUserConversations,
+    GetUserConversationbyId,
+    NewConversation
 };
+
