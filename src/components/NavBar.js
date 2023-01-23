@@ -10,7 +10,16 @@ import { FontAwesomeIcon as Fa } from '@fortawesome/react-fontawesome';
 import { Link, useNavigate } from "react-router-dom";
 
 // Guts@gmail.com
-const NavBar = ({ UserImg, NewNotificationCount = 0 }) => {
+const NavBar = ({ UserImg, NewNotificationCount = 0, NewMsgCount = 0}) => {
+	
+	const [MessagesCount, setMCount] = useState(NewMsgCount);
+	const [NotificationsCount, setNCount] = useState(NewNotificationCount);
+	
+	useEffect(() =>  {
+		setNCount(NewNotificationCount);
+		setMCount(NewMsgCount);
+	}, [NewNotificationCount, NewMsgCount])
+
 	const dispatch = useDispatch();
 	const redirect_ = useNavigate();
 	
@@ -36,20 +45,21 @@ const NavBar = ({ UserImg, NewNotificationCount = 0 }) => {
 
 			<Link to="/Notifications" className="flex items-start justify-start"> 
 				<Fa icon={ faBell } className="hover:text-blue-500 transition-all text-white" size="lg"/>
+		
 				{
-					(NewNotificationCount > 0) ?  <span className="border-2 border-black p-2 flex z-30 items-center justify-center -top-1 right-2.5 rounded-full relative bg-sky-500 my-auto mx-auto text-white w-2.5 h-2.5 text-center" style={{ fontSize: "9px" }}> {NewNotificationCount} </span> : ""
+					(NotificationsCount > 0) ?  <span className="border-2 border-black p-2 flex z-30 items-center justify-center -top-1 right-2.5 rounded-full relative bg-sky-500 my-auto mx-auto text-white w-2.5 h-2.5 text-center" style={{ fontSize: "9px" }}> { NotificationsCount } </span> : ""
 				}
+		
 			</Link>
 			
 			<Link to="/chat" className="flex items-start justify-start"> 
 				<Fa icon={ faMessage } className="hover:text-blue-500 transition-all text-white" size="lg"/>
+		
 				{
-					(NewNotificationCount > 0) ?  <span className="border-2 border-black p-2 flex z-30 items-center justify-center -top-1 right-2.5 rounded-full relative bg-sky-500 my-auto mx-auto text-white w-2.5 h-2.5 text-center" style={{ fontSize: "9px" }}> {NewNotificationCount} </span> : ""
+					(MessagesCount > 0) ?  <span className="border-2 border-black p-2 flex z-30 items-center justify-center -top-1 right-2.5 rounded-full relative bg-sky-500 my-auto mx-auto text-white w-2.5 h-2.5 text-center" style={{ fontSize: "9px" }}> { MessagesCount } </span> : ""
 				}
+
 			</Link>
-			
-
-
 
 			<Fa onClick={signOut} icon={ faSignOut } className="cursor-pointer hover:text-blue-500 transition-all text-white" size="lg"/>
 

@@ -4,7 +4,7 @@ import { faBell  } from '@fortawesome/free-solid-svg-icons';
 import { Link } from "react-router-dom";
 import { notificationIconMap, LIKE, COMMENT, FOLLOW, NOTIFICATION } from "../server/Var";
 import { useState, useEffect } from "react";
-
+import { UIWrapper } from "../components/microComps";
 const UserNotifications = ({ Notifications, NewNotifications, socketConn, CountCallback }) => {
 	//TODO get notifications from server.
 	// if connected we will get everything in realtime. once something happens we ship it to this place if the user is online.

@@ -22,11 +22,11 @@ const MessageUI = ({
 
 	useEffect(() => {
 		setSide(Align);
+		console.log(Align)
 		return () => {
 			// clearInterval(I);
 			setSide(null);
 		}
-
 	}, []);
 
 
@@ -36,7 +36,7 @@ const MessageUI = ({
 			{/*	<img src={User.img} className="h-10 shadow-black shadow-2xl rounded w-10"/>*/}
 				<p className="mx-1"> {msg} </p>
 			</div>
-			<span className="text-neutral-600 text-xs p-1 "> { timeAgo.format(TimeStamp) } </span>	
+			<span className="text-neutral-600 text-xs p-1 "> { timeAgo.format((typeof TimeStamp === 'object') ? TimeStamp : new Date(TimeStamp)) } </span>	
 		</div> 
 	)
 }
@@ -73,11 +73,13 @@ const MessageInputUI = ({
 	
 	return (
 
-		<form className="w-full border-slate-700 border bg-neutral-900 rounded mx-auto flex items-end transition-all ease-in-out flex-col justify-between p-6 my-2 justify-center items-end w-full transition-all">
-			<textarea cols="80" rows={row} ref={textField} onChange={OnTypingText} className="rounded focus:border-sky-500 border my-1 border-neutral-700 transition-all ease-in-out border-box text-white resize-none outline-none p-2 bg-black w-full" type="text" placeholder="say something" /> 
+		<form className="w-full rounded mx-auto flex items-end transition-all ease-in-out flex-col justify-between p-6 my-2 justify-center items-end w-full transition-all">
+			
+			<textarea cols="80" rows={row} ref={textField} onChange={OnTypingText} className="rounded focus:border-sky-500 border my-1 border-neutral-700 transition-all ease-in-out border-box text-white resize-none outline-none p-2 bg-black w-full" type="text" placeholder="say something" /> 		
 			<button className="text-white bg-blue-500 rounded p-2" onClick={Send}>
 				send
 			</button>
+			
 		</form>
 	)
 }

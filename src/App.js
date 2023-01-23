@@ -25,6 +25,7 @@ import { PostPage } from "./components/Post";
 import { HOST, NOTIFICATION, NEWPOST, MSG } from "./server/Var";
 import { useSocket } from "./server/socketOps"
 
+
 const App = () => {    
     
     const User = useSelector(state => state.User);
@@ -34,11 +35,13 @@ const App = () => {
     const [Loading, setLoading] = useState(true);
     const [Notification, setNotification] = useState(null);
     const [NewNots, setNewNots] = useState([])
-    const [notCount, setnotCount] = useState(0);
     const [FetchedNotifications, setFetchedNotifications] = useState([]);
     const [FuncPool, setFuncPool] = useState({});
     const [NewMsgs, setNewMsgs] = useState([]);
-
+    // Counters 
+    const [notCount, setnotCount] = useState(0);
+    const [NewMessageCount, setNewMessageCount] = useState(0);
+   
     const AddToPool = (Obj) => {
         setFuncPool(p => {
             return { ...p, ...Obj };
@@ -65,9 +68,15 @@ const App = () => {
         console.log("-------------------------------------------------------------------")
     }
 
-
     const HandleShatNewMsg = (msgObject) => {
-        console.log(msgObject);
+        
+        msgObject.side = "left";
+    
+        setNewMsgs(
+            p => [...p, msgObject]
+        );
+
+        setNewMessageCount(p => p + 1);
     };
 
     const onMessageCallback = (m) => {
@@ -214,11 +223,11 @@ const App = () => {
             {
                 (User && !Loading) ? (
                         <>
-                            <NavBar UserImg={User.img} NewNotificationCount={notCount}/>
+                            <NavBar NewMsgCount={NewMessageCount} UserImg={User.img} NewNotificationCount={notCount}/>
                             { ("setPosts" in FuncPool) ? <FloatingPostFormUI setPosts={FuncPool["setPosts"]} NotificationFunc={dispatchNotificationEvent} /> : "" }
                             <Routes>
                                 <Route path="/" element={<Home NewPosts={NewPosts} setNewPosts={setNewPosts} NotificationFunc={dispatchNotificationEvent} funcPoolManager={AddToPool} />} />
-                                <Route path="/chat" element={<ChatUI User={User} NotificationFunc={dispatchNotificationEvent} Conn={SocketConn} />} />
+                                <Route path="/chat" element={<ChatUI flushMessages={() => setNewMsgs([])} User={User} NewMessages={NewMsgs} NotificationFunc={dispatchNotificationEvent} Conn={SocketConn} />} />
                                 <Route path="/Home" element={<Home NewPosts={NewPosts} setNewPosts={setNewPosts} NotificationFunc={dispatchNotificationEvent} funcPoolManager={AddToPool} />} />
                                 <Route path="/Login" element={<Login NotificationFunc={dispatchNotificationEvent} />} />
                                 <Route path="/Signup" element={<SignUp NotificationFunc={dispatchNotificationEvent}/>} />

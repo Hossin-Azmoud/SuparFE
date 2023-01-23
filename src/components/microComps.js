@@ -23,7 +23,7 @@ const Paragraphs = ({ Text, Class="" }) => {
 
 const UIWrapper = ({ children, ExtendStyles="" }) => {
 	return (
-		<div className={`flex w-[90%] sm:w-[600px] flex-col justify-start items-start my-2 ${ExtendStyles}`}>
+		<div className={`flex w-[90%] sm:w-[600px] flex-col justify-center items-center my-2 ${ExtendStyles}`}>
 			{ Children.map(children, child => child) }
 		</div>
 	)

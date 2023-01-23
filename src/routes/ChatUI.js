@@ -7,6 +7,7 @@ import { Link, useParams } from "react-router-dom";
 import { UIWrapper } from "../components/microComps";
 import { MessageUI, MessageInputUI } from "../components/MessageUI";
 import Loader from "../components/Loader";
+
 import {
 	GetUserById,
 	GetUserFollowers,
@@ -16,23 +17,28 @@ import {
     NewConversation
 } from "../server/serverFuncs";
 
-
-
 const ChatUI = ({
 	NotificationFunc = () => {},
 	Conn = {
 		send: (o) => { console.log(o, "\n", o.length) }
 	},
-	User
+	User,
+	NewMessages = [],
+	flushMessages = () => {
+		// TODO MEANT TO CLEAN UP THE NEW MESSAGES AFTER UPDATING!!!	
+	}	
 }) => {
 
 	const [Convos, setConvos] = useState(null);
 	const [Users, setUsers] = useState([]);
 	const [Other, setOther] = useState(null);
 	// TODO: Fetch the user messages!
+	
 	const [IsLoading, setIsLoading] = useState(true);
 	const [OpenNewConv, setOpenNewConv] = useState(false);
-
+	const [SelectedConversation, SelectConversation] = useState(null);
+	const getSide = (id) => ((id === User.id_) ? "left" : "right");
+	
 	const SendMessage = (conversation_id, text, mt, other_id) => {
 		Conn.send(JSON.stringify({
 			code: 200,
@@ -49,12 +55,12 @@ const ChatUI = ({
 	}
 
 	const GetRelations = () => {
-		let temp = []
+		let TempUserRelationShips = []
 		GetUserFollowers(User.id_)
 		.then(r => r.json())
 		.then(J => {
 			if(J.code === 200) {
-				temp = [...temp, ...J.data]
+				TempUserRelationShips = [...TempUserRelationShips, ...J.data]
 			}
 		})
 		.catch(e => console.log(e))
@@ -64,8 +70,8 @@ const ChatUI = ({
 		.then(J => {
 			if(J.code === 200) {
 				for(let i = 0; i < J.data.length; i++) {
-					if(!(temp.includes(J.data[i]))) {
-						temp.push(J.data[i]);
+					if(!(TempUserRelationShips.includes(J.data[i]))) {
+						TempUserRelationShips.push(J.data[i]);
 					}
 				}
 			}
@@ -77,14 +83,13 @@ const ChatUI = ({
 				setIsLoading(false);
 			}
 
-			GetUserObjects(temp, callback);
+			GetUserObjects(TempUserRelationShips, callback);
 			
 		})
 		.catch(e => console.log(e))
 	}
 
 	const GetUserObjects = (Array_, callback) => {
-		
 		var temp = []
 		var UObject;
 		for(let i = 0; i < Array_.length; i++) {
@@ -100,9 +105,11 @@ const ChatUI = ({
 			})
 			.finally(() => {
 				temp.push(UObject);
+				
 				if(Array_.length === temp.length) {
 					callback(temp);
 				}
+
 			})
 			.catch(e => console.log(e));
 		}
@@ -115,7 +122,7 @@ const ChatUI = ({
 	}
 
 	const GetAllConversations = () => {
-		let temp;
+		let tempConversations;
 		let ids = [];		
 		
 		GetUserConversations(User.id_)
@@ -123,27 +130,41 @@ const ChatUI = ({
 		.then(J => {
 			if(J.code === 200) {
 				if(J.data !== null && J.data !== undefined) {
-					temp = J.data;
-					console.log(J.data)
+					tempConversations = J.data;
 				}
 			}
 		})
 		.finally(() => {
-			
-			temp.map((c) => {
-				ids.push((c.fpair === User.id_) ? c.spair : c.fpair);	
-				return c;
-			});
+			if(tempConversations) {
+				
+				tempConversations.map((c) => {
+					ids.push((c.fpair === User.id_) ? c.spair : c.fpair);	
+					return c;
+				});
 
-			const callback = (data) => {
-				for(let i = 0; i < temp.length; i++) {
-					temp[i].Other = data[i];
+				const callback = (data) => {
+					console.log(tempConversations[0]);
+					for(let i = 0; i < tempConversations.length; i++) {
+						
+						tempConversations[i].Other = data[i];
+						
+						if(tempConversations[i].messages) {
+							
+							tempConversations[i].messages.map(v => {
+								v.side = getSide(v.topic_id);
+							})
+
+							// for (let j = 0; j < tempConversations[i].messages.length; j++){
+							// 	tempConversations[i].messages[j].side = getSide(messages[j].topic_id);
+							// }
+						}
+					}
+
+					setConvos(tempConversations);
 				}
-				console.log(temp);
-				// setConvos(temp);
-			}
 
-			GetUserObjects(ids, callback);
+				GetUserObjects(ids, callback);	
+			}
 		})
 		.catch(e => console.log(e))
 	}
@@ -151,13 +172,38 @@ const ChatUI = ({
 	useEffect(() => {
 		// TODO require a token! so not everyone can get the messages or send shit!
 		GetAllConversations();
-		
 		return () => {
 			setIsLoading(true);
 			setUsers([]);
 		};
 
 	}, [])
+
+	useEffect(() => {
+		
+		if(Convos) {
+				
+			var tempConversations = Convos;
+			console.log("NEW Message!!!")
+			console.log(NewMessages)
+			console.log(tempConversations)
+			
+			tempConversations.map(c => {
+			
+				NewMessages.map(m => {
+					if(m.conversation_id === c.id) { 
+						c.messages.push(m) 
+					}
+				})
+
+			});
+
+			flushMessages();
+
+			setConvos(tempConversations)
+		}
+
+	}, [NewMessages.length])
 
 	return (
 		
@@ -169,10 +215,25 @@ const ChatUI = ({
 						NotificationFunc={NotificationFunc}
 						Conn={Conn}
 						Other={Other}
+						conversation={SelectedConversation}
+						callback={(id, New) => {
+							var tempConversations = Convos;
+							
+							tempConversations.map(c => {
+								if(id === c.id) {
+									c = New;
+									return;
+								}
+							});
+
+							console.log("Dispatched action and the res is mutated convos");
+							console.log(New)
+							setConvos(tempConversations);
+						}}
 					/>
 				) : (
 				<>			
-					<div className="w-full mx-auto p-3 bg-neutral-900 rounded border border-neutral-700 flex flex-row justify-between items-center">
+					<div className="w-full my-4 mx-auto p-3 bg-neutral-900 rounded border border-neutral-700 flex flex-row justify-between items-center">
 						<div className="flex flex-row items-start">
 							<img
 								src={User.img} 
@@ -249,32 +310,37 @@ const ChatUI = ({
 						(Convos !== null && Convos !== undefined && Convos.messages !== null) ? (
 							Convos.map(c => {
 								return (
-									<div key={c.id} className="w-full bg-neutral-900 p-2 rounded-md flex flex-row justify-between items-center"> 
+									<div onClick={() => {
+										SelectConversation(c);
+										setOther(c.Other);
+									}} key={c.id} className="w-full bg-neutral-900 p-2 border-b border-b-slate-700 flex flex-row justify-between items-center cursor-pointer"> 
+										
 										<div className="rounded-md flex flex-row justify-start items-center">
+											
 											<img 
 												src={c.Other.img} 
 												alt="User image"
 												className="w-10 h-10 rounded-md"
 											/>
-											<div className="text-white mx-2 text-sm">
-												<p>{ c.Other.UserName }</p>
-												<p className="text-orange-300"> { JSON.stringify(c.messages) } </p>
+											<div className="text-white mx-2">
+												<p className="text-base"> 
+													{ c.Other.UserName }
+													<span className="text-xs text-neutral-500 mx-2">
+														{ timeAgo.format(new Date(c.messages[c.messages.length - 1].ts)) } 
+													</span>  
+													</p>
+												<p className="text-sm text-orange-300"> { c.messages[c.messages.length - 1].data.text } </p>
 											</div>
-
 										</div>
-										
 									</div>
 								)
 							})
-
 						) : ""
 					}
 
 				</>
 			)
-			}
-			
-			
+		}
 		</UIWrapper>
 	)
 }
@@ -358,7 +424,8 @@ const ConversationUI = ({
 	CurrUserId,
 	NotificationFunc = () => {},
 	Conn,
-	Other
+	Other,
+	callback = (id, ob) => { console.log(id - 1, ob) }
 }) => {
 	/*
 		conversation = {
@@ -381,86 +448,104 @@ const ConversationUI = ({
 	*/
 
 	const [Conversation, setConversation] = useState(conversation);
+	
 	const [OtherUser, setOtherUser] = useState(Other);
-	const [MAXID, setMAXID] = useState((conversation) ? conversation.length : 0);
+	
+	const [MsgCount, setMsgCount] = useState((conversation) ? ((conversation.messages !== null) ? conversation.messages.length : 0 ) : 0)
+	
 	const getSide = (id) => ((id === CurrUserId) ? "left" : "right");
 	
 	const Send_Message = (text) => {
+		
 		if(Conversation) {
+
 			var ob = {
 				code:200,
 				action: MSG,
 				data: {
+					id: (Conversation.messages !== null) ? Conversation.messages[Conversation.messages.length - 1].id + 1 : 1,
 					conversation_id: Conversation.id,
 					data: { 
 						text, 
 						mt: "plain-text"
 					},
+					ts: new Date(),
 					other_id: (Conversation.fpair === CurrUserId) ? Conversation.spair : Conversation.fpair
 				}
 			}
 
-			setConversation(p => {
-				
-				var temp = p;
-				
-				if(temp.messages === undefined || temp.messages === null) {
-					temp.messages = [];
-				}
-
-				temp.messages.push({
-					id: MAXID + 1,
-					...ob.data,
-					topic_id: CurrUserId,
-					ts: new Date(),
-					side: "left"
-				})
-
-				setMAXID(MAXID + 1);
-				// scroll(0, document.body.scrollHeight + 400);
-				return temp;
+			var tempConversation = Conversation;
+			
+			if(tempConversation.messages === undefined || tempConversation.messages === null) {
+				tempConversation.messages = [];
+			}
+			
+			tempConversation.messages.push({
+				...ob.data,
+				topic_id: CurrUserId,
+				ts: new Date(),
+				side: "left"
 			});
 
-
+			setMsgCount(p => p + 1)
+			scroll(0, document.body.scrollHeight + 400);
+			callback(tempConversation.id, tempConversation);
+			// Todo: when I add a message, the UI does not act accordinly !
+		
+			changeCurrConv(tempConversation);
 			Conn.send(JSON.stringify(ob));
+			
 		}
+	}
+
+	const changeCurrConv = (d) => {
+		setConversation(d);
 	}
 
 	useEffect(() => {
 		
 		if(Conversation) { 
+			
+			console.log(Conversation.messages);
 			if(Conversation.messages !== undefined && Conversation.messages !== null) {
-				Conversation.messages.map((v) => {v.side = getSide(v.topic_id)})
+				Conversation.messages.map(
+					(v) => {
+						v.side = getSide(v.topic_id);
+						if(v.id === NaN) v.id = Conversation.messages[Conversation.messages.length - 1].id + 1;
+					}
+				)
 			}
 		}
 
-	}, [Conversation])
+	}, [MsgCount])
 
 	const GetConv = (ID, callback) => {
-		let temp;
+		
+		let tempConversation;
+
 		GetUserConversationbyId(CurrUserId, ID)
 		.then((r) => {
 			return r.json()
 		})
 		.then((J) => {
 			if(J.code === 200) {
-				temp = J.data;
+				tempConversation = J.data;
 			} else if (J.code === 204){
-				temp = {};
+				tempConversation = {};
 			} else {
 				alert(JSON.stringify(J));
 			}
 			console.log(J.data);
 		})
 		.finally(() => {
-			// temp.map((v) => {})
-			callback(temp);
+			// tempConversation.map((v) => {})
+			callback(tempConversation);
 		})
 	}
 
 	useEffect(() => {
 		let Id;
-		console.log(Conn);
+		
 		if(Conversation === null) {
 			NewConversation(CurrUserId, Other.id_)
 			.then((req) => {
@@ -474,8 +559,11 @@ const ConversationUI = ({
 			.finally(() => {
 				if(Id) {
 					const callback = (data) => {
+						console.log(data)
 						setConversation(data);
-						console.log(data);
+						if(data) {
+							setMsgCount((data.messages !== null) ? data.messages.length : 0)
+						};
 					}
 
 					GetConv(Id, callback);
@@ -484,10 +572,13 @@ const ConversationUI = ({
 			.catch(e => console.log(e))
 		}
 
+		return () => {
+			setConversation([]);
+		}
 	}, []);
 
 	return (
-		<UIWrapper ExtendStyles="pb-16">
+		<section className="pb-16 w-full">
 			{
 				(OtherUser) ? (
 					<>
@@ -517,7 +608,7 @@ const ConversationUI = ({
 													key={m.id} 
 													msg={m.data.text} 
 													Align={m.side}
-													TimeStamp={m.ts}
+													TimeStamp={new Date(m.ts)}
 												/>
 											)
 										) : ""
@@ -530,7 +621,8 @@ const ConversationUI = ({
 			}
 
 			<MessageInputUI SendMessage={Send_Message}/>
-		</UIWrapper>
+
+		</section>
 	)
 }
 
