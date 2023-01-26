@@ -1,15 +1,15 @@
 import { faHeart, faComment, faUserPlus } from "@fortawesome/free-solid-svg-icons";
 
-var api          = `http://${location.hostname}:8888/v2`; // Dev 
-var HOST         = location.hostname;
-var socket_base  = `ws://${location.hostname}:8888/v2`
-var FOLLOW       = 0
-var LIKE         = 1
-var COMMENT 	 = 2
-var NOTIFICATION = "NN"
-var NEWPOST      = "NP"
-var MSG          = "M"
-var POSTCHANGE   = "PC" // CAN BE INCREMENATION OF LIKES/COMMENT..
+var api          	= `http://${location.hostname}:8888/v2`; // Dev 
+var HOST         	= location.hostname;
+var socket_base  	= `ws://${location.hostname}:8888/v2`
+
+const FOLLOW        = 0
+const LIKE          = 1
+const COMMENT       = 2
+const NOTIFICATION  = 3
+const NEWPOST       = 4
+const MSG           = 5
 
 const notificationIconMap = {
 	0 : {
@@ -43,6 +43,5 @@ export {
 	FOLLOW,
 	NOTIFICATION,
 	NEWPOST,
-	POSTCHANGE,
 	MSG
-};
+}

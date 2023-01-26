@@ -20,7 +20,11 @@ const Home = ({
 	NotificationFunc = () => {},
 	funcPoolManager = null,
 	NewPosts = [],
-	setNewPosts
+	NewLikes = [],
+	NewComments = [],
+	FlushNewPosts,
+	FlushNewComments,
+	FlushNewLikes
 }) => {
 	
 	const User = useSelector(state => state.User);
@@ -33,11 +37,50 @@ const Home = ({
 		
 		if(NewPosts.length > 0) {
 			// TODO: Clean after consumption.
-			setPosts(p => [...NewPosts, ...p])
-			setNewPosts([]);
-		}		
-
+			if(Posts.length > 0) {
+				setPosts(p => [...NewPosts, ...p])	
+			} else {
+				setPosts(NewPosts)
+			}
+			
+			FlushNewPosts();
+		}	
 	}, [NewPosts.length])
+
+	useEffect(() => {
+		// post_id
+		if(NewComments.length > 0) {
+			if(Posts.length > 0) {
+				var tmp = Posts
+				
+				NewComments.map(entry => {
+					if(tmp[entry.post_id].likes_count === 0) tmp[entry.post_id].post_likes = [];
+					tmp[entry.post_id].post_likes.push(entry);
+					tmp[entry.post_id].likes_count++;
+				})
+
+				setPosts(tmp);
+				FlushNewComments();
+			}
+		}
+	}, [NewComments.length])
+
+	useEffect(() => {
+		// post_id
+		if(NewLikes.length > 0) {
+			if(Posts.length > 0) {
+				var tmp = Posts
+				NewLikes.map(entry => {
+					if(tmp[entry.post_id].comments_count === 0) tmp[entry.post_id].post_comments = [];
+					tmp[entry.post_id].post_comments.push(entry);
+					tmp[entry.post_id].comments_count++;
+				})
+
+				setPosts(tmp);
+				FlushNewLikes();
+			}
+		}
+	}, [NewLikes.length])
 
 	const FetchPosts = (isSubscribed) => {
 		if(isSubscribed) {
@@ -53,10 +96,10 @@ const Home = ({
 	        
 	        .then((Json) => {
 	        	if(Json.code == 200) {
-	        		if(Json.data.length > 0) {
+	        		
+	        		if(Object.keys(Json.data).length > 0) {
 	        			var posts = Json.data;
 	        			setPosts(posts);
-
 	        		} else {
 	        			setPosts("No posts to display.");
 	        		}
@@ -94,7 +137,7 @@ const Home = ({
 			setPosts(null);
 		}
 
-	}, [])
+	}, []);
 
 	return (	
 		<UIWrapper>
@@ -104,7 +147,7 @@ const Home = ({
 
          		{
 					(Posts && (typeof Posts === "object")) ? (
-						Posts.map((v, i) => {
+						Object.values(Posts).reverse().map((v, i) => {
 							return (
 								<Post 
 									Userid_={v.user.id_}
@@ -116,10 +159,11 @@ const Home = ({
 									CreatedDate={v.date}
 									key={v.id}
 									NotificationFunc={NotificationFunc}
+									PostLikesProp={ (v.post_likes !== null) ? v.post_likes : []}
+									PostCommentsProp={ (v.post_comments !== null) ? v.post_comments : [] }
 								/>
 							)
 						})
-						
 						) : (
 							<div className="text-white flex flex-col justify-center items-center h-24">
 								{ (isLoading) ? <Loader /> : (typeof Posts === "string") ? <p className="text-white"> { Posts } </p> : <Retry func={FetchPosts}/> }

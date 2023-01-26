@@ -1,4 +1,4 @@
-import { faHeart, faComment, faEdit, faShare, faEllipsisVertical, faTrashCan, faClose, faAdd } from "@fortawesome/free-solid-svg-icons";
+import { faImage, faHeart, faComment, faEdit, faShare, faEllipsisVertical, faTrashCan, faClose, faAdd } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon as Fa } from "@fortawesome/react-fontawesome";
 import { useState, useEffect, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -6,6 +6,7 @@ import { Paragraphs, Iframe } from "./microComps";
 import { useSelector, useDispatch } from 'react-redux';
 import { CommentPannel as CommentPannelUI } from "./commentPannel";
 import { UserDisplay } from "./UserUI";
+
 import {
 	getPostById,
 	DeletePost, 
@@ -30,11 +31,43 @@ const Post = ({
 	PostText,
 	NotificationFunc = () => {},
 	CreatedDate = new Date(),
-	expanded = false
+	expanded = false,
+	PostLikesProp,
+	PostCommentsProp,
+	PostEventDispatcher = (action, payload) => console.log(action, "\n", payload)
 }) => {
 
-	const [PostLikes, setPostLikes] = useState([]);
-	const [PostComments, setPostComments] = useState([]);
+	/* 
+	TODO:
+		EventFuncs = {
+			'remove': () => {
+				# signal to the UI that the post was deleted.
+			},
+			'RemComment': (State) => {
+				# signal to the UI that a comment was removed.
+			},
+			'RemLike': () => {
+				# signal to the UI that a like was removed.
+			},
+			'AddComment': (State) => {
+				# signal to the UI that a comment was added.
+			},
+			'AddLike': () => {
+				# signal to the UI that a like was added.
+			}
+		}
+		
+		PostEventDispatcher = () => {
+			...
+		}
+		
+		# Dispatch an event with an action and a payload to use...
+		PostEventDispatcher = (action, payload) => EventFuncs[action](payload);
+
+	*/
+
+	const [PostLikes, setPostLikes] = useState(PostLikesProp);
+	const [PostComments, setPostComments] = useState(PostCommentsProp);
 	const User = useSelector(state => state.User);
 	const [Liked, setLike] = useState(false);
 	const [imgcmp, setImgcmp] = useState(false);
@@ -55,9 +88,10 @@ const Post = ({
 	const removeLike = () => {
 		
 		const temp = PostLikes;
+	
 		var New = PostLikes.filter(s => s.uuid != User.id_);
 		setPostLikes(New);
-
+		
 		unLike(PostId, User.id_)
 		.then(r => r.json())
 		.then(json => {
@@ -65,6 +99,8 @@ const Post = ({
 				// failed.
 				setPostLikes(temp);
 				setLike(true);
+			} else {
+				PostEventDispatcher('RemLike', User.id_);
 			}
 		})
 		.catch(e => {
@@ -73,7 +109,7 @@ const Post = ({
 	}
 
 	const addLike = () => {
-		const temp = PostLikes;
+		const old = PostLikes;
 		var New = PostLikes;
 		
 		const ob = {
@@ -91,8 +127,11 @@ const Post = ({
 			
 			if(json.code !== 200) {
 				// Success.
-				setPostLikes(temp);
+				setPostLikes(old);
 				setLike(false);
+			} else {
+				PostEventDispatcher('AddLike', User.id_);
+				console.log(json);
 			}
 		})
 		.catch(e => {
@@ -103,7 +142,6 @@ const Post = ({
 	const like = () => {
 		
 		if(!LikeEventFlag) {
-			
 			setLikeEventFlag(true);
 				
 			if(Liked) {
@@ -120,51 +158,8 @@ const Post = ({
 		setLikeEventFlag(false);
 	}
 
-	const UpdateComments = () => {
-		getComments(PostId)
-		
-		.then((r) => {
-			return r.json()
-		})
-
-		.then((json) => {
-			
-			if(json.code === 200 ) {
-				// alert(JSON.stringify(json));
-				if(json.data != null) {
-					var comments = json.data;
-					setPostComments(comments)
-				}
-			}
-		})
-		
-		.catch(e => {
-			console.log(e)
-		})
-	}
-
-	const UpdateLikes = () => {
-		
-		getLikes(PostId)
-		.then((r) => {
-			return r.json()
-		})
-
-		.then((json) => {
-			
-			if(json.code === 200 ) {
-				if(json.data != null) {
-					setPostLikes(json.data)
-				}
-			}
-		})
-		
-		.catch(e => {
-			console.log(e)
-		})
-	}
-
 	useEffect(() => {
+
 		
 		if(PostLikes.length > 0) {
 			PostLikes.map(v => {
@@ -173,22 +168,12 @@ const Post = ({
 				}
 			})
 		}
-
-		return () => setLike(false);
-
-	}, [PostLikes]);
-
-	useEffect(() => {
-
-		UpdateLikes();
-		UpdateComments();
 		
 		return () => {
 			setPostComments([]);
 			setPostLikes([]);
 			setLike(false);
 		}
-
 	}, [])
 
 	const PostOnClick = () => {
@@ -199,24 +184,17 @@ const Post = ({
 	}
 
 	const Delete = () => {
-		
-		console.log(Userid_, PostId);
-
 		DeletePost(Userid_, PostId)
 		.then(response => { return response.json() })
 		.then(json => {
 			if(json.code === 200) { 
 				setdeletedflag(true)
-				
 				NotificationFunc({
 					text: "Post deleted successfully!!",
 					status: "success"
-				});
-
+				})
 			}
 			else {
-				console.log(json);
-
 				NotificationFunc({
 					text: `post Was not deleted, ${json.data}`,
 					status: "info"
@@ -227,7 +205,7 @@ const Post = ({
 			NotificationFunc({
 				text: `warning: ${e}`,
 				status: "info"
-			});
+			})
 		})
 	}
 	
@@ -272,7 +250,7 @@ const Post = ({
 					{
 						(User.id_ === Userid_) ? (
 							<>
-								<Fa icon={faEllipsisVertical} title="edit post." className="transition-all cursor-pointer text-white" onClick={onEditPost}/>
+								<Fa size="sm" icon={faEllipsisVertical} title="edit post." className="transition-all cursor-pointer text-white" onClick={onEditPost}/>
 						
 								<div className={`text-white shadow-xl bg-neutral-800 px-4 rounded absolute ${(ShowEdit) ? "flex flex-col" : "hidden"}`} style={{
 									top: `${EditPos.y}px`,
@@ -280,14 +258,13 @@ const Post = ({
 								}}>
 									<button className="flex flex-row justify-between items-center my-1 hover:underline cursor-pointer" title="delete the post" onClick={Delete}>
 										<span> Delete </span> 
-										<Fa icon={faTrashCan} className="ml-4 transition-all text-white"/> 
+										<Fa icon={faTrashCan} className="ml-4 transition-all text-white" size="sm"/> 
 									</button>
 									
 									<button className="flex flex-row justify-between items-center my-1 hover:underline cursor-pointer" title="edit the post" onClick={Delete}>
 										<span> Edit </span> 
-										<Fa icon={ faEdit } className="ml-4 transition-all text-white"/> 
+										<Fa icon={ faEdit } className="ml-4 transition-all text-white" size="sm"/> 
 									</button>
-
 								</div>
 							</>
 						) : ""
@@ -313,17 +290,17 @@ const Post = ({
 				
 					<div className="flex flex-row items-center justify-start">
 						<div className="flex flex-row items-center justify-start rounded shadow-2xl">
-							<Fa icon={ faHeart } className={`cursor-pointer transition-all ${(Liked) ? "text-rose-700" : "text-white"}`} size="md" onClick={like}/>
+							<Fa icon={ faHeart } className={`cursor-pointer transition-all ${(Liked) ? "text-rose-700" : "text-white"}`} size="sm" onClick={like}/>
 							<span className="font-base text-slate-400 ml-2"> { PostLikes.length } </span>
 						</div>
 						
 						<div className="ml-5 flex flex-row items-center justify-start rounded shadow-2xl">
-							<Fa icon={ faComment } className="cursor-pointer transition-all text-white" size="md" onClick={ToggleExpandPost}/>
+							<Fa icon={ faComment } className="cursor-pointer transition-all text-white" size="sm" onClick={ToggleExpandPost}/>
 							<span className="font-thin text-white ml-2"> { PostComments.length } </span>
 						</div>
 
 						<div className="ml-5 flex flex-row items-center justify-start rounded shadow-2xl">
-							<Fa icon={ faShare } className="cursor-pointer transition-all text-white" size="md" />
+							<Fa icon={ faShare } className="cursor-pointer transition-all text-white" size="sm" />
 							<span className="font-thin text-white ml-2"> 0 </span>
 						</div>
 					</div>
@@ -573,7 +550,7 @@ const PostFormUI = ({ setPosts, NotificationFunc }) => {
 					var New = state;
 					
 
-					New.id = Json.data - 1;
+					New.id = Json.data;
 					New.user = User;
 					
 					resetAll(New); // TODO this is fishy !!
@@ -601,43 +578,29 @@ const PostFormUI = ({ setPosts, NotificationFunc }) => {
 
 
 	return (
-		<form className="mx-auto border border-slate-900 mt-2 flex rounded py-6 px-2 flex-col justify-center items-start my-2 w-full md:w-[80%]  transition-all">
+		<form className="mx-auto border border-slate-900 mt-2 flex rounded p-2 flex-col justify-center items-start my-2 w-full md:w-[80%]  transition-all">
 					
 			<input type="file" id="image" className="hidden" onChange={OnImageSelected}/>
-
         	<textarea cols="81" rows={rows} ref={textField} onChange={OnTypingText} className="NoBar w-full focus:border-b-sky-700 border-b-neutral-700 border-b resize-none p-3 text-white bg-none px-2 outline-none bg-black p-2" type="text" placeholder="say something" /> 
         	
-        	<div className="flex flex-row items-center justify-between mt-2 w-full">
-              	<div>
-              		<button onClick={OpenFileDialogue} title="Attach image" className="text-white p-2 hover:bg-neutral-800 mx-2 bg-neutral-900 rounded">
-      				<p className=""> add image </p>
-              		</button>
-					<button onClick={OnSubmit} title="Send post" className="text-white p-2 hover:bg-sky-500 bg-sky-600 rounded">
-	              		<p className=""> post </p>
-	              	</button>
+        	<div className="flex flex-col bg-neutral-900 p-2 rounded-md mt-2 w-full">
+              	<div className="flex w-full flex-row items-center justify-between">
+              		<Link to='/profile' className="flex flex-row items-start justify-start">
+	               	    <img src={User.img} alt="avatar" className="w-10 h-10 rounded-full shadow-2xl"/>
+	              	</Link>
+
+	              	<div className="flex items-center justify-center">
+	              		<Fa onClick={OpenFileDialogue} icon={faImage} size="sm" 
+	              			className="transition-all ease-in-out mx-2 cursor-pointer text-white rounded-full hover:bg-sky-600 p-2" />
+						<button onClick={OnSubmit} title="Send post" className="text-white py-1 px-2 hover:bg-sky-500 bg-sky-600 rounded">
+		              		<p className=""> post </p>
+		              	</button>
+	              	</div>
               	</div>
-              	<Link to='/profile'>
-               	    <img src={User.img} alt="avatar" className="w-10 h-10 rounded-full shadow-2xl"/>
-              	</Link>
+
+              	{ (Image) ? (<img src={Image} className="rounded-md my-2 w-full" alt='imgUploaded' />) : "" }
+
         	</div>
-
-        	{
-        		(Image) ? (
-        			<div className="text-white flex justify-center items-start flex-row flex-wrap p-2">
-            			{
-            				(typeof Image === "string") ? (
-            					<img src={Image} className="rounded-md h-30" alt='imgUploaded' />
-            				) : (
-            				
-        						Image.map((v, i) => {
-		        					return <img key={i} src={v} className="rounded-md h-24" alt='imgUploaded' />	
-        						})
-            				)
-            			}
-					</div>
-        		) : ""
-            }
-
     	</form>
 	)
 }

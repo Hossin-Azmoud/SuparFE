@@ -22,62 +22,97 @@ import UserNotifications from "./routes/UserNotifications";
 import { SubmitJWT, GetUserNotifications } from "./server/serverFuncs";
 import { ApplicationNotification } from "./components/microComps";
 import { PostPage } from "./components/Post";
-import { HOST, NOTIFICATION, NEWPOST, MSG } from "./server/Var";
+import { HOST, NOTIFICATION, NEWPOST, MSG, LIKE, COMMENT } from "./server/Var";
 import { useSocket } from "./server/socketOps"
-
 
 const App = () => {    
     
     const User = useSelector(state => state.User);
-    const PostPool = useSelector(state => state.PostPool);
-    const [NewPosts, setNewPosts] = useState([]);
+
     const dispatch = useDispatch();
+    // Loading state
     const [Loading, setLoading] = useState(true);
+    
+    // Application main notifier state.
     const [Notification, setNotification] = useState(null);
-    const [NewNots, setNewNots] = useState([])
+    
     const [FetchedNotifications, setFetchedNotifications] = useState([]);
+    
     const [FuncPool, setFuncPool] = useState({});
+   
+    // Socket handeled states.
     const [NewMsgs, setNewMsgs] = useState([]);
+    const [NewPosts, setNewPosts] = useState([]);
+    const flushNewPosts = () => setNewPosts([])
+
+    const [NewComments, setNewComments] = useState([]);
+    const flushNewComments = () => setNewComments([])
+
+    const [NewLikes, setNewLikes] = useState([]);
+    const flushNewLikes = () => setNewLikes([])
+
+
+    const [NewNots, setNewNots] = useState([])
+   
     // Counters 
     const [notCount, setnotCount] = useState(0);
     const [NewMessageCount, setNewMessageCount] = useState(0);
-   
+    const [NotificationID, setID] = useState(0);
+
+    let NotsFetched = false;
+    // Socket
+    var [SocketConn, setSocketConn] = useState(null);
+    
+    /*       Functions         */
     const AddToPool = (Obj) => {
         setFuncPool(p => {
             return { ...p, ...Obj };
         })
     }
-
     const HandleNewNotification = (ob) => {
         setNewNots([...NewNots, ob]);
         setnotCount(p => p + 1);
     }
-
     const HandleNewPost = (ob) => {
         setNewPosts(
             p => [ob, ...p]
         );
     }
-
     const HandlePostChange = (ob) => console.log(ob)
-
     const LogUnknownActionData = (data) => {
+       
         console.log("-------------------------------------------------------------------")
         console.log("Unsupported action: ")
         console.log(        data       )
         console.log("-------------------------------------------------------------------")
     }
-
     const HandleShatNewMsg = (msgObject) => {
+        msgObject.side = "right"; 
         
-        msgObject.side = "left";
-    
         setNewMsgs(
             p => [...p, msgObject]
         );
 
         setNewMessageCount(p => p + 1);
-    };
+    }
+
+    const HandleNewComment = (Comment) => {
+        console.log("NEW Comment")
+        console.table(Comment);
+        // Mutate state.
+        setNewComments(
+            p => [Comment, ...p]
+        );
+    }
+  
+    const HandleNewLike = (Like) => {
+        console.log("NEW Like")
+        console.table(Like);
+        // Mutate state.
+        setNewLikes(
+            p => [Like, ...p]
+        );
+    }
 
     const onMessageCallback = (m) => {
         
@@ -91,11 +126,17 @@ const App = () => {
             case NEWPOST:
                 HandleNewPost(SockMsg.data);
                 break
-           
-            // case POSTCHANGE:
-            //     HandlePostChange(SockMsg.data);    
-            //     break
+            
+            case COMMENT:
+                // TODO add the comment to the posts.
+                HandleNewComment(SockMsg.data);
+                break
 
+            case LIKE:
+                // TODO Add the like to the posts.
+                HandleNewLike(SockMsg.data);
+                break
+            
             case MSG:
                 HandleShatNewMsg(SockMsg.data)
                 break
@@ -104,11 +145,7 @@ const App = () => {
                 LogUnknownActionData(SockMsg)
                 break
         }
-
     }
-    
-    var [SocketConn, setSocketConn] = useState(null);
-    var NotsFetched = false;
 
     const fetchOldNotifications = () => {
         
@@ -143,52 +180,42 @@ const App = () => {
         })
 
         .catch(e => console.log(e))
-
     }
+    const AuthUser = () => {
+        // Gets user using the json web token!
 
-    useEffect(() => {
+        SubmitJWT(JWT)
+        .then((res) => {
+            return res.json()
+        })
 
-        if(JWT) {
-            SubmitJWT(JWT)
+        .then((Json) => {
             
-            .then((res) => {
-                return res.json()
-            })
-
-            .then((Json) => {
-                
-                if(Json.code === 200) {
-                    var user = Json.data;
-                    dispatch(login(user));
-        
-                } else {
-                    console.log(Json);
-                }
-            })
-            .finally(() => {
-                setLoading(false);
-            })
-            .catch(e => {
-                
+            if(Json.code === 200) {
+                var user = Json.data;
+                dispatch(login(user));
+            } else {
                 dispatchNotificationEvent({
-                    text: "Could not login.",
+                    text: `${Json.data}`,
                     status: "error"
                 })
-
-            })
-        } else {
+            }
+        })
+        .finally(() => {
             setLoading(false);
-        }
-
-        return () => setLoading(true);
-
-    }, []);
-
-    
-
-    useEffect(() => {
-        
+        })
+        .catch(e => {
+            
+            dispatchNotificationEvent({
+                text: "Could not login.",
+                status: "error"
+            })
+        })
+    }
+    const OnAuth = () => {
+        // Initiate a connection with the backend if the user is authenticated !
         if(User) {
+            
             if(SocketConn === null) {
                 var s = useSocket(User.id_, onMessageCallback);
                 setSocketConn(s);    
@@ -196,27 +223,47 @@ const App = () => {
 
             fetchOldNotifications();
         }
-
-        return () => {
-            setSocketConn(null);
-            setFetchedNotifications([]);
-            setNewNots([]);
-            setnotCount(0);
-        }
-                
-    }, [User])
-
-    const [ID, setID] = useState(0);
-
+    }
+    const ResetAppState = () => {
+        // Reset state.
+        setSocketConn(null);
+        setFetchedNotifications([]);
+        setNewNots([]);
+        setnotCount(0);
+        setNewMessageCount(0);
+        setNewPosts([]);
+        setNewMsgs([]);
+    }  
     const dispatchNotificationEvent = (ob) => {
         
         setNotification({
             ...ob,
-            id: ID
+            id: NotificationID
         });
 
         setID(o => o + 1)
     }
+    const FlushNewMessagesAfterUse = () => {
+        console.log("FLUSHED!");
+        setNewMsgs([]);
+    }
+    
+    // Effects
+    useEffect(() => {
+
+        if(JWT) {
+            AuthUser()
+        } else {
+            setLoading(false);
+        }
+
+        return () => setLoading(true);
+    }, [])
+
+    useEffect(() => {
+        OnAuth();
+        return ResetAppState;
+    }, [User])
 
     return (
         <>
@@ -226,21 +273,15 @@ const App = () => {
                             <NavBar NewMsgCount={NewMessageCount} UserImg={User.img} NewNotificationCount={notCount}/>
                             { ("setPosts" in FuncPool) ? <FloatingPostFormUI setPosts={FuncPool["setPosts"]} NotificationFunc={dispatchNotificationEvent} /> : "" }
                             <Routes>
-                                <Route path="/" element={<Home NewPosts={NewPosts} setNewPosts={setNewPosts} NotificationFunc={dispatchNotificationEvent} funcPoolManager={AddToPool} />} />
-                                <Route path="/chat" element={<ChatUI flushMessages={() => setNewMsgs([])} User={User} NewMessages={NewMsgs} NotificationFunc={dispatchNotificationEvent} Conn={SocketConn} />} />
-                                <Route path="/Home" element={<Home NewPosts={NewPosts} setNewPosts={setNewPosts} NotificationFunc={dispatchNotificationEvent} funcPoolManager={AddToPool} />} />
+                                <Route path="/" element={<Home NewPosts={NewPosts} NewComments={NewComments} NewLikes={NewLikes} FlushNewPosts={flushNewPosts} FlushNewComments={flushNewComments} FlushNewLikes={flushNewLikes} NotificationFunc={dispatchNotificationEvent} funcPoolManager={AddToPool} />} />
+                                <Route path="/Home" element={<Home NewPosts={NewPosts} NewLikes={NewLikes} NewComments={NewComments} FlushNewPosts={flushNewPosts} FlushNewComments={flushNewComments} FlushNewLikes={flushNewLikes} NotificationFunc={dispatchNotificationEvent} funcPoolManager={AddToPool} />} />
+                                <Route path="/chat" element={<ChatUI flushMessages={FlushNewMessagesAfterUse} User={User} NewMessages={NewMsgs} NotificationFunc={dispatchNotificationEvent} Conn={SocketConn} />} />
                                 <Route path="/Login" element={<Login NotificationFunc={dispatchNotificationEvent} />} />
                                 <Route path="/Signup" element={<SignUp NotificationFunc={dispatchNotificationEvent}/>} />
                                 <Route path="/profile" element={<CurrentUserProfile NotificationFunc={dispatchNotificationEvent}/>}/>
                                 <Route path="/Notifications" element={<UserNotifications socketConn={SocketConn} Notifications={FetchedNotifications} CountCallback={setnotCount} NewNotifications={NewNots}/>} />
                                 <Route path="/i" element={<Icons NotificationFunc={dispatchNotificationEvent} />} />
                                 <Route path="/Accounts" element={<AccountsSearchPannel CurrUserId={User.id_} NotificationFunc={dispatchNotificationEvent} />}/>
-                                <Route 
-                                    path="/chat/:conversation_id" 
-                                    action={({ params }) => {}}
-                                    loader={({ params }) => {}}
-                                    element={<ConversationUI CurrUserId={User.id_} Conn={SocketConn} NotificationFunc={dispatchNotificationEvent}/>} 
-                                />
 
                                 <Route
                                     path="/Accounts/:id"
@@ -285,7 +326,9 @@ const App = () => {
                         )
                     )}
             <div>
-                { (Notification) ? <ApplicationNotification msg={Notification.text} StyleKey={Notification.status} id={ID}/> : ("") }
+                { 
+                    (Notification) ? <ApplicationNotification msg={Notification.text} StyleKey={Notification.status} id={NotificationID}/> : ("")
+                }
             </div>
         </>
     );

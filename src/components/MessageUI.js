@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { timeAgo } from "../Util/time";
-
+import { faEllipsisVertical, faImage } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon as Fa } from "@fortawesome/react-fontawesome";
 
 const MessageUI = ({ 
 	msg, 
@@ -45,13 +46,12 @@ const MessageInputUI = ({
 	SendMessage = () => {}
 }) => {
 	const textField = useRef(null)
+	
 	const [row, setRow] = useState(1);
 	const [msg, setMsg] = useState("");
 	const countLines = (t) => t.split('\n').length;	
 
-	const OnTypingText = (e) => {
-		setMsg(e.target.value);
-	}
+	const OnTypingText = (e) => setMsg(e.target.value);
 
 	useEffect(() => {
 		if(msg) {
@@ -64,22 +64,23 @@ const MessageInputUI = ({
 
 	}, [msg])
 
+	const ResetFormState = () => {
+		setMsg("");
+	}
+
 	const Send = (e) => {
-		e.preventDefault();
-		// TODO send the data
+		e.preventDefault()
 		SendMessage(msg);
-		// scroll(0, document.body.scrollHeight + 10)
+		ResetFormState();
 	}
 	
 	return (
-
-		<form className="w-full rounded mx-auto flex items-end transition-all ease-in-out flex-col justify-between p-6 my-2 justify-center items-end w-full transition-all">
-			
-			<textarea cols="80" rows={row} ref={textField} onChange={OnTypingText} className="rounded focus:border-sky-500 border my-1 border-neutral-700 transition-all ease-in-out border-box text-white resize-none outline-none p-2 bg-black w-full" type="text" placeholder="say something" /> 		
-			<button className="text-white bg-blue-500 rounded p-2" onClick={Send}>
+		<form className="w-full rounded mx-auto flex items-end transition-all border border-neutral-900 focus-within:border-sky-500 ease-in-out flex-row p-2 items-center justify-between my-2 w-full transition-all">
+			<Fa icon={faImage} size="sm" className="transition-all ease-in-out cursor-pointer text-white rounded-full hover:bg-slate-900 p-2" />
+			<textarea rows={row} value={msg} onChange={OnTypingText} className="p-1 mx-4 rounded transition-all ease-in-out border-box text-white resize-none outline-none bg-black w-full" type="text" placeholder="say something" /> 
+			<button className="text-white bg-blue-500 cursor-pointer rounded px-2 py-1" onClick={Send}>
 				send
 			</button>
-			
 		</form>
 	)
 }

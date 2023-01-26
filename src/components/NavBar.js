@@ -1,16 +1,14 @@
 import { useSelector, useDispatch } from 'react-redux';
-
 import {
 	logout
 } from "../store/userStore";
-
 import { useEffect, useState } from 'react';
 import { faHouse, faMessage, faUserFriends, faSignOut, faUsers, faCog, faBell  } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon as Fa } from '@fortawesome/react-fontawesome';
 import { Link, useNavigate } from "react-router-dom";
 
 // Guts@gmail.com
-const NavBar = ({ UserImg, NewNotificationCount = 0, NewMsgCount = 0}) => {
+const NavBar = ({ UserImg, NewNotificationCount, NewMsgCount}) => {
 	
 	const [MessagesCount, setMCount] = useState(NewMsgCount);
 	const [NotificationsCount, setNCount] = useState(NewNotificationCount);
@@ -66,6 +64,5 @@ const NavBar = ({ UserImg, NewNotificationCount = 0, NewMsgCount = 0}) => {
 		</aside>
 	)
 };
-
 
 export default NavBar;

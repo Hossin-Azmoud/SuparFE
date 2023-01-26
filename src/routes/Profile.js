@@ -237,25 +237,15 @@ const ProfileRenderer = ({
 	            return res.json()
 	        })
 	        .then(Json => {
-	        	if(Json.code == 200) {
+	        	if(Json.code == 200) {	        		
 	        		if(Json.data) {
-	        			
 	        			var posts = Json.data;
-	        			
-	        			if(HOST) {
-	        				posts.map((v, i) => {
-										v.img = v.img.replace("localhost", HOST)
-	        				})
-	        			}
-
 	        			setPosts(posts);
-
 	        		} else {
 	        			setPosts("No posts yet.");
 	        		}
-	        	} else if (Json.code == 500) {
-	        		setPosts(Json.data);
 	        	}
+
 	        })
 	        .finally(() => {
 	        	setLoading(false);
@@ -427,7 +417,7 @@ const ProfileRenderer = ({
 				
 				{
 					(Posts && (typeof Posts === "object")) ? (
-						Posts.map((v, i) => {
+						Object.values(Posts).reverse().map((v, i) => {
 							return (
 								<Post 
 									Userid_={User.id_}
@@ -437,6 +427,8 @@ const ProfileRenderer = ({
 									PostImg={v.img}
 									PostText={v.text}
 									CreatedDate={v.date}
+									PostLikesProp={ (v.post_likes !== null) ? v.post_likes : []}
+									PostCommentsProp={ (v.post_comments !== null) ? v.post_comments : [] }
 									key={i}
 								/>
 							)

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { faHeart, faComment, faEdit, faShare, faEllipsisVertical, faTrashCan, faClose, faAdd, faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeftLong, faHeart, faComment, faEdit, faShare, faEllipsisVertical, faTrashCan, faClose, faAdd, faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon as Fa } from "@fortawesome/react-fontawesome";
 import { timeAgo } from "../Util/time";
 import { MSG } from "../server/Var";
@@ -17,6 +17,10 @@ import {
     NewConversation
 } from "../server/serverFuncs";
 
+// Utill
+const ScrollTop = () => scroll(0, 0);
+const ScrollBottom = () => scroll(0, document.body.scrollHeight);
+
 const ChatUI = ({
 	NotificationFunc = () => {},
 	Conn = {
@@ -25,34 +29,20 @@ const ChatUI = ({
 	User,
 	NewMessages = [],
 	flushMessages = () => {
-		// TODO MEANT TO CLEAN UP THE NEW MESSAGES AFTER UPDATING!!!	
+		// TODO MEANT TO CLEAN UP THE NEW MESSAGES AFTER UPDATING!!!
 	}	
 }) => {
 
 	const [Convos, setConvos] = useState(null);
 	const [Users, setUsers] = useState([]);
 	const [Other, setOther] = useState(null);
-	// TODO: Fetch the user messages!
 	
+	// TODO: Fetch the user messages!
 	const [IsLoading, setIsLoading] = useState(true);
 	const [OpenNewConv, setOpenNewConv] = useState(false);
 	const [SelectedConversation, SelectConversation] = useState(null);
 	const getSide = (id) => ((id === User.id_) ? "left" : "right");
 	
-	const SendMessage = (conversation_id, text, mt, other_id) => {
-		Conn.send(JSON.stringify({
-			code: 200,
-			action: MSG,
-			data: {
-				conversation_id,
-				data: { 
-					text, 
-					mt 
-				},
-				other_id
-			}
-		}));
-	}
 
 	const GetRelations = () => {
 		let TempUserRelationShips = []
@@ -90,7 +80,8 @@ const ChatUI = ({
 	}
 
 	const GetUserObjects = (Array_, callback) => {
-		var temp = []
+		
+		var temp = {}
 		var UObject;
 		for(let i = 0; i < Array_.length; i++) {
 			GetUserById(Array_[i], User.id_)
@@ -104,9 +95,9 @@ const ChatUI = ({
 				}
 			})
 			.finally(() => {
-				temp.push(UObject);
+				temp[UObject.id_] = UObject;
 				
-				if(Array_.length === temp.length) {
+				if(Array_.length === Object.keys(temp).length) {
 					callback(temp);
 				}
 
@@ -126,7 +117,12 @@ const ChatUI = ({
 		let ids = [];		
 		
 		GetUserConversations(User.id_)
-		.then(r => r.json())
+		
+		.then(r => {
+			// if(r.status_code !== 200) { console.log(r) }
+			return r.json()
+		})
+		
 		.then(J => {
 			if(J.code === 200) {
 				if(J.data !== null && J.data !== undefined) {
@@ -134,44 +130,44 @@ const ChatUI = ({
 				}
 			}
 		})
+		
 		.finally(() => {
 			if(tempConversations) {
 				
-				tempConversations.map((c) => {
-					ids.push((c.fpair === User.id_) ? c.spair : c.fpair);	
-					return c;
-				});
+				Object.values(tempConversations).map(c => {
+					ids.push((c.fpair === User.id_) ? c.spair : c.fpair)
+					return c
+				})
 
 				const callback = (data) => {
-					console.log(tempConversations[0]);
-					for(let i = 0; i < tempConversations.length; i++) {
-						
-						tempConversations[i].Other = data[i];
-						
-						if(tempConversations[i].messages) {
-							
-							tempConversations[i].messages.map(v => {
-								v.side = getSide(v.topic_id);
-							})
+					
+					Object.keys(tempConversations).map(k => {
+						const OTHER_ID = (tempConversations[k].fpair === User.id_) ? tempConversations[k].spair : tempConversations[k].fpair;
+					
+						tempConversations[k].Other = data[OTHER_ID];
 
-							// for (let j = 0; j < tempConversations[i].messages.length; j++){
-							// 	tempConversations[i].messages[j].side = getSide(messages[j].topic_id);
-							// }
+						if(tempConversations[k].messages) {
+							tempConversations[k].messages.map(v => {
+								v.side = getSide(v.topic_id);
+								return v;
+							})
 						}
-					}
+					})
 
 					setConvos(tempConversations);
 				}
 
-				GetUserObjects(ids, callback);	
+				GetUserObjects(ids, callback);
 			}
 		})
+
 		.catch(e => console.log(e))
 	}
 
 	useEffect(() => {
 		// TODO require a token! so not everyone can get the messages or send shit!
 		GetAllConversations();
+		ScrollBottom();
 		return () => {
 			setIsLoading(true);
 			setUsers([]);
@@ -179,31 +175,54 @@ const ChatUI = ({
 
 	}, [])
 
-	useEffect(() => {
-		
-		if(Convos) {
-				
-			var tempConversations = Convos;
-			console.log("NEW Message!!!")
-			console.log(NewMessages)
-			console.log(tempConversations)
+	useEffect(() => OnNewMessagesEvent, [NewMessages.length])
+	
+	const OnNewMessagesEvent = () => {
+		if(Convos) NewMessages.map(m => DispatchNewMessageEvent(m))
+		flushMessages();
+	}
+
+	const GetUserObject = (uuid) => {
+		var ob = {};
+
+		GetUserById(uuid, User.id_)
+		.then(r => r.json())
+		.then(J => {
+			if (J.code === 200) {
+				ob = J.data;
+			}
+		})
+		.catch(e => console.log(e));
+		return ob;
+	}
+
+	const DispatchNewMessageEvent = NewMsg => {
+		var tempConversations = Convos;
+		const key = String(NewMsg.conversation_id)
+		// After the update.
+		if(Object.keys(tempConversations).includes(key)) {
+			if(tempConversations[key].message_count === 0) tempConversations[key].messages = [];
+			tempConversations[key].messages.push(NewMsg);
+			tempConversations[key].message_count++;
+		} else {
 			
-			tempConversations.map(c => {
-			
-				NewMessages.map(m => {
-					if(m.conversation_id === c.id) { 
-						c.messages.push(m) 
-					}
-				})
+			tempConversations[key] = {
+				id: parseInt(key),
+				fpair: NewMsg.other_id,
+				spair: NewMsg.topic_id,
+				messages: [NewMsg],
+				message_count: 1,
+				ts: new Date()
+			}
 
-			});
-
-			flushMessages();
-
-			setConvos(tempConversations)
+			tempConversations[key].Other = GetUserObject(NewMsg.topic_id);
+			console.log("New socket msg!")
+			console.log(tempConversations[key]);
 		}
 
-	}, [NewMessages.length])
+		setConvos(tempConversations);
+		ScrollBottom();
+	}
 
 	return (
 		
@@ -216,20 +235,7 @@ const ChatUI = ({
 						Conn={Conn}
 						Other={Other}
 						conversation={SelectedConversation}
-						callback={(id, New) => {
-							var tempConversations = Convos;
-							
-							tempConversations.map(c => {
-								if(id === c.id) {
-									c = New;
-									return;
-								}
-							});
-
-							console.log("Dispatched action and the res is mutated convos");
-							console.log(New)
-							setConvos(tempConversations);
-						}}
+						callback={DispatchNewMessageEvent}
 					/>
 				) : (
 				<>			
@@ -275,8 +281,8 @@ const ChatUI = ({
 										<Loader size="20" />
 									</div>
 								) : (
-									(Users.length > 0) ? (
-										Users.map(v => {
+									(Object.values(Users).length > 0) ? (
+										Object.values(Users).map(v => {
 												return (
 													<div key={v.id_} className="my-2 bg-neutral-800 p-2 rounded-md flex flex-row justify-between items-center">
 														
@@ -307,32 +313,34 @@ const ChatUI = ({
 					}
 
 					{
-						(Convos !== null && Convos !== undefined && Convos.messages !== null) ? (
-							Convos.map(c => {
+						((Convos !== null) && (Convos !== undefined)) ? (
+							Object.values(Convos).reverse().map(c => {
 								return (
-									<div onClick={() => {
-										SelectConversation(c);
-										setOther(c.Other);
-									}} key={c.id} className="w-full bg-neutral-900 p-2 border-b border-b-slate-700 flex flex-row justify-between items-center cursor-pointer"> 
-										
-										<div className="rounded-md flex flex-row justify-start items-center">
-											
-											<img 
-												src={c.Other.img} 
-												alt="User image"
-												className="w-10 h-10 rounded-md"
-											/>
-											<div className="text-white mx-2">
-												<p className="text-base"> 
-													{ c.Other.UserName }
-													<span className="text-xs text-neutral-500 mx-2">
-														{ timeAgo.format(new Date(c.messages[c.messages.length - 1].ts)) } 
-													</span>  
-													</p>
-												<p className="text-sm text-orange-300"> { c.messages[c.messages.length - 1].data.text } </p>
+									(c.messages) ? (
+										<div onClick={() => {
+											SelectConversation(c);
+											setOther(c.Other);
+											}} key={c.id} className="w-full bg-neutral-900 p-2 border-b border-b-slate-700 flex flex-row justify-between items-center cursor-pointer"> 
+												
+											<div className="rounded-md flex flex-row justify-start items-center">
+												
+												<img 
+													src={c.Other.img} 
+													alt="User image"
+													className="w-10 h-10 rounded-md"
+												/>
+												<div className="text-white mx-2">
+													<p className="text-base"> 
+														{ c.Other.UserName }
+														<span className="text-xs text-neutral-500 mx-2">
+															{ timeAgo.format(new Date(c.messages[c.messages.length - 1].ts)) } 
+														</span>  
+														</p>
+													<p className="text-sm text-orange-300"> { c.messages[c.messages.length - 1].data.text } </p>
+												</div>
 											</div>
 										</div>
-									</div>
+									) : ""
 								)
 							})
 						) : ""
@@ -428,6 +436,7 @@ const ConversationUI = ({
 	callback = (id, ob) => { console.log(id - 1, ob) }
 }) => {
 	/*
+	
 		conversation = {
 			id: 0
 			fpair: 0
@@ -445,69 +454,69 @@ const ConversationUI = ({
 			}]
 			ts: new Date()
 		}
+	
 	*/
 
 	const [Conversation, setConversation] = useState(conversation);
-	
 	const [OtherUser, setOtherUser] = useState(Other);
-	
 	const [MsgCount, setMsgCount] = useState((conversation) ? ((conversation.messages !== null) ? conversation.messages.length : 0 ) : 0)
-	
 	const getSide = (id) => ((id === CurrUserId) ? "left" : "right");
 	
 	const Send_Message = (text) => {
-		
 		if(Conversation) {
+			var tempConversation = Conversation;
+			console.log(tempConversation)
+			
+			if(tempConversation.message_count === 0) tempConversation.messages = [];
 
-			var ob = {
-				code:200,
+			const SocketMsg = {
+				code: 200,
 				action: MSG,
 				data: {
-					id: (Conversation.messages !== null) ? Conversation.messages[Conversation.messages.length - 1].id + 1 : 1,
-					conversation_id: Conversation.id,
+					id: (tempConversation.message_count === 0) ? tempConversation.message_count + 1 : 1,
+					conversation_id: tempConversation.id,
+					
 					data: { 
 						text, 
 						mt: "plain-text"
 					},
+
 					ts: new Date(),
-					other_id: (Conversation.fpair === CurrUserId) ? Conversation.spair : Conversation.fpair
+					other_id: (tempConversation.fpair === CurrUserId) ? tempConversation.spair : tempConversation.fpair
 				}
 			}
 
-			var tempConversation = Conversation;
-			
-			if(tempConversation.messages === undefined || tempConversation.messages === null) {
-				tempConversation.messages = [];
-			}
-			
-			tempConversation.messages.push({
-				...ob.data,
+			const Msg = {
+				...SocketMsg.data,
 				topic_id: CurrUserId,
 				ts: new Date(),
 				side: "left"
-			});
+			}
 
+			
+			
 			setMsgCount(p => p + 1)
 			scroll(0, document.body.scrollHeight + 400);
-			callback(tempConversation.id, tempConversation);
-			// Todo: when I add a message, the UI does not act accordinly !
-		
-			changeCurrConv(tempConversation);
-			Conn.send(JSON.stringify(ob));
+			callback(Msg);
 			
-		}
-	}
+			if(Conversation.message_count < tempConversation.message_count ) {
+				if(Conversation.message_count === 0) tempConversation.messages = [];
+				
+				tempConversation.messages.push(Msg)
+				tempConversation.message_count++;
+				setConversation(tempConversation);
+			}
 
-	const changeCurrConv = (d) => {
-		setConversation(d);
+			Conn.send(JSON.stringify(SocketMsg))
+		}
+
+		ScrollBottom();
 	}
 
 	useEffect(() => {
 		
 		if(Conversation) { 
-			
-			console.log(Conversation.messages);
-			if(Conversation.messages !== undefined && Conversation.messages !== null) {
+			if(Conversation.message_count > 0) {
 				Conversation.messages.map(
 					(v) => {
 						v.side = getSide(v.topic_id);
@@ -516,10 +525,9 @@ const ConversationUI = ({
 				)
 			}
 		}
-
 	}, [MsgCount])
 
-	const GetConv = (ID, callback) => {
+	const GetConv = (ID, updateConversation) => {
 		
 		let tempConversation;
 
@@ -535,11 +543,11 @@ const ConversationUI = ({
 			} else {
 				alert(JSON.stringify(J));
 			}
-			console.log(J.data);
+
 		})
 		.finally(() => {
 			// tempConversation.map((v) => {})
-			callback(tempConversation);
+			updateConversation(tempConversation);
 		})
 	}
 
@@ -558,15 +566,16 @@ const ConversationUI = ({
 			})
 			.finally(() => {
 				if(Id) {
-					const callback = (data) => {
-						console.log(data)
+					
+					const update = (data) => {
 						setConversation(data);
+						
 						if(data) {
 							setMsgCount((data.messages !== null) ? data.messages.length : 0)
-						};
+						}
 					}
 
-					GetConv(Id, callback);
+					GetConv(Id, update);
 				}
 			})
 			.catch(e => console.log(e))
@@ -574,6 +583,8 @@ const ConversationUI = ({
 
 		return () => {
 			setConversation([]);
+			setMsgCount(0);
+			setOtherUser(null);
 		}
 	}, []);
 
@@ -598,11 +609,12 @@ const ConversationUI = ({
 						</div>
 						
 						<div className="w-full">
+							
 							{
 								(Conversation !== null) ? (
 									(Conversation.messages !== undefined && Conversation.messages !== null) ? (
 										(Conversation.messages.length > 0) ? (
-										// <p>  {JSON.stringify(Conversation)} </p>
+										// <p>  { JSON.stringify(Conversation) } </p>
 											Conversation.messages.map(
 												(m) => <MessageUI 
 													key={m.id} 
@@ -615,13 +627,13 @@ const ConversationUI = ({
 									) : ""
 								) : ""
 							}
+
 						</div>
 					</>
 				) : ""
 			}
 
 			<MessageInputUI SendMessage={Send_Message}/>
-
 		</section>
 	)
 }
