@@ -18,8 +18,6 @@ import {
 	NewPost
 } from "../server/serverFuncs";
 import { convertBase64 } from "../server/functions";
-// import { HOST } from "../server/Var";
-// import { format } from 'timeago.js';
 import { timeAgo } from "../Util/time";
 
 const Post = ({
@@ -73,24 +71,22 @@ const Post = ({
 	const [imgcmp, setImgcmp] = useState(false);
 	const [ShowEdit, setShowEdit] = useState(false);
 	const [LikeEventFlag, setLikeEventFlag] = useState(false);
+	
 	const [EditPos, setEditPos] = useState({
 		x: 0,
 		y: 0
-	});
+	})
 
 	const [ExpandPost, setExpandPost] = useState(expanded);
 	const [deletedflag, setdeletedflag] = useState(null); // it will be set once we delete a post successfully, substituting the content of the current post.
 
-	const ToggleExpandPost = (e) => {
-		setExpandPost(!ExpandPost);
-	}
+	const ToggleExpandPost = (e) => setExpandPost(!ExpandPost)
 
 	const removeLike = () => {
 		
 		const temp = PostLikes;
-	
-		var New = PostLikes.filter(s => s.uuid != User.id_);
-		setPostLikes(New);
+		var New = PostLikes.filter(s => s.uuid != User.id_);		
+		setPostLikes(New);	
 		
 		unLike(PostId, User.id_)
 		.then(r => r.json())
@@ -126,11 +122,11 @@ const Post = ({
 		.then(json => {
 			
 			if(json.code !== 200) {
-				// Success.
+				// Failed.
 				setPostLikes(old);
 				setLike(false);
 			} else {
-				PostEventDispatcher('AddLike', User.id_);
+				// PostEventDispatcher('AddLike', User.id_);
 				console.log(json);
 			}
 		})
@@ -189,11 +185,13 @@ const Post = ({
 		.then(json => {
 			if(json.code === 200) { 
 				setdeletedflag(true)
+				
 				NotificationFunc({
 					text: "Post deleted successfully!!",
 					status: "success"
 				})
 			}
+
 			else {
 				NotificationFunc({
 					text: `post Was not deleted, ${json.data}`,
@@ -469,7 +467,8 @@ const PostPage = ({ NotificationFunc }) => {
 	)
 }
 
-const PostFormUI = ({ setPosts, NotificationFunc }) => {
+const PostFormUI = ({ AddNewPost, NotificationFunc }) => {
+	
 	const User = useSelector(state => state.User);
 	const [rows, setRows] = useState(3);
 	const [Image, setImage] = useState(null);
@@ -477,13 +476,11 @@ const PostFormUI = ({ setPosts, NotificationFunc }) => {
 	const textField = useRef(null)
 	const [state, setState] = useState({});
 	const countLines = (t) => t.split('\n').length;
-
 	const resetAll = (New) => {
 		setImage(null);
 		setText("");
-
-		setPosts(p => [New, ...p]);
-
+		// Fixed.
+		AddNewPost(New);
 		setState({});
 		textField.current.value = "";
 	}
@@ -549,6 +546,11 @@ const PostFormUI = ({ setPosts, NotificationFunc }) => {
 					});
 					var New = state;
 					
+					New.post_comments = [];
+					New.post_likes = [];
+
+					New.comments_count = 0;
+					New.likes_count = 0;
 
 					New.id = Json.data;
 					New.user = User;

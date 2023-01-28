@@ -6,12 +6,9 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState, useEffect, useRef } from "react"
 import { useSelector } from 'react-redux';
-import { api } from "../server/Var";
 import { GetAllPosts } from "../server/serverFuncs";
 import Post from "../components/Post";
 import Loader from "../components/Loader";
-import { JWT } from "../server/functions";
-import { HOST } from "../server/Var";
 import { Link } from "react-router-dom";
 import { Retry, UIWrapper } from "../components/microComps";
 import { PostFormUI } from "../components/Post"
@@ -28,58 +25,81 @@ const Home = ({
 }) => {
 	
 	const User = useSelector(state => state.User);
-	const [Posts, setPosts] = useState(null);
+	const [Posts, setPosts] = useState({});
 	const [isLoading, setisLoading] = useState(true);
 	
+
+	// const EventFuncs = {
+	// 	'remove': (payload) => {
+	// 		setPostspayload)
+	// 	},
+	// 	'RemComment': (payload) => {
+	
+	// 	},
+	// 	'RemLike': (payload) => {
+	
+	// 	},
+	// 	'AddComment': (payload) => {
+	
+	// 	},
+	// 	'AddLike': (payload) => {
+	
+	// 	}
+	// }
+	
+	// PostEventDispatcher = (action, ob) => {
+	// 	if(Object(EventFuncs).keys().includes(action)) {
+	// 		EventFuncs[action](ob)	
+	// 	}
+	// }
 
 
 	useEffect(() => {
 		
 		if(NewPosts.length > 0) {
 			// TODO: Clean after consumption.
-			if(Posts.length > 0) {
-				setPosts(p => [...NewPosts, ...p])	
-			} else {
-				setPosts(NewPosts)
-			}
-			
+			NewPosts.map(post => OnNewPost(post))
 			FlushNewPosts();
-		}	
+		}
+
 	}, [NewPosts.length])
 
 	useEffect(() => {
 		// post_id
 		if(NewComments.length > 0) {
-			if(Posts.length > 0) {
+			if(Object.keys(Posts).length > 0) {
 				var tmp = Posts
-				
+
 				NewComments.map(entry => {
-					if(tmp[entry.post_id].likes_count === 0) tmp[entry.post_id].post_likes = [];
-					tmp[entry.post_id].post_likes.push(entry);
-					tmp[entry.post_id].likes_count++;
-				})
-
-				setPosts(tmp);
-				FlushNewComments();
-			}
-		}
-	}, [NewComments.length])
-
-	useEffect(() => {
-		// post_id
-		if(NewLikes.length > 0) {
-			if(Posts.length > 0) {
-				var tmp = Posts
-				NewLikes.map(entry => {
 					if(tmp[entry.post_id].comments_count === 0) tmp[entry.post_id].post_comments = [];
 					tmp[entry.post_id].post_comments.push(entry);
 					tmp[entry.post_id].comments_count++;
 				})
 
 				setPosts(tmp);
+				FlushNewComments();
+			}
+		}
+
+	}, [NewComments.length])
+
+	useEffect(() => {
+		// post_id
+		if(NewLikes.length > 0) {
+			if(Object.keys(Posts).length > 0){
+				var tmp = Posts
+				
+				NewLikes.map(entry => {
+					if(tmp[entry.post_id].likes_count === 0) tmp[entry.post_id].post_likes = [];
+					tmp[entry.post_id].post_likes.push(entry);
+					tmp[entry.post_id].likes_count++;
+				})
+
+				setPosts(tmp);
 				FlushNewLikes();
 			}
 		}
+
 	}, [NewLikes.length])
 
 	const FetchPosts = (isSubscribed) => {
@@ -121,6 +141,13 @@ const Home = ({
 		}
 	}
 
+	const OnNewPost = (new_) => {
+		var tmp = Posts;
+		tmp[new_.id] = new_;
+		setPosts(tmp);
+		console.log(`${new_.id} WAS ADDED!`);
+	}
+
 	useEffect(() => {
 		
 		var subscribed = true;
@@ -141,8 +168,8 @@ const Home = ({
 
 	return (	
 		<UIWrapper>
-       		<PostFormUI setPosts={setPosts} NotificationFunc={NotificationFunc}/>
-        	
+       		<PostFormUI AddNewPost={OnNewPost} NotificationFunc={NotificationFunc}/>
+ 
 			<div className="w-full flex-col justify-start items-center pb-14">
 
          		{
@@ -159,8 +186,8 @@ const Home = ({
 									CreatedDate={v.date}
 									key={v.id}
 									NotificationFunc={NotificationFunc}
-									PostLikesProp={ (v.post_likes !== null) ? v.post_likes : []}
-									PostCommentsProp={ (v.post_comments !== null) ? v.post_comments : [] }
+									PostLikesProp={ (v.post_likes) ? v.post_likes : []}
+									PostCommentsProp={ (v.post_comments) ? v.post_comments : [] }
 								/>
 							)
 						})

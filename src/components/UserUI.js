@@ -54,8 +54,7 @@ const UserUI = ({
 				console.log("error: ", e);
 			})
 		}
-		
-    	
+
     	return () => {
     		setfollowed(false)
     	};
@@ -82,18 +81,21 @@ const UserUI = ({
 	
 		(PassedUser.UserName) ? (
 				
-				<div className={`flex bg-neutral-900 flex-row w-[90%] justify-between items-center bg-black rounded p-2 my-1 text-slate-900 font-semibold sm:w-[400px] ${class_}`}> 
-					
-					<Link to={`/Accounts/${PassedUser.id_}`}>
-						<img className="shadow-xl w-10 rounded-full h-10" src={(PassedUser.img) ? PassedUser.img : "/img/defUser.jpg"} />
-					</Link>
-					
-					<div className="w-[50%] flex flex-col justify-start items-start">
-						<p className="text-white"> {UserName} </p>
-						<p className="text-sm text-neutral-700"> #{PassedUser.id_} </p>
+				<div className={`flex bg-neutral-900 border border-neutral-700 border flex-row w-full justify-between items-center bg-black rounded my-1 text-slate-900 sm:w-[400px] ${class_} px-2 py-1`}> 
+			
+					<div className="flex flex-row items-center justify-center">
+						<Link to={`/Accounts/${PassedUser.id_}`}>
+							<img className="shadow-xl w-10 rounded h-10" src={(PassedUser.img) ? PassedUser.img : "/img/defUser.jpg"} />
+						</Link>
+						
+						<div className="flex mx-6 flex-col justify-start items-start">
+							<p className="text-white"> {UserName} </p>
+							<p className="text-sm  text-thin text-orange-300"> #{PassedUser.id_} </p>
+						</div>
 					</div>
 
-					<button className={`px-6 py-1 shadow-md rounded duration-50 ${ (!followed) ? " hover:bg-sky-400 bg-sky-500" : "bg-slate-900 border border-white" }`} onClick={follow}>
+
+					<button className={`px-4 py-1 shadow-md rounded duration-50 ${ (!followed) ? " hover:bg-sky-400 bg-sky-500" : "bg-slate-800" }`} onClick={follow}>
 						<span className="font-thin text-sm text-white"> 
 							
 							{
@@ -102,6 +104,7 @@ const UserUI = ({
 
 						</span>
 					</button>
+
 				</div>
 
 		) : ("")

@@ -47,9 +47,8 @@ const UserNotifications = ({ Notifications, NewNotifications, socketConn, CountC
 
 	return (
 		<UIWrapper>
-			<ul className="border-r-neutral-800 border-l-neutral-800 border-r border-l text-white bg-black my-2 w-full h-screen overflow-y-scroll">
-				<h1 className="text-white text-2xl font-bold py-4 w-full text-center border-b border-b-neutral-800"> User notifications </h1>		
-				
+			<ul className="text-white w-full p-2">
+				<h1 className="border border-slate-800 bg-neutral-900 my-2 rounded text-white text-2xl font-bold py-4 w-full text-center"> User notifications </h1>		
 				{
 					
 					(All.length > 0) ? (
@@ -58,7 +57,6 @@ const UserNotifications = ({ Notifications, NewNotifications, socketConn, CountC
 				}
 			</ul>	
 		</UIWrapper>
-
 	)
 }
 
@@ -70,7 +68,6 @@ const UserNotificationUI = ({ NotificationOBJ, socketConn, CountCallback }) => {
 		return () => {
 			setNotificationObject(null);
 		}
-
 	}, [])
 
 	const seen = () => {
@@ -96,7 +93,7 @@ const UserNotificationUI = ({ NotificationOBJ, socketConn, CountCallback }) => {
 			<li
 				className={`${!Boolean(notificationObject.seen) ? "bg-violet-900 bg-opacity-20" : "bg-black"} cursor-pointer w-full flex flex-row justify-start items-center hover:bg-neutral-900 transition-all hover:bg-opacity-10 border-b border-b-neutral-800 p-4 reveal`}
 				onClick={seen}
-			> 
+			>
 
 				<div className="shadow-xl w-10 rounded-md h-10 bg-slate-900 flex items-center justify-center">
 					{ (notificationObject.type in notificationIconMap) ? <Fa icon={notificationIconMap[notificationObject.type].icon} size="sm" className={`${notificationIconMap[notificationObject.type].class_} `}/> : <Fa icon={ faBell } size="sm" className="text-white"/> }	

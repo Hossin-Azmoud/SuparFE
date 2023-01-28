@@ -30,7 +30,7 @@ function RemoveJWT() {
 }
 
 
-var JWT = getJwtAuthToken();
+var JWT = () => getJwtAuthToken();
 
 
 

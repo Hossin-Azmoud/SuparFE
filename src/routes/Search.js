@@ -10,6 +10,7 @@ const AccountsSearchPannel = ({
     NotificationFunc= () => {} 
 }) => {
     // NotificationFunc is used to push a notification.
+ 
     /**
      * Usage:
        
@@ -55,9 +56,7 @@ const AccountsSearchPannel = ({
         // an onmount event to fetch everything from the database/server once the page is loaded
         
         var subscribed = true;
-        
         GetUsersFromApi(subscribed)
-
         return () => { 
             subscribed = false;
             setUsers(null);
@@ -92,6 +91,7 @@ const AccountsSearchPannel = ({
                         </div>
                     )
                 }
+                
             </div>
         </UIWrapper>
     )

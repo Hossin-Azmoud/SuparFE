@@ -23,14 +23,10 @@ const ScrollBottom = () => scroll(0, document.body.scrollHeight);
 
 const ChatUI = ({
 	NotificationFunc = () => {},
-	Conn = {
-		send: (o) => { console.log(o, "\n", o.length) }
-	},
-	User,
 	NewMessages = [],
-	flushMessages = () => {
-		// TODO MEANT TO CLEAN UP THE NEW MESSAGES AFTER UPDATING!!!
-	}	
+	Conn,
+	User,
+	flushMessages	
 }) => {
 
 	const [Convos, setConvos] = useState(null);
@@ -230,12 +226,12 @@ const ChatUI = ({
 			{
 				(Other) ? (
 					<ConversationUI 
-						CurrUserId={User.id_}
-						NotificationFunc={NotificationFunc}
-						Conn={Conn}
-						Other={Other}
-						conversation={SelectedConversation}
-						callback={DispatchNewMessageEvent}
+						CurrUserId={ User.id_ }
+						NotificationFunc={ NotificationFunc }
+						Connexion={ Conn }
+						Other={ Other }
+						conversation={ SelectedConversation }
+						callback={ DispatchNewMessageEvent }
 					/>
 				) : (
 				<>			
@@ -284,9 +280,9 @@ const ChatUI = ({
 									(Object.values(Users).length > 0) ? (
 										Object.values(Users).map(v => {
 												return (
-													<div key={v.id_} className="my-2 bg-neutral-800 p-2 rounded-md flex flex-row justify-between items-center">
-														
+													<div key={v.id_} className="my-2 bg-neutral-900 p-2 rounded-md flex flex-row justify-between items-center">
 														<div className="rounded-md flex flex-row justify-start items-center">
+															
 															<img 
 																src={v.img} 
 																alt="User image"
@@ -299,6 +295,7 @@ const ChatUI = ({
 															</div>
 
 														</div>
+														
 														<Fa onClick={() => setOther(v)} icon={faEnvelope} size="lg" className="transition-all ease-in-out hover:bg-sky-500 cursor-pointer text-white mx-2 p-3 rounded-full shadow-md"/>
 
 													</div>
@@ -320,7 +317,7 @@ const ChatUI = ({
 										<div onClick={() => {
 											SelectConversation(c);
 											setOther(c.Other);
-											}} key={c.id} className="w-full bg-neutral-900 p-2 border-b border-b-slate-700 flex flex-row justify-between items-center cursor-pointer"> 
+										}} key={c.id} className="w-full rounded my-1 bg-neutral-900 p-2 flex flex-row justify-between items-center cursor-pointer"> 
 												
 											<div className="rounded-md flex flex-row justify-start items-center">
 												
@@ -338,6 +335,7 @@ const ChatUI = ({
 														</p>
 													<p className="text-sm text-orange-300"> { c.messages[c.messages.length - 1].data.text } </p>
 												</div>
+
 											</div>
 										</div>
 									) : ""
@@ -366,8 +364,7 @@ const ConversationRoute = ({
 	conversation_id = parseInt(conversation_id);
 	const [FetchedConv, setFetchedConv] = useState({});
 	const [Other, setOther] = useState({});
-	
-	const DummyDataPup = () => {
+	const DummyDataPup = () => {	
 			var Data = {
 				id: conversation_id,
 				fpair: CurrUserId,
@@ -394,7 +391,8 @@ const ConversationRoute = ({
 				(v) => {
 					v.side = getSide(v.topic_id)
 				}
-			);
+			)
+	
 			return Date;
 	}
 	
@@ -422,8 +420,8 @@ const ConversationRoute = ({
 		conversation={FetchedConv}
 		CurrUserId={CurrUserId}
 		NotificationFunc={NotificationFunc}
-		Conn={Conn}
-		Other={Other}
+		Connexion={ Conn }
+		Other={ Other }
 	/>
 }
 
@@ -431,7 +429,7 @@ const ConversationUI = ({
 	conversation = null, 
 	CurrUserId,
 	NotificationFunc = () => {},
-	Conn,
+	Connexion,
 	Other,
 	callback = (id, ob) => { console.log(id - 1, ob) }
 }) => {
@@ -462,28 +460,74 @@ const ConversationUI = ({
 	const [MsgCount, setMsgCount] = useState((conversation) ? ((conversation.messages !== null) ? conversation.messages.length : 0 ) : 0)
 	const getSide = (id) => ((id === CurrUserId) ? "left" : "right");
 	
+	// const Send_image = (data) => {
+	// 	if(Conversation) {
+	// 		var tempConversation = Conversation;
+	// 		if(tempConversation.message_count === 0) tempConversation.messages = [];
+
+	// 		const SocketMsg = {
+				
+	// 			code: 200,
+	// 			action: MSG,
+	// 			data: {
+	// 				id: (tempConversation.message_count === 0) ? tempConversation.message_count + 1 : 1,
+	// 				conversation_id: tempConversation.id,
+	// 				data: { 
+	// 					text, 
+	// 					mt: "plain-text"
+	// 				},
+	// 				ts: new Date(),
+	// 				other_id: (tempConversation.fpair === CurrUserId) ? tempConversation.spair : tempConversation.fpair
+	// 			}
+
+	// 		}
+
+	// 		const Msg = {
+	// 			...SocketMsg.data,
+	// 			topic_id: CurrUserId,
+	// 			ts: new Date(),
+	// 			side: "left"
+	// 		}
+			
+	// 		setMsgCount(p => p + 1)
+	// 		scroll(0, document.body.scrollHeight + 400);
+	// 		callback(Msg);
+			
+	// 		if(Conversation.message_count < tempConversation.message_count ) {
+	// 			if(Conversation.message_count === 0) tempConversation.messages = [];
+				
+	// 			tempConversation.messages.push(Msg)
+	// 			tempConversation.message_count++;
+	// 			setConversation(tempConversation);
+	// 		}
+
+	// 		Connexion.send(JSON.stringify(SocketMsg));
+	// 	}
+
+	// 	ScrollBottom();
+	// }
+
 	const Send_Message = (text) => {
+		
 		if(Conversation) {
 			var tempConversation = Conversation;
-			console.log(tempConversation)
-			
 			if(tempConversation.message_count === 0) tempConversation.messages = [];
 
 			const SocketMsg = {
+				
 				code: 200,
 				action: MSG,
 				data: {
 					id: (tempConversation.message_count === 0) ? tempConversation.message_count + 1 : 1,
 					conversation_id: tempConversation.id,
-					
 					data: { 
 						text, 
 						mt: "plain-text"
 					},
-
 					ts: new Date(),
 					other_id: (tempConversation.fpair === CurrUserId) ? tempConversation.spair : tempConversation.fpair
 				}
+
 			}
 
 			const Msg = {
@@ -492,8 +536,6 @@ const ConversationUI = ({
 				ts: new Date(),
 				side: "left"
 			}
-
-			
 			
 			setMsgCount(p => p + 1)
 			scroll(0, document.body.scrollHeight + 400);
@@ -507,7 +549,7 @@ const ConversationUI = ({
 				setConversation(tempConversation);
 			}
 
-			Conn.send(JSON.stringify(SocketMsg))
+			Connexion.send(JSON.stringify(SocketMsg));
 		}
 
 		ScrollBottom();

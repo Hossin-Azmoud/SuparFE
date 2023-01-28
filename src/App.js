@@ -19,7 +19,7 @@ import { AppMainLoader as Loader } from "./components/Loader";
 import { FloatingPostFormUI } from "./components/Post";
 import AccountsSearchPannel from "./routes/Search";
 import UserNotifications from "./routes/UserNotifications";
-import { SubmitJWT, GetUserNotifications } from "./server/serverFuncs";
+import { SubmitJWT, GetUserNotifications, LoadJWT } from "./server/serverFuncs";
 import { ApplicationNotification } from "./components/microComps";
 import { PostPage } from "./components/Post";
 import { HOST, NOTIFICATION, NEWPOST, MSG, LIKE, COMMENT } from "./server/Var";
@@ -51,9 +51,7 @@ const App = () => {
     const [NewLikes, setNewLikes] = useState([]);
     const flushNewLikes = () => setNewLikes([])
 
-
     const [NewNots, setNewNots] = useState([])
-   
     // Counters 
     const [notCount, setnotCount] = useState(0);
     const [NewMessageCount, setNewMessageCount] = useState(0);
@@ -74,13 +72,16 @@ const App = () => {
         setnotCount(p => p + 1);
     }
     const HandleNewPost = (ob) => {
-        setNewPosts(
-            p => [ob, ...p]
-        );
+        
+        ob.post_comments = [];
+        ob.post_likes = [];
+        ob.comments_count = 0;
+        ob.likes_count = 0;
+        setNewPosts(p => [ob, ...p]);
+
     }
     const HandlePostChange = (ob) => console.log(ob)
     const LogUnknownActionData = (data) => {
-       
         console.log("-------------------------------------------------------------------")
         console.log("Unsupported action: ")
         console.log(        data       )
@@ -117,7 +118,6 @@ const App = () => {
     const onMessageCallback = (m) => {
         
         var SockMsg = JSON.parse(m.data)
-        
         switch (SockMsg.action) {
             case NOTIFICATION:
                 HandleNewNotification(SockMsg.data);
@@ -181,10 +181,11 @@ const App = () => {
 
         .catch(e => console.log(e))
     }
+    
     const AuthUser = () => {
         // Gets user using the json web token!
 
-        SubmitJWT(JWT)
+        SubmitJWT()
         .then((res) => {
             return res.json()
         })
@@ -203,6 +204,7 @@ const App = () => {
         })
         .finally(() => {
             setLoading(false);
+            LoadJWT();
         })
         .catch(e => {
             
@@ -212,6 +214,7 @@ const App = () => {
             })
         })
     }
+
     const OnAuth = () => {
         // Initiate a connection with the backend if the user is authenticated !
         if(User) {
@@ -224,6 +227,7 @@ const App = () => {
             fetchOldNotifications();
         }
     }
+
     const ResetAppState = () => {
         // Reset state.
         setSocketConn(null);
@@ -234,6 +238,7 @@ const App = () => {
         setNewPosts([]);
         setNewMsgs([]);
     }  
+
     const dispatchNotificationEvent = (ob) => {
         
         setNotification({
@@ -243,15 +248,13 @@ const App = () => {
 
         setID(o => o + 1)
     }
-    const FlushNewMessagesAfterUse = () => {
-        console.log("FLUSHED!");
-        setNewMsgs([]);
-    }
+
+    const FlushNewMessagesAfterUse = () => setNewMsgs([]);
     
     // Effects
     useEffect(() => {
 
-        if(JWT) {
+        if(JWT()) {
             AuthUser()
         } else {
             setLoading(false);
