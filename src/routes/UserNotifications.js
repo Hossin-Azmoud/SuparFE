@@ -1,3 +1,5 @@
+// BUG HERE!
+// DESC: The notification poll vanishes after the server sends a new notification!
 
 import { FontAwesomeIcon as Fa } from "@fortawesome/react-fontawesome";
 import { faBell  } from '@fortawesome/free-solid-svg-icons';

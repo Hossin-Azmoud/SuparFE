@@ -103,7 +103,3 @@ const Icons = ({ NotificationFunc }) => {
 
 
 export default Icons;
-
-
-
-

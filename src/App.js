@@ -23,7 +23,7 @@ import { SubmitJWT, GetUserNotifications, LoadJWT } from "./server/serverFuncs";
 import { ApplicationNotification } from "./components/microComps";
 import { PostPage } from "./components/Post";
 import { HOST, NOTIFICATION, NEWPOST, MSG, LIKE, COMMENT } from "./server/Var";
-import { useSocket } from "./server/socketOps"
+import { useSocket } from "./server/socketOps";
 
 const App = () => {    
     

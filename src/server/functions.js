@@ -1,4 +1,5 @@
 const SetAuthCookie = (T, ExpirationDays = 365) => {
+
 	if(T) {
 		let Date_ = new Date();
 		Date_.setTime(Date_.getTime() + ExpirationDays * 24 * 60 * 60 * 1000);
@@ -31,7 +32,6 @@ function RemoveJWT() {
 
 
 var JWT = () => getJwtAuthToken();
-
 
 
 const convertBase64 = (file) => {

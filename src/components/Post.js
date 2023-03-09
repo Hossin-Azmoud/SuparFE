@@ -156,7 +156,6 @@ const Post = ({
 
 	useEffect(() => {
 
-		
 		if(PostLikes.length > 0) {
 			PostLikes.map(v => {
 				if(v.uuid === User.id_) {
@@ -406,6 +405,8 @@ const ExpandedPostUI = ({
 }
 
 const PostPage = ({ NotificationFunc }) => {
+	// BUG HERE!!
+	// DESC: When we fetch the post, we forget to pass the likes and comments of the post to the post object. which makes the page not displayed!
 	let { id } = useParams();
 	const [PostObj, setPost] = useState(null)
 	const [IsLoading, setLoading] = useState(true)

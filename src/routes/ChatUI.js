@@ -1,3 +1,9 @@
+// BUG HERE!
+// DESC: When the user sends the first message in a new conversation, the conversations tree don't get updated. hence the message is never shown to the user.
+// TODO: Make interactive buttons, back, cancel, newMessage(floating)
+// TODO-FEATURE: Send images, send videos, send files, like-msg.
+
+
 import { useState, useEffect, useRef } from "react";
 import { faArrowLeftLong, faHeart, faComment, faEdit, faShare, faEllipsisVertical, faTrashCan, faClose, faAdd, faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon as Fa } from "@fortawesome/react-fontawesome";
@@ -171,7 +177,14 @@ const ChatUI = ({
 
 	}, [])
 
-	useEffect(() => OnNewMessagesEvent, [NewMessages.length])
+	useEffect(() => {
+		// TODO: When a message comes in we need to make it as a non-seen message and the prototype is:
+		/* newMessage => SignalToUI => AddToConversation using the ID. */
+		
+		if(NewMessages.length > 0) {
+			OnNewMessagesEvent();
+		}
+	}, [NewMessages.length])
 	
 	const OnNewMessagesEvent = () => {
 		if(Convos) NewMessages.map(m => DispatchNewMessageEvent(m))
@@ -359,11 +372,13 @@ const ConversationRoute = ({
 	NotificationFunc = () => {},
 	Conn
 }) => {
-	//TODO This one gets one information, fetchs the rest of the things from the serevr.
+	// TODO This one gets one information, fetchs the rest of the things from the serevr.
+	
 	let { conversation_id } = useParams();
 	conversation_id = parseInt(conversation_id);
 	const [FetchedConv, setFetchedConv] = useState({});
 	const [Other, setOther] = useState({});
+	
 	const DummyDataPup = () => {	
 			var Data = {
 				id: conversation_id,
@@ -567,6 +582,7 @@ const ConversationUI = ({
 				)
 			}
 		}
+
 	}, [MsgCount])
 
 	const GetConv = (ID, updateConversation) => {
@@ -583,6 +599,7 @@ const ConversationUI = ({
 			} else if (J.code === 204){
 				tempConversation = {};
 			} else {
+				// BUG!
 				alert(JSON.stringify(J));
 			}
 
@@ -598,9 +615,7 @@ const ConversationUI = ({
 		
 		if(Conversation === null) {
 			NewConversation(CurrUserId, Other.id_)
-			.then((req) => {
-				return req.json()
-			})
+			.then((req) => req.json())
 			.then((Json) => {
 				if(Json.code === 200) {
 					Id = Json.data
@@ -608,7 +623,7 @@ const ConversationUI = ({
 			})
 			.finally(() => {
 				if(Id) {
-					
+
 					const update = (data) => {
 						setConversation(data);
 						
