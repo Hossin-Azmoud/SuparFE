@@ -14,6 +14,7 @@ import { SetAuthCookie, JWT } from "./server/functions";
 import { 
     login
 } from './store/userStore';
+
 import NavBar from "./components/NavBar";
 import { AppMainLoader as Loader } from "./components/Loader";
 import { FloatingPostFormUI } from "./components/Post";
@@ -25,12 +26,35 @@ import { PostPage } from "./components/Post";
 import { HOST, NOTIFICATION, NEWPOST, MSG, LIKE, COMMENT } from "./server/Var";
 import { useSocket } from "./server/socketOps";
 
-const App = () => {    
-    
-    const User = useSelector(state => state.User);
+const useFree = (init) => {
+    /* My freeing hook! */
+    const [state, setState] = useState(init);
 
+    return [
+        state, 
+        setState,
+        (() => setState(init))
+    ];
+}
+
+
+// const useOnce = (init) => {
+//     const [state, setState] = useState(init);
+//     const use = setState()
+    
+//     return [
+//         state, 
+//         setState,
+//         (() => setState(init))
+//     ];
+// }
+
+const App = () => {
+    var User = useSelector(state => state.User);
+    
     const dispatch = useDispatch();
-    // Loading state
+    
+    // Loading state.
     const [Loading, setLoading] = useState(true);
     
     // Application main notifier state.
@@ -39,7 +63,7 @@ const App = () => {
     const [FetchedNotifications, setFetchedNotifications] = useState([]);
     
     const [FuncPool, setFuncPool] = useState({});
-   
+    const freefuncPool = () => setFuncPool({});
     // Socket handeled states.
     const [NewMsgs, setNewMsgs] = useState([]);
     const [NewPosts, setNewPosts] = useState([]);
@@ -51,7 +75,10 @@ const App = () => {
     const [NewLikes, setNewLikes] = useState([]);
     const flushNewLikes = () => setNewLikes([])
 
-    const [NewNots, setNewNots] = useState([])
+    // NotificationPool, FreeNotificationPool
+    const [notificationPool, setNotificationPool] = useState([])
+    const freeNotificationPool = () => setNotificationPool([])
+
     // Counters 
     const [notCount, setnotCount] = useState(0);
     const [NewMessageCount, setNewMessageCount] = useState(0);
@@ -67,10 +94,19 @@ const App = () => {
             return { ...p, ...Obj };
         })
     }
+    
     const HandleNewNotification = (ob) => {
-        setNewNots([...NewNots, ob]);
+        if(notificationPool.length == 0) {
+            setNotificationPool([ob])   
+        }
+
+        if(notificationPool.length > 0) {
+            setNotificationPool([ob, ...notificationPool])
+        }
+
         setnotCount(p => p + 1);
     }
+    
     const HandleNewPost = (ob) => {
         
         ob.post_comments = [];
@@ -80,13 +116,16 @@ const App = () => {
         setNewPosts(p => [ob, ...p]);
 
     }
+
     const HandlePostChange = (ob) => console.log(ob)
+    
     const LogUnknownActionData = (data) => {
         console.log("-------------------------------------------------------------------")
         console.log("Unsupported action: ")
         console.log(        data       )
         console.log("-------------------------------------------------------------------")
     }
+
     const HandleShatNewMsg = (msgObject) => {
         msgObject.side = "right"; 
         
@@ -118,6 +157,7 @@ const App = () => {
     const onMessageCallback = (m) => {
         
         var SockMsg = JSON.parse(m.data)
+        
         switch (SockMsg.action) {
             case NOTIFICATION:
                 HandleNewNotification(SockMsg.data);
@@ -163,20 +203,24 @@ const App = () => {
         })
 
         .finally(() => {
-            var tmp = [];
-
+            var old = [];
+            var new_ = [];
+            
             for(let i = 0; i < Data.length; i++) {
                 const NotificationObj = Data[i];
+                
                 if(!Boolean(NotificationObj.seen)) {
-                    tmp.push(NotificationObj);
-                    console.log(NotificationObj);
-                    Data = Data.filter(j => j.id !== NotificationObj.id);
+                    new_.push(NotificationObj);
+                    continue
                 }
+                console.log("new")
+                old.push(NotificationObj);
             }
 
-            setFetchedNotifications(Data);
-            setnotCount(p => tmp.length + p);
-            setNewNots([...NewNots, ...tmp]);
+            setFetchedNotifications(old);
+            setnotCount(p => new_.length + p);
+            setNotificationPool(new_);
+            
         })
 
         .catch(e => console.log(e))
@@ -201,10 +245,10 @@ const App = () => {
                     status: "error"
                 })
             }
+
         })
         .finally(() => {
             setLoading(false);
-            LoadJWT();
         })
         .catch(e => {
             
@@ -227,16 +271,21 @@ const App = () => {
             fetchOldNotifications();
         }
     }
+    
+    const FlushNewMessagesAfterUse = () => setNewMsgs([]);
 
     const ResetAppState = () => {
         // Reset state.
         setSocketConn(null);
+        freeNotificationPool();
         setFetchedNotifications([]);
-        setNewNots([]);
+        flushNewLikes([]);
+        FlushNewMessagesAfterUse();
         setnotCount(0);
-        setNewMessageCount(0);
-        setNewPosts([]);
+        flushNewComments(0);
+        flushNewPosts([]);
         setNewMsgs([]);
+        freefuncPool();
     }  
 
     const dispatchNotificationEvent = (ob) => {
@@ -249,9 +298,9 @@ const App = () => {
         setID(o => o + 1)
     }
 
-    const FlushNewMessagesAfterUse = () => setNewMsgs([]);
     
     // Effects
+    
     useEffect(() => {
 
         if(JWT()) {
@@ -261,7 +310,8 @@ const App = () => {
         }
 
         return () => setLoading(true);
-    }, [])
+    
+    }, []);
 
     useEffect(() => {
         OnAuth();
@@ -282,7 +332,7 @@ const App = () => {
                                 <Route path="/Login" element={<Login NotificationFunc={dispatchNotificationEvent} />} />
                                 <Route path="/Signup" element={<SignUp NotificationFunc={dispatchNotificationEvent}/>} />
                                 <Route path="/profile" element={<CurrentUserProfile NotificationFunc={dispatchNotificationEvent}/>}/>
-                                <Route path="/Notifications" element={<UserNotifications socketConn={SocketConn} Notifications={FetchedNotifications} CountCallback={setnotCount} NewNotifications={NewNots}/>} />
+                                <Route path="/Notifications" element={<UserNotifications socketConn={SocketConn} Notifications={FetchedNotifications} CountCallback={setnotCount} FreeNotificationPool={freeNotificationPool} NotificationPool={notificationPool}/>} />
                                 <Route path="/i" element={<Icons NotificationFunc={dispatchNotificationEvent} />} />
                                 <Route path="/Accounts" element={<AccountsSearchPannel CurrUserId={User.id_} NotificationFunc={dispatchNotificationEvent} />}/>
 

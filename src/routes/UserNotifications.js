@@ -7,39 +7,57 @@ import { Link } from "react-router-dom";
 import { notificationIconMap, LIKE, COMMENT, FOLLOW, NOTIFICATION } from "../server/Var";
 import { useState, useEffect } from "react";
 import { UIWrapper } from "../components/microComps";
-const UserNotifications = ({ Notifications, NewNotifications, socketConn, CountCallback }) => {
+
+const UserNotifications = ({ Notifications, NotificationPool, FreeNotificationPool, socketConn, CountCallback }) => {
 	//TODO get notifications from server.
 	// if connected we will get everything in realtime. once something happens we ship it to this place if the user is online.
 	// if the u is not online we keep everything pending in the server. once connected we send everything..
 	
 	/*
-	NOTIFICATION model {
-		"id": v,
-		"text": v,
-		"type": v,
-		"date": v,
-		"uuid": v,
-		"actor_id": v,
-		"seen": v,
-		"post_id": v
-	}*/
+		
+		NOTIFICATION model {
+			"id": v,
+			"text": v,
+			"type": v,
+			"date": v,
+			"uuid": v,
+			"actor_id": v,
+			"seen": v,
+			"post_id": v
+		}
+
+	*/
 
 	const [All, setAll] = useState([])
 	
-	useEffect(() => {
+	const updateNotifications = () => {
 
-		setAll([...NewNotifications, ...Notifications]);
+		if(NotificationPool.length === 1) {
+			setAll([NotificationPool[0], ...Notifications]);
+		}
+
+		if(NotificationPool.length > 1) {
+			setAll([...NotificationPool, ...Notifications]);
+		}
+		
+		// FreeNotificationPool();
+
+	}
+
+	useEffect(() => {
+		
+		updateNotifications();
 		
 		return () => {
-			setAll([]);
+			setAll([]); 
 		};
-
-	}, [NewNotifications])
+	
+	}, [NotificationPool.length])
 	
 
 	useEffect(() => {
 		
-		setAll([...NewNotifications, ...Notifications]);
+		setAll([...NotificationPool, ...Notifications]);
 		
 		return () => {
 			setAll([]);

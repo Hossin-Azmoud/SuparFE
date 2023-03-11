@@ -1,4 +1,4 @@
-// BUG HERE!
+ // BUG HERE!
 // DESC: When the user sends the first message in a new conversation, the conversations tree don't get updated. hence the message is never shown to the user.
 // TODO: Make interactive buttons, back, cancel, newMessage(floating)
 // TODO-FEATURE: Send images, send videos, send files, like-msg.
@@ -8,7 +8,7 @@ import { useState, useEffect, useRef } from "react";
 import { faArrowLeftLong, faHeart, faComment, faEdit, faShare, faEllipsisVertical, faTrashCan, faClose, faAdd, faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon as Fa } from "@fortawesome/react-fontawesome";
 import { timeAgo } from "../Util/time";
-import { MSG } from "../server/Var";
+import { MSG, SEENMESSAGE } from "../server/Var";
 import { Link, useParams } from "react-router-dom";
 import { UIWrapper } from "../components/microComps";
 import { MessageUI, MessageInputUI } from "../components/MessageUI";
@@ -34,11 +34,12 @@ const ChatUI = ({
 	User,
 	flushMessages	
 }) => {
+	// Need to filtr the new and old messages.
 
-	const [Convos, setConvos] = useState(null);
+	const [Convos, setConvos] = useState({ });
 	const [Users, setUsers] = useState([]);
 	const [Other, setOther] = useState(null);
-	
+	const [NewMessagesCount, setNewMessagesCount] = useState(0);
 	// TODO: Fetch the user messages!
 	const [IsLoading, setIsLoading] = useState(true);
 	const [OpenNewConv, setOpenNewConv] = useState(false);
@@ -144,16 +145,27 @@ const ChatUI = ({
 				const callback = (data) => {
 					
 					Object.keys(tempConversations).map(k => {
-						const OTHER_ID = (tempConversations[k].fpair === User.id_) ? tempConversations[k].spair : tempConversations[k].fpair;
+						var c = tempConversations[k];
+						const OTHER_ID = (c.fpair === User.id_) ? c.spair : c.fpair;
 					
-						tempConversations[k].Other = data[OTHER_ID];
+						c.Other = data[OTHER_ID];
+						c.NewMessagesCount_ = 0;
 
-						if(tempConversations[k].messages) {
-							tempConversations[k].messages.map(v => {
+						if(c.messages) {
+							c.messages.map(v => {
 								v.side = getSide(v.topic_id);
+								
+								if(!Boolean(v.seen)) {
+									if(v.topic_id !== User.id_) c.NewMessagesCount_++;
+								}
+
 								return v;
 							})
 						}
+
+						console.log(c.NewMessagesCount_);
+
+						return c;
 					})
 
 					setConvos(tempConversations);
@@ -184,6 +196,7 @@ const ChatUI = ({
 		if(NewMessages.length > 0) {
 			OnNewMessagesEvent();
 		}
+
 	}, [NewMessages.length])
 	
 	const OnNewMessagesEvent = () => {
@@ -209,12 +222,19 @@ const ChatUI = ({
 		var tempConversations = Convos;
 		const key = String(NewMsg.conversation_id)
 		// After the update.
+		
 		if(Object.keys(tempConversations).includes(key)) {
-			if(tempConversations[key].message_count === 0) tempConversations[key].messages = [];
+		
+			if(tempConversations[key].message_count === 0) {
+				tempConversations[key].messages = [];
+				tempConversations[key].NewMessagesCount_ = 0;
+			}
+				
 			tempConversations[key].messages.push(NewMsg);
 			tempConversations[key].message_count++;
+			if(NewMsg.topic_id !== User.id_) tempConversations.NewMessagesCount_++;
+		
 		} else {
-			
 			tempConversations[key] = {
 				id: parseInt(key),
 				fpair: NewMsg.other_id,
@@ -239,12 +259,14 @@ const ChatUI = ({
 			{
 				(Other) ? (
 					<ConversationUI 
+					
 						CurrUserId={ User.id_ }
 						NotificationFunc={ NotificationFunc }
 						Connexion={ Conn }
 						Other={ Other }
 						conversation={ SelectedConversation }
 						callback={ DispatchNewMessageEvent }
+					
 					/>
 				) : (
 				<>			
@@ -349,7 +371,14 @@ const ChatUI = ({
 													<p className="text-sm text-orange-300"> { c.messages[c.messages.length - 1].data.text } </p>
 												</div>
 
+												
+											
 											</div>
+											
+											{
+												(c.NewMessagesCount_ > 0) ? (<p className="mx-2 bg-orange-500 text-white shadow-md p-1 w-5 h-5 rounded-md flex items-center justify-center text-sm"> {c.NewMessagesCount_} </p>) : ""	
+											}
+
 										</div>
 									) : ""
 								)
@@ -380,6 +409,7 @@ const ConversationRoute = ({
 	const [Other, setOther] = useState({});
 	
 	const DummyDataPup = () => {	
+			
 			var Data = {
 				id: conversation_id,
 				fpair: CurrUserId,
@@ -475,53 +505,6 @@ const ConversationUI = ({
 	const [MsgCount, setMsgCount] = useState((conversation) ? ((conversation.messages !== null) ? conversation.messages.length : 0 ) : 0)
 	const getSide = (id) => ((id === CurrUserId) ? "left" : "right");
 	
-	// const Send_image = (data) => {
-	// 	if(Conversation) {
-	// 		var tempConversation = Conversation;
-	// 		if(tempConversation.message_count === 0) tempConversation.messages = [];
-
-	// 		const SocketMsg = {
-				
-	// 			code: 200,
-	// 			action: MSG,
-	// 			data: {
-	// 				id: (tempConversation.message_count === 0) ? tempConversation.message_count + 1 : 1,
-	// 				conversation_id: tempConversation.id,
-	// 				data: { 
-	// 					text, 
-	// 					mt: "plain-text"
-	// 				},
-	// 				ts: new Date(),
-	// 				other_id: (tempConversation.fpair === CurrUserId) ? tempConversation.spair : tempConversation.fpair
-	// 			}
-
-	// 		}
-
-	// 		const Msg = {
-	// 			...SocketMsg.data,
-	// 			topic_id: CurrUserId,
-	// 			ts: new Date(),
-	// 			side: "left"
-	// 		}
-			
-	// 		setMsgCount(p => p + 1)
-	// 		scroll(0, document.body.scrollHeight + 400);
-	// 		callback(Msg);
-			
-	// 		if(Conversation.message_count < tempConversation.message_count ) {
-	// 			if(Conversation.message_count === 0) tempConversation.messages = [];
-				
-	// 			tempConversation.messages.push(Msg)
-	// 			tempConversation.message_count++;
-	// 			setConversation(tempConversation);
-	// 		}
-
-	// 		Connexion.send(JSON.stringify(SocketMsg));
-	// 	}
-
-	// 	ScrollBottom();
-	// }
-
 	const Send_Message = (text) => {
 		
 		if(Conversation) {
@@ -533,7 +516,7 @@ const ConversationUI = ({
 				code: 200,
 				action: MSG,
 				data: {
-					id: (tempConversation.message_count === 0) ? tempConversation.message_count + 1 : 1,
+					id: tempConversation.message_count + 1,
 					conversation_id: tempConversation.id,
 					data: { 
 						text, 
@@ -556,14 +539,14 @@ const ConversationUI = ({
 			scroll(0, document.body.scrollHeight + 400);
 			callback(Msg);
 			
-			if(Conversation.message_count < tempConversation.message_count ) {
-				if(Conversation.message_count === 0) tempConversation.messages = [];
-				
+			if(Conversation.message_count === 0) {
+				tempConversation.messages = [];
 				tempConversation.messages.push(Msg)
 				tempConversation.message_count++;
 				setConversation(tempConversation);
 			}
-
+			
+	
 			Connexion.send(JSON.stringify(SocketMsg));
 		}
 

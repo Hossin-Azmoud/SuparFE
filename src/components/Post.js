@@ -405,8 +405,6 @@ const ExpandedPostUI = ({
 }
 
 const PostPage = ({ NotificationFunc }) => {
-	// BUG HERE!!
-	// DESC: When we fetch the post, we forget to pass the likes and comments of the post to the post object. which makes the page not displayed!
 	let { id } = useParams();
 	const [PostObj, setPost] = useState(null)
 	const [IsLoading, setLoading] = useState(true)
@@ -434,23 +432,6 @@ const PostPage = ({ NotificationFunc }) => {
 
 	}, [])
 	
-
- 	// {
-	 // 	"id":51,
-	 // 	"uuid":1718,
-	 // 	"text": "Hello, I am a berserk faan",
-	 // 	"img":"",
-	 // 	"user":{
-	 // 		"id_":1718,
-	 // 		"UserName":"Jillly",
-	 // 		"img":"http://localhost:8500/Zimg/1718/img.jpeg",
-	 // 		"bg":"http://localhost:8500/Zimg/bg/1718/bg.png",
-	 // 		"bio":"We all have emotions out here.\n",
-	 // 		"addr":"I live in Space!",
-	 // 		"isfollowed":false
-	 // 	}
- 	// }
-
 	return (
 		(PostObj && !IsLoading) ? (
 			<Post 
@@ -462,6 +443,8 @@ const PostPage = ({ NotificationFunc }) => {
 				PostText={PostObj.text}
 				CreatedDate={PostObj.date}
 				NotificationFunc={NotificationFunc}
+				PostLikesProp={(PostObj.post_likes) ? PostObj.post_likes : []}
+				PostCommentsProp={(PostObj.post_comments) ? PostObj.post_comments : []}
 				expanded={ true }
 			/>
 		) : ""
@@ -648,5 +631,4 @@ const FloatingPostFormUI = ({
 }
 
 export { PostPage, PostFormUI, FloatingPostFormUI };
-
 export default Post;

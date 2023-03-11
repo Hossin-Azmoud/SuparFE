@@ -146,17 +146,16 @@ const UserSlice = createSlice({
 		login: (state, action) => {
 			// Gets the token using the payload.
 			// state.User = action.payload;
-
 			if(action.payload.token) {
 				SetAuthCookie(action.payload.token);
 			}
 
 			state.User = action.payload;
+
 		},
 		
 		updateUser: (state, action) => {
 			// doc: update a field.
-
 			Object.keys(state.User).map(k => {
 				if(k in action.payload) {
 					state.User[k] = action.payload[k];

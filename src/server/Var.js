@@ -9,6 +9,7 @@ const COMMENT       = 2
 const NOTIFICATION  = 3
 const NEWPOST       = 4
 const MSG           = 5
+const SEENMESSAGE   = 6
 
 const notificationIconMap = {
 	0 : {
@@ -41,5 +42,6 @@ export {
 	FOLLOW,
 	NOTIFICATION,
 	NEWPOST,
-	MSG
+	MSG,
+	SEENMESSAGE
 }
