@@ -10,6 +10,8 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import Loader from "../components/Loader";
 import Logo from "../components/Logo";
+import { isEmail } from "./validation";
+
 const Login = ({ 
 	NotificationFunc = () => {}
 }) => {
@@ -27,7 +29,11 @@ const Login = ({
 	
 	const ChangeState = (e, key) => {
 		const NewState = state;
-		NewState[key] = e.target.value;
+		
+		const tmp     = e.target.value;
+		NewState[key] = tmp.trim();
+		e.target.value = tmp;
+		
 		setState(NewState);
 	}
 
@@ -37,9 +43,25 @@ const Login = ({
 		setLoading(true);
 		
 		Object.keys(state).map((k, i) => {
-			if(!state[k])
-				Problematics.push({index: i, errMsg: "This field can not be empty!!"})
-				return
+			const v = state[k];
+			
+			
+			
+			switch(k) {
+				case "Email":
+					if(!isEmail(v))    Problematics.push({index: i, errMsg: "invalid email! please try another."});
+					break;
+				
+				case "Password":
+					if(v.length < 6)   Problematics.push({index: i, errMsg: "password must be atleast 6 characters long.."});
+					break;
+
+				default:
+					if(!v) {
+						Problematics.push({ index: i, errMsg: "This field can not be empty!!" })
+						return
+					}
+			}
 		});
 
 		if(Problematics.length === 0) {

@@ -29,7 +29,6 @@ import { useSocket } from "./server/socketOps";
 const useFree = (init) => {
     /* My freeing hook! */
     const [state, setState] = useState(init);
-
     return [
         state, 
         setState,
@@ -159,6 +158,7 @@ const App = () => {
         var SockMsg = JSON.parse(m.data)
         
         switch (SockMsg.action) {
+            
             case NOTIFICATION:
                 HandleNewNotification(SockMsg.data);
                 break
@@ -184,6 +184,7 @@ const App = () => {
             default:
                 LogUnknownActionData(SockMsg)
                 break
+
         }
     }
 
@@ -220,7 +221,6 @@ const App = () => {
             setFetchedNotifications(old);
             setnotCount(p => new_.length + p);
             setNotificationPool(new_);
-            
         })
 
         .catch(e => console.log(e))
@@ -300,7 +300,6 @@ const App = () => {
 
     
     // Effects
-    
     useEffect(() => {
 
         if(JWT()) {
